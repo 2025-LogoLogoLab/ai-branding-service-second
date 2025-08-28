@@ -1,0 +1,33 @@
+/* src/molecules/FeatureCard.module.css */
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 버튼을 아래로 밀기 위한 핵심 속성 */
+    padding: 20px;
+    background-color: #fdf8f6;
+    border-radius: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.05);
+    gap: 12px;
+    height: 100%; /* 카드의 높이를 고정하거나 부모의 height: 100%일 경우 대응 */
+    padding-bottom: 0px;
+}
+
+.title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+}
+
+.description {
+    font-size: 13px;
+    color: #444;
+    margin-bottom: 8px;
+}
+
+.imageWrapper {
+    flex-grow: 1; /* 이미지가 공간을 유연하게 차지하게 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

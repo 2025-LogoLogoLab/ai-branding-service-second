@@ -1,0 +1,14 @@
+/* src/components/ColorGuideStrip/ColorGuideStrip.module.css */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* 좁은 화면에서 2열로 보기 좋게 */
+@media (max-width: 680px) {
+  .row {
+    gap: 12px;
+  }
+}

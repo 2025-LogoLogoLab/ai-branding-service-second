@@ -1,0 +1,115 @@
+# ------------------------
+# Global
+# ------------------------
+
+# OS에서 자동 생성되는 파일 (불필요한 파일 clutter 방지)
+.DS_Store          # macOS의 디렉토리 메타데이터
+Thumbs.db          # Windows의 이미지 캐시 파일
+
+# IDE 설정 파일들 (개인 설정이므로 팀 프로젝트에 불필요)
+.vscode/
+.idea/
+*.iml
+
+# 로그 파일들 (디버깅 용도로만 사용되므로 저장할 필요 없음)
+*.log
+
+# 환경 변수 파일 (보안 민감 정보 포함 가능)
+.env
+.env.*
+
+
+# ------------------------
+# frontend
+# ------------------------
+
+# node_modules 폴더는 외부 패키지들을 설치한 결과이므로 Git에 포함 X
+/frontend/node_modules/
+
+# Vite 캐시 파일
+# /frontend/dist/               # Vite build 결과물 (정적 파일 - 배포 시 재생성됨)
+/frontend/.vite/              # Vite 개발 서버 캐시
+
+# 로그와 환경파일들
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
+
+# 자동 생성된 API 클라이언트 
+# 프론트에서 swagger.yaml 기반 openapi-generator 로 만든 클라이언트 코드
+/frontend/src/generated-api/
+
+
+# ------------------------
+# Java (backend - Spring Boot)
+# ------------------------
+
+# 빌드된 바이너리 및 결과물 (매번 새로 빌드되므로 Git에 포함 불필요)
+!/backend/src/main/resources/        # resources는 포함
+/backend/target/                     # Maven build 결과물
+/backend/build/                      # Gradle build 결과물
+
+# 설정 정보 (로컬 DB, 민감정보 포함 가능)
+/backend/*.log
+/backend/*.env
+/backend/*.properties
+/backend/*.yml
+
+# IDE 빌드 관련 캐시 (Eclipse/IntelliJ 등)
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.mvn/
+backend/*.iml
+
+
+# ------------------------
+# Python (ai - 모델 학습/실험 등)
+# ------------------------
+
+# 파이썬 캐시 및 빌드 파일
+/ai/__pycache__/
+/ai/*.py[cod]
+/ai/*.egg-info/
+/ai/dist/
+/ai/build/
+
+# Jupyter 노트북 실행 결과 캐시
+/ai/.ipynb_checkpoints/
+
+# 가상환경 폴더 (개인 개발 환경이므로 Git에 포함 X)
+# 보통 venv, .venv, env, .env 등으로 이름이 지정됨
+/ai/venv/
+/ai/.venv/
+/ai/env/
+/ai/.env/
+
+# 데이터셋 및 생성 결과
+# /ai/datasets/ # **** 이 자리에 데이터 셋 경로 넣어주세요
+# /ai/outputs/ # **** 이 자리에 생성물 경로 넣어주세요
+
+# 로그 및 환경 정보
+/ai/*.log
+/ai/.env
+
+# ------------------------
+# Git 관련
+# ------------------------
+
+# Git이 병합 중 생성하는 임시 파일들
+*.orig
+
+# 커밋 메시지 템플릿 파일 무시 (개인용)
+.gitmessage
+
+# ------------------------
+# 기타 사용자 지정 캐시
+# ------------------------
+
+# 백업 파일
+*~
+*.bak

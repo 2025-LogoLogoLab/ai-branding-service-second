@@ -1,0 +1,16 @@
+/* src/molecules/LabeledInput/LabeledInput.module.css */
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+/* 라벨 스타일: 크기 작고 간결하게 */
+.label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #555;
+    padding-left: 4px;
+}

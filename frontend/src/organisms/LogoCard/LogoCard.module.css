@@ -1,0 +1,24 @@
+/* src/organisms/LogoCard/LogoCard.module.css */
+
+/* 전체 카드 컨테이너 */
+.logoCard {
+    width: 200px;                  /* 카드 가로 크기 (필요 시 조정) */
+    height: auto;                 /* 카드 세로 크기 */
+    border-radius: 12px;           /* 카드 모서리 둥글게 */
+    /* 자식 요소가 넘치지 않도록 */
+    /* overflow: hidden;               */
+    background-color: #ffffff;     /* 기본 배경 (필요 시 이미지 로딩 전 대비) */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); /* 부드러운 그림자 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* 툴바 포지션 조정 */
+.toolbarWrapper {
+    align-self: flex-end;          /* 오른쪽 정렬 */
+    display: flex;    
+    justify-content: center;
+    margin-top: 8px;
+    margin-right: 8px;
+}

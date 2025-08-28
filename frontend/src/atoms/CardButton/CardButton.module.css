@@ -1,0 +1,23 @@
+/* src/atoms/CardButton/CardButton.module.css */
+
+.cardButton {
+    padding: 8px 20px;
+    background-color: #f5f0ed;
+    color: #1a1a1a;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    border-radius: 14px 14px 0px 0px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.cardButton:hover {
+    background-color: #ebe5e2;
+}
+
+.cardButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

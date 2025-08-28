@@ -1,0 +1,47 @@
+/* src/atoms/IconButton/IconButton.module.css */
+/* .button {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.button:active {
+    background-color: rgba(0, 0, 0, 0.1); 
+} */
+
+/* 공통 아이콘 버튼 스타일 */
+.iconButton {
+    border: none;                 /* 기본 테두리 제거 */
+    background: transparent;      /* 배경 없음 */
+    cursor: pointer;              /* 커서를 포인터로 표시 (클릭 가능한 UI) */
+    padding: 4px;                 /* 버튼 여백 */
+    border-radius: 4px;           /* 버튼 모서리 둥글게 */
+    transition: background 0.2s ease; /* hover 효과 부드럽게 */
+}
+
+/* 마우스 오버 시 배경 강조 */
+.iconButton:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* 비활성화 상태: 흐리게 표시하고 커서 변경 */
+.iconButton.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* variant별 스타일 (기본은 따로 스타일 없음) */
+.default {}              /* 기본 스타일 */
+.danger { color: red; }  /* 위험한 작업: 삭제 등 */
+.success { color: green; } /* 긍정적인 작업: 저장 등 */
+.ghost { opacity: 0.6; } /* 흐릿한 버튼, 덜 강조되는 스타일 */

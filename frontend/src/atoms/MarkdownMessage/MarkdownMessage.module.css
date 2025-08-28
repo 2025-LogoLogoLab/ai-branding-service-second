@@ -1,0 +1,35 @@
+/* src/atoms/MarkdownMessage/MarkdownMessage.module.css */
+
+/* src/atoms/MarkdownMessage/MarkdownMessage.module.css */
+
+/* 공통 박스 스타일 */
+.systemMessage,
+.userMessage {
+    max-width: 80%;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+/* 시스템 (AI) 메시지: 좌측 상단 각짐 */
+.systemMessage {
+    background-color: #f7f7f8;
+    color: #000;
+    align-self: flex-start;
+    margin-bottom: 8px;
+    border-radius: 16px 16px 16px 0px; /* 좌측 하단은 각지게, 나머지는 둥글게 */
+}
+
+/* 사용자 메시지: 우측 하단 각짐 */
+.userMessage {
+    background-color: #ff5722;
+    color: #fff;
+    align-self: flex-end;
+    margin-bottom: 8px;
+    border-radius: 16px 16px 0 16px; /* 우측 하단만 각지게 */
+}
+
+
+/* 부모 컨테이너가 flex column 정렬일 경우 align-self 사용됨 */

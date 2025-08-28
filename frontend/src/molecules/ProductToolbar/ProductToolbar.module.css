@@ -1,0 +1,21 @@
+/* src/molecules/ProductToolbar/ProductToolbar.module.css */
+/* 툴바 전체 컨테이너 */
+.toolbarContainer {
+    display: flex;                /* 버튼을 가로로 정렬 */
+    flex-direction: row;         /* 명시적으로 가로 방향 설정 */
+    align-items: center;         /* 수직 가운데 정렬 */
+    gap: 4px;                    /* 버튼 사이 간격 */
+    padding: 4px 0;              /* 위아래 여백 */
+}
+
+/* 반응형 대응... 나중에 추가할까 고민중 */
+/* 작은 화면에서 툴바가 너무 길면 줄 바꿈 되도록 설정 가능 */
+/*
+@media (max-width: 480px) {
+    .toolbarContainer {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 6px;
+    }
+}
+*/

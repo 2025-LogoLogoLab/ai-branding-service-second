@@ -1,0 +1,51 @@
+/*
+    src/atoms/TextButton/TextButton.module.css
+
+    기본 버튼 Atom 스타일
+*/
+
+/* 공통 버튼 스타일 */
+.base {
+    /* 패딩 */
+    padding: 8px 24px;                  
+    font-size: 16px;                    /* 글자 크기 */
+    font-weight: 500;                   /* 두께 적당히 */
+    border-radius: 12px;               
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    font-family: inherit;
+    box-sizing: border-box;
+    border: none;                       /* 기본은 테두리 없음 */
+}
+
+/* 흰 배경, 테두리 없음 (기본) */
+.white {
+    background-color: white;
+    color: #2f2f2f;
+}
+
+.white:hover {
+    color: #ff5722;
+}
+
+/* 오렌지 색 */
+.orange {
+    background-color: #ff5722;
+    color: #2f2f2f;
+}
+
+.orange:hover {
+    color: white;
+}
+
+/* 흰 배경 + 연회색 테두리 */
+.outlined {
+    background-color: white;
+    color: #2f2f2f;
+    border: 2px solid #ccc;
+}
+
+.outlined:hover {
+    color: #ff5722;
+    /* border: 2px solid #2f2f2f; */
+}
