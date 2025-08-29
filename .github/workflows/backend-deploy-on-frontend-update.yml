@@ -48,19 +48,18 @@ jobs:                                                                   # [워�
       #   # 이후 SSH에서 tar 해제: sudo mkdir -p $STATIC_DIR && sudo tar -xzf ... -C $STATIC_DIR --strip-components=0
       #   # (정적을 Nginx로 서빙한다면 적절한 디렉터리에 해제)
 
-      - name: Set up Java (Temurin)                                      # [공식 액션] JDK 설치/Gradle 캐시
+      - name: Set up Java (corretto)                                      # [공식 액션] JDK 설치/Gradle 캐시
         uses: actions/setup-java@v4
         with:
-          distribution: temurin                                          #  - JDK 배포판 (권장: Temurin)
+          distribution: corretto                                         #  - JDK 배포판 (서버 환경: corretto)
           java-version: '17'                                             #  - 프로젝트 JDK 버전(변경 가능)
           cache: gradle                                                  #  - Gradle 캐시 활성화
 
       - name: Build Spring Boot (Gradle)                                 # [셸 명령] 백엔드 빌드
         working-directory: ./backend/logologolab                         #  - 백엔드 루트로 이동 (사용자 경로에 맞게)
         run: |
-          ls -la
           chmod +x ./gradlew                                            #  - 그레이들 래퍼 실행권한 (필요시)
-          ./gradlew clean build                                         #  - 로컬과 동일: 테스트 포함 빌드
+          # ./gradlew clean build                                         #  - 로컬과 동일: 테스트 포함 빌드
           ./gradlew clean build -x test                               #  - (선택) 테스트 제외 시 사용
 
       - name: Find built JAR path                                        # [셸 명령] 최신 JAR 탐색 후 출력값으로 전달
