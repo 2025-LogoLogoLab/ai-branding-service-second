@@ -64,7 +64,7 @@ jobs:                                                                   # [워�
 
       - name: Find built JAR path                                        # [셸 명령] 최신 JAR 탐색 후 출력값으로 전달
         id: jar
-        working-directory: ./backend
+        working-directory: ./backend/logologolab
         run: |
           JAR=$(ls -t build/libs/*.jar | head -n1)                      #  - 가장 최근 JAR 1개
           echo "file=$JAR" >> "$GITHUB_OUTPUT"                          #  - steps.jar.outputs.file 로 노출
