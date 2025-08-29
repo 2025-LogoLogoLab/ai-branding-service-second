@@ -1,72 +1,68 @@
-name: Frontend Build
+name: Frontend Build → Artifact → Commit                 # [워크플로 이름](변경 가능)
 
-on:
-    push:
-        branches:
-            - frontend
-        paths-ignore:
-            - 'frontend/build/**'
-            - 'frontend/dist/**'
-    pull_request:
-        branches:
-            - frontend
-        types:
-            - closed
-    workflow_dispatch: 
+on:                                                      # [워크플로 구문](GitHub 제공)
+  push:                                                  # [이벤트] frontend 브랜치에 푸시되면 실행
+    branches: [ frontend, main ]                               #  - 대상 브랜치(변경 가능)
+    paths-ignore:                                        #  - 루프 방지: 빌드 산출물만 변경된 푸시는 무시
+      - 'frontend/build/**'                              #    (프로젝트에 맞춰 dist/도 추가 권장)
+      - 'frontend/dist/**'                               #    (build 또는 dist 사용하는 툴에 맞게 조정)
+      - 'backend/**'                                     # backend 변경 시 필요 없음.
+  pull_request:                                          # [이벤트] PR이 frontend를 대상으로 할 때
+    branches: [ frontend, main ]                               #  - 대상(base) 브랜치
+    types: [ closed ]                                    #  - PR이 "닫힐 때" 트리거
+  workflow_dispatch:                                     # [이벤트] 수동 실행 허용
 
-    
 jobs:
-    build:
+  build:
+    # PR 닫힘 이벤트인 경우 "머지로 닫힘"에만 동작(단순 close 제외)
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.merged == true }} # [조건] 병합 여부 확인
+    runs-on: ubuntu-latest                               # [러너] GitHub 호스티드 러너 (변경 가능)
 
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.merged == true }}
-        runs-on: ubuntu-latest
+    permissions:                                         # [권한] 커밋/푸시 위해 contents: write 필요
+      contents: write                                    #  - Settings → Actions → Workflow permissions 도 확인
 
-        permissions:
-            contents: write
+    defaults:                                            # [기본값] run 스텝 작업 디렉터리
+      run:
+        working-directory: ./frontend                    #  - 모든 run 스텝을 frontend/에서 실행
 
-        defaults:
-            run:
-                working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4                        # [공식 액션] 코드 체크아웃 (버전 고정 권장)
+        with:
+          fetch-depth: 0                                 #  - 푸시용 히스토리 확보(옵션)
 
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                fetch-depth : 0
+      - uses: actions/setup-node@v4                      # [공식 액션] Node 설치
+        with:
+          node-version: 20.12.2                          #  - Node 버전(변경 가능)
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
-            - uses: actions/setup-node@v4
-              with:
-                node-version: 22.14.0
-                cache: npm
-                cache-dependency-path: frontend/package-lock.json
+      - run: npm ci                                      # [셸 명령] 락파일 기반 클린 설치
+      - run: npm run build                               # [셸 명령] 프론트 빌드(build/ 또는 dist/ 생성)
 
-            
-            - run: npm ci
-            - run: npm run build
+      - name: Pack build output                          # [셸 명령] 산출물 압축(아티팩트/배포 공유용)
+        run: |
+          OUT=dist; [ -d build ] && OUT=build
+          tar -czf ../frontend.tar.gz $OUT
 
-            - name: Pack build output
-              run: |
-                OUT=dist; [ -d build ] && OUT=build
-                tar -czf ../frontend.tar.gz $OUT
-            
-            - name: Upload artiffact
-              uses: actions/upload-artifacts@v4
-              with:
-                name: frontend-build
-                path: frontend.tar.gz
-                retention-days: 7
+      - name: Upload artifact                            # [공식 액션] 아티팩트 업로드(보존/재사용)
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build                           #  - 아티팩트 이름(변경 가능)
+          path: frontend.tar.gz                          #  - 워크스페이스 기준 경로
+          retention-days: 7                              #  - 보존 기간(변경 가능) 
 
-            - name: Commit build files to fronted branch
-              run: |
-                OUT=dist; [ -d build ] && OUT=build
-                cd ..
-                git config user.name "github-actions"
-                git config user.email "actions@github.com"
-
-                git add -f frontend/$OUT
-                if git diff --cached --quiet; then
-                    echo "No built changes to commit."
-                else
-                    git commit -m "chore(frontend): commit built assets ($OUT) [ skip ci ]"
-                    git push origin HEAD:frontend
-                fi
-
+      - name: Commit built files to frontend branch      # [셸 명령] 빌드 산출물 커밋/푸시(동일 브랜치)
+        run: |
+          OUT=dist; [ -d build ] && OUT=build
+          cd ..
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          # .gitignore에 막혀 있어도 강제 추가
+          git add -f frontend/$OUT
+          if git diff --cached --quiet; then
+            echo "No built changes to commit."
+          else
+            # 루프 방지: [skip ci] 포함 → push/pull_request 워크플로 스킵 
+            git commit -m "chore(frontend): commit built assets ($OUT) [skip ci]"
+            git push origin HEAD:frontend
+          fi
