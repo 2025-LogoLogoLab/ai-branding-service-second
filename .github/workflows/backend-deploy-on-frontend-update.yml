@@ -76,8 +76,10 @@ jobs:                                                                   # [워�
           username: ${{ secrets.SSH_USER }}                              #  - 비밀: SSH 사용자 (예: ec2-user)
           key: ${{ secrets.SSH_KEY }}                                    #  - 비밀: PEM 개인키 내용
           port: ${{ secrets.SSH_PORT || 22 }}                            #  - 비밀/옵션
-          source: "backend/logologolab/${{ steps.jar.outputs.file }}"    # ★ 루트 경로 접두. 로컬 빌드 산출 jar
-          target: "${{ env.DEPLOY_DIR }}/"                               #  - 서버 배포 디렉터리
+          source: "backend/logologolab/build/libs/*-SNAPSHOT.jar,!backend/logologolab/build/libs/*-plain.jar"  # 리포 루트 기준
+          target: "${{ env.DEPLOY_DIR }}/"                # /home/ec2-user/
+          strip_components: 4                             # backend/logologolab/build/libs/ 제거 → 파일만 떨어짐
+          overwrite: true                                 # 같은 이름이면 덮어쓰기
 
       - name: Restart Spring service (SSH)                                # [마켓 액션] 원격 명령: 서비스 재시작/상태/로그
         uses: appleboy/ssh-action@v1.2.0
