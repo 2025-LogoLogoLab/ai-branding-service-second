@@ -3,7 +3,7 @@ name: Backend Deploy (on frontend update)                               # [워�
 
 on:                                                                     # [워크플로 구문] 트리거 (GitHub 제공)
   workflow_run:                                                         # [이벤트] 다른 워크플로 완료 시 (GitHub 제공)
-    workflows: [ "Frontend Build → Artifact → Commit" ]                 #  - 연동할 프론트 워크플로의 name (사용자 저장한 이름과 동일해야 함)
+    workflows: [ "Frontend Build → Artifact → Commit → Auto PR" ]                 #  - 연동할 프론트 워크플로의 name (사용자 저장한 이름과 동일해야 함)
     types: [ completed ]                                                #  - 완료 시점에만 반응
     branches: [ frontend, main ]                                        #  - 어떤 브랜치에서 돌아간 빌드가 완료되면 트리거할지 (변경 가능)
   workflow_dispatch:                                                    # [이벤트] 수동 실행 허용 (GitHub 제공)
