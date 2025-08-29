@@ -45,15 +45,16 @@ jobs:
           OUT=dist; [ -d build ] && OUT=build
           echo "OUT=$OUT" >> "$GITHUB_ENV"               # 다음 스텝에서도 $OUT 사용 가능 ($GITHUB_ENV는 스텝 간 환경전파용)
 
-      - name: Pack build output                          # 빌드 산출물 압축 (폴더명 없이 파일만 포함)
-        run: |
-          tar -C "$OUT" -czf ../frontend.tar.gz .          
+      # - name: Pack build output                          # 빌드 산출물 압축 (폴더명 없이 파일만 포함)
+      #   run: |
+      #     tar -C "$OUT" -czf ../frontend.tar.gz .          
 
       - name: Upload artifact                            # [공식 액션] 아티팩트 업로드(보존/재사용)
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build                           #  - 아티팩트 이름(변경 가능)
-          path: frontend.tar.gz                          #  - 워크스페이스 기준 경로
+          # path: frontend.tar.gz                          #  - 워크스페이스 기준 경로
+          path: dist/**                          #  - 워크스페이스 기준 경로
           retention-days: 7                              #  - 보존 기간(변경 가능) 
 
       - name: Commit built files to frontend branch      # [셸 명령] 빌드 산출물 커밋/푸시(동일 브랜치)
