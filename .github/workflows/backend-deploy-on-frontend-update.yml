@@ -16,6 +16,7 @@ jobs:                                                                   # [워�
 
     permissions:                                                        # [권한] 아티팩트 다운로드/로그 코멘트 등 최소 필요 권한
       contents: read                                                    #  - 코드 읽기 (변경 가능; 여기선 read만 필요)
+      actions: read
 
     env:                                                                # [환경 변수] 배포에 쓰는 값 (사용자 변경 권장)
       SERVICE_NAME: logologolab.service                                 #  - systemd 유닛 이름 (변경 가능)
@@ -30,6 +31,7 @@ jobs:                                                                   # [워�
         uses: actions/download-artifact@v4                               #  - v4 권장
         with:
           name: frontend-build                                          #  - 프론트 워크플로에서 올린 아티팩트 이름과 동일해야 함(변경 가능)
+          run-id: ${{ github.event.workflow_run.id }}                   # [중요] 트리거한 **소스 런**의 ID를 지정 (크로스-런)
           path: ./_artifact                                             #  - 저장 경로 (변경 가능)
 
       # (선택) 정적 파일을 서버에 별도 배포할 경우 scp로 업로드
