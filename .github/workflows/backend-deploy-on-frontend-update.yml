@@ -21,7 +21,9 @@ jobs:                                                                   # [워�
     env:                                                                # [환경 변수] 배포에 쓰는 값 (사용자 변경 권장)
       SERVICE_NAME: logologolab.service                                 #  - systemd 유닛 이름 (변경 가능)
       DEPLOY_DIR: /home/ec2-user                                        #  - JAR 파일을 둘 서버 경로 (변경 가능)
-      # (선택) STATIC_DIR: /var/www/html                               #  - Nginx 등으로 정적 파일 서빙 시 경로 (프로젝트에 맞게)
+      FRONTEND_BUNDLE_DIR: ./_artifact                                    # [고정/사용자 변경] download-artifact 저장 위치
+      SPRING_STATIC_DIR: ./backend/logologolab/src/main/resources/static  # [사용자 변경] 스프링 정적 리소스 폴더
+
 
     steps:
       - name: Checkout                                                  # [공식 액션] 리포지토리 체크아웃
@@ -35,18 +37,15 @@ jobs:                                                                   # [워�
           github-token: ${{ secrets.GITHUB_TOKEN }}                     # [권장] 리포 권한 토큰(기본 제공) 
           path: ./_artifact                                             #  - 저장 경로 (변경 가능)
 
-      # (선택) 정적 파일을 서버에 별도 배포할 경우 scp로 업로드
-      # - name: Upload static bundle (optional)
-      #   uses: appleboy/scp-action@v0.1.7                               # [마켓 액션] SCP 파일 전송
-      #   with:
-      #     host: ${{ secrets.SSH_HOST }}                                #  - EC2 호스트/IP (비밀)
-      #     username: ${{ secrets.SSH_USER }}                            #  - SSH 사용자 (비밀, 예: ec2-user)
-      #     key: ${{ secrets.SSH_KEY }}                                  #  - PEM 개인키 내용 (비밀)
-      #     port: ${{ secrets.SSH_PORT || 22 }}                          #  - 포트(옵션)
-      #     source: "_artifact/frontend.tar.gz"                          #  - 앞선 아티팩트(압축 파일)
-      #     target: "${{ env.DEPLOY_DIR }}/frontend.tar.gz"              #  - 서버 임시 경로
-      #   # 이후 SSH에서 tar 해제: sudo mkdir -p $STATIC_DIR && sudo tar -xzf ... -C $STATIC_DIR --strip-components=0
-      #   # (정적을 Nginx로 서빙한다면 적절한 디렉터리에 해제)
+      - name: Sync frontend → Spring static                               # [셸] 프론트 정적 리소스를 스프링에 반영
+        run: |
+          ls -al ${{ env.FRONTEND_BUNDLE_DIR }}
+          set -e                                                          # [셸] 에러 시 즉시 실패
+          mkdir -p "${{ env.SPRING_STATIC_DIR }}"                         # [사용자 변경] static 폴더 보장 생성
+          rm -rf "${{ env.SPRING_STATIC_DIR }}"/*                         # [주의] 기존 파일 정리(필요 시 주석 처리)
+          cp -a "${{ env.FRONTEND_BUNDLE_DIR }}"/. "${{ env.SPRING_STATIC_DIR }}"/
+                                                                          # [핵심] 아티팩트(예: dist의 index.html, assets/) 내용을 그대로 복사
+          ls -la "${{ env.SPRING_STATIC_DIR }}"                           # [검증] 복사된 파일 목록 출력
 
       - name: Set up Java (corretto)                                      # [공식 액션] JDK 설치/Gradle 캐시
         uses: actions/setup-java@v4
@@ -62,25 +61,22 @@ jobs:                                                                   # [워�
           # ./gradlew clean build                                         #  - 로컬과 동일: 테스트 포함 빌드
           ./gradlew clean build -x test                               #  - (선택) 테스트 제외 시 사용
 
-      # (1) JAR 찾기: backend/logologolab 안에서 찾되, 출력값은 "리포 루트 기준 경로"로 내보내기
-      - name: Find built JAR path                                   # [GitHub 제공 run 스텝]
-        id: jar                                                     # [고정] 이후 outputs로 참조
-        working-directory: ./backend/logologolab                    # [사용자 변경 가능] 프로젝트 루트
+      - name: Find built JAR path                                        # [셸 명령] 최신 JAR 탐색 후 출력값으로 전달
+        id: jar
+        working-directory: ./backend/logologolab
         run: |
-          JAR=$(ls -t build/libs/*.jar | grep -v -- '-plain\.jar' | head -n1)  # [사용자 변경 가능] 최신 bootJar 선택
-          echo "file=backend/logologolab/$JAR" >> "$GITHUB_OUTPUT"             # [중요] 리포 루트 기준 경로로 출력
-              
-      # (2) 업로드: uses 스텝은 working-directory가 안 먹으므로, 꼭 루트 기준 경로를 넘기기
-      - name: Upload JAR to EC2 (SCP)                              # [마켓 액션]
-        uses: appleboy/scp-action@v0.1.7                           # [고정] 액션 호출
-        with:
-          host: ${{ secrets.SSH_HOST }}                            # [비밀] 서버 호스트
-          username: ${{ secrets.SSH_USER }}                        # [비밀] SSH 사용자
-          key: ${{ secrets.SSH_KEY }}                              # [비밀] 개인키
-          port: ${{ secrets.SSH_PORT || 22 }}                      # [옵션] 포트
-          source: "${{ steps.jar.outputs.file }}"                  # [중요] 루트 기준 경로(위에서 만든 출력값)
-          target: "${{ env.DEPLOY_DIR }}/"                         # [사용자 변경 가능] 서버 경로
+          JAR=$(ls -t build/libs/*.jar | head -n1)                      #  - 가장 최근 JAR 1개
+          echo "file=$JAR" >> "$GITHUB_OUTPUT"                          #  - steps.jar.outputs.file 로 노출
 
+      - name: Upload JAR to EC2 (SCP)                                    # [마켓 액션] 원격 서버로 JAR 복사
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}                                  #  - 비밀: EC2 호스트/IP 또는 도메인(duckdns 등)
+          username: ${{ secrets.SSH_USER }}                              #  - 비밀: SSH 사용자 (예: ec2-user)
+          key: ${{ secrets.SSH_KEY }}                                    #  - 비밀: PEM 개인키 내용
+          port: ${{ secrets.SSH_PORT || 22 }}                            #  - 비밀/옵션
+          source: "${{ steps.jar.outputs.file }}"                        #  - 로컬 빌드 산출 JAR
+          target: "${{ env.DEPLOY_DIR }}/"                               #  - 서버 배포 디렉터리
 
       - name: Restart Spring service (SSH)                                # [마켓 액션] 원격 명령: 서비스 재시작/상태/로그
         uses: appleboy/ssh-action@v1.2.0
