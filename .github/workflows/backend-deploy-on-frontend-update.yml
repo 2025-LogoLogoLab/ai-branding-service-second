@@ -28,10 +28,11 @@ jobs:                                                                   # [워�
         uses: actions/checkout@v4                                       #  - 버전 고정 권장 (변경 가능)
 
       - name: Download frontend artifact                                # [공식 액션] 프론트 빌드 아티팩트 수신
-        uses: actions/download-artifact@v4                               #  - v4 권장
+        uses: actions/download-artifact@v4                              #  - v4 권장
         with:
           name: frontend-build                                          #  - 프론트 워크플로에서 올린 아티팩트 이름과 동일해야 함(변경 가능)
           run-id: ${{ github.event.workflow_run.id }}                   # [중요] 트리거한 **소스 런**의 ID를 지정 (크로스-런)
+          github-token: ${{ secrets.GITHUB_TOKEN }}                     # [권장] 리포 권한 토큰(기본 제공) 
           path: ./_artifact                                             #  - 저장 경로 (변경 가능)
 
       # (선택) 정적 파일을 서버에 별도 배포할 경우 scp로 업로드
