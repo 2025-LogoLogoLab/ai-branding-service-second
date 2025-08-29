@@ -2,13 +2,13 @@ name: Frontend Build → Artifact → Commit                 # [워크플로 이
 
 on:                                                      # [워크플로 구문](GitHub 제공)
   push:                                                  # [이벤트] frontend 브랜치에 푸시되면 실행
-    branches: [ frontend, main ]                               #  - 대상 브랜치(변경 가능)
+    branches: [ frontend ]                               #  - 대상 브랜치(변경 가능)
     paths-ignore:                                        #  - 루프 방지: 빌드 산출물만 변경된 푸시는 무시
       - 'frontend/build/**'                              #    (프로젝트에 맞춰 dist/도 추가 권장)
       - 'frontend/dist/**'                               #    (build 또는 dist 사용하는 툴에 맞게 조정)
       - 'backend/**'                                     # backend 변경 시 필요 없음.
   pull_request:                                          # [이벤트] PR이 frontend를 대상으로 할 때
-    branches: [ frontend, main ]                               #  - 대상(base) 브랜치
+    branches: [ frontend ]                               #  - 대상(base) 브랜치
     types: [ closed ]                                    #  - PR이 "닫힐 때" 트리거
   workflow_dispatch:                                     # [이벤트] 수동 실행 허용
 
@@ -20,6 +20,7 @@ jobs:
 
     permissions:                                         # [권한] 커밋/푸시 위해 contents: write 필요
       contents: write                                    #  - Settings → Actions → Workflow permissions 도 확인
+      pull-requests: write                               #  - PR 생성
 
     defaults:                                            # [기본값] run 스텝 작업 디렉터리
       run:
@@ -39,10 +40,14 @@ jobs:
       - run: npm ci                                      # [셸 명령] 락파일 기반 클린 설치
       - run: npm run build                               # [셸 명령] 프론트 빌드(build/ 또는 dist/ 생성)
 
-      - name: Pack build output                          # [셸 명령] 산출물 압축(아티팩트/배포 공유용)
+      - name: Detect output dir & export                 # [셸] 산출 디렉터리 감지 후 ENV로 전파
         run: |
           OUT=dist; [ -d build ] && OUT=build
-          tar -czf ../frontend.tar.gz $OUT
+          echo "OUT=$OUT" >> "$GITHUB_ENV"               # 다음 스텝에서도 $OUT 사용 가능 ($GITHUB_ENV는 스텝 간 환경전파용)
+
+      - name: Pack build output                          # 빌드 산출물 압축 (폴더명 없이 파일만 포함)
+        run: |
+          tar -C "$OUT" -czf ../frontend.tar.gz .          
 
       - name: Upload artifact                            # [공식 액션] 아티팩트 업로드(보존/재사용)
         uses: actions/upload-artifact@v4
@@ -66,3 +71,28 @@ jobs:
             git commit -m "chore(frontend): commit built assets ($OUT) [skip ci]"
             git push origin HEAD:frontend
           fi
+
+      - uses: actions/github-script@v7                  # [공식 액션] GitHub REST API 호출
+        with:
+          
+          script: |                                     # [Node 런타임] 스크립트 본문
+            const { owner, repo } = context.repo;       // (고정) 리포 식별자 컨텍스트
+            const head  = process.env.PR_HEAD_BRANCH;   // (env) 아래에서 지정한 값 사용
+            const base  = process.env.PR_BASE_BRANCH;   // (env)
+            const title = process.env.PR_TITLE;         // (env)
+            const body  = process.env.PR_BODY;          // (env)
+
+            // 단순 생성. 이미 존재(422)면 스킵
+            try {
+              await github.rest.pulls.create({ owner, repo, head, base, title, body });
+              core.info(`PR created: ${head} -> ${base}`);
+            } catch (e) {
+              if (e.status === 422) core.info('PR already exists — skipping.');
+              else throw e;
+            }
+
+        env:
+          PR_HEAD_BRANCH: frontend                      # PR HEAD 브랜치
+          PR_BASE_BRANCH: main                          # PR BASE 브랜치
+          PR_TITLE: "Merge frontend into main"          # PR 제목
+          PR_BODY: "Auto-created by workflow."          # PR 설명
