@@ -4,9 +4,6 @@ on:
     push:
         branches:
             - frontend
-        paths:
-            - 'frontend/**'
-            - '.github/workflows/frontend-build.yml'
         paths-ignore:
             - 'frontend/build/**'
             - 'frontend/dist/**'
