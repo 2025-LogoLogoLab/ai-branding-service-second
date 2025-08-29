@@ -67,6 +67,7 @@ jobs:                                                                   # [워�
         run: |
           JAR=$(ls -t build/libs/*.jar | head -n1)                      #  - 가장 최근 JAR 1개
           echo "file=$JAR" >> "$GITHUB_OUTPUT"                          #  - steps.jar.outputs.file 로 노출
+          echo $GITHUB_OUTPUT
 
       - name: Upload JAR to EC2 (SCP)                                    # [마켓 액션] 원격 서버로 JAR 복사
         uses: appleboy/scp-action@v0.1.7
