@@ -1,0 +1,91 @@
+# .github/workflows/backend-deploy-on-frontend-update.yml
+name: Backend Deploy (on frontend update)                               # [워크플로 이름](사용자 변경 가능)
+
+on:                                                                     # [워크플로 구문] 트리거 (GitHub 제공)
+  workflow_run:                                                         # [이벤트] 다른 워크플로 완료 시 (GitHub 제공)
+    workflows: [ "Frontend Build → Artifact → Commit" ]                 #  - 연동할 프론트 워크플로의 name (사용자 저장한 이름과 동일해야 함)
+    types: [ completed ]                                                #  - 완료 시점에만 반응
+    branches: [ frontend, main ]                                        #  - 어떤 브랜치에서 돌아간 빌드가 완료되면 트리거할지 (변경 가능)
+  workflow_dispatch:                                                    # [이벤트] 수동 실행 허용 (GitHub 제공)
+
+jobs:                                                                   # [워크플로 구문] 잡 집합 (GitHub 제공)
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+                                                                        # [조건] 수동 실행이거나, 연동된 워크플로가 성공했을 때만 진행
+    runs-on: ubuntu-latest                                              # [러너] GitHub 호스티드 러너 (변경 가능)
+
+    permissions:                                                        # [권한] 아티팩트 다운로드/로그 코멘트 등 최소 필요 권한
+      contents: read                                                    #  - 코드 읽기 (변경 가능; 여기선 read만 필요)
+
+    env:                                                                # [환경 변수] 배포에 쓰는 값 (사용자 변경 권장)
+      SERVICE_NAME: logologolab.service                                 #  - systemd 유닛 이름 (변경 가능)
+      DEPLOY_DIR: /home/ec2-user                                        #  - JAR 파일을 둘 서버 경로 (변경 가능)
+      # (선택) STATIC_DIR: /var/www/html                               #  - Nginx 등으로 정적 파일 서빙 시 경로 (프로젝트에 맞게)
+
+    steps:
+      - name: Checkout                                                  # [공식 액션] 리포지토리 체크아웃
+        uses: actions/checkout@v4                                       #  - 버전 고정 권장 (변경 가능)
+
+      - name: Download frontend artifact                                # [공식 액션] 프론트 빌드 아티팩트 수신
+        uses: actions/download-artifact@v4                               #  - v4 권장
+        with:
+          name: frontend-build                                          #  - 프론트 워크플로에서 올린 아티팩트 이름과 동일해야 함(변경 가능)
+          path: ./_artifact                                             #  - 저장 경로 (변경 가능)
+
+      # (선택) 정적 파일을 서버에 별도 배포할 경우 scp로 업로드
+      # - name: Upload static bundle (optional)
+      #   uses: appleboy/scp-action@v0.1.7                               # [마켓 액션] SCP 파일 전송
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}                                #  - EC2 호스트/IP (비밀)
+      #     username: ${{ secrets.SSH_USER }}                            #  - SSH 사용자 (비밀, 예: ec2-user)
+      #     key: ${{ secrets.SSH_KEY }}                                  #  - PEM 개인키 내용 (비밀)
+      #     port: ${{ secrets.SSH_PORT || 22 }}                          #  - 포트(옵션)
+      #     source: "_artifact/frontend.tar.gz"                          #  - 앞선 아티팩트(압축 파일)
+      #     target: "${{ env.DEPLOY_DIR }}/frontend.tar.gz"              #  - 서버 임시 경로
+      #   # 이후 SSH에서 tar 해제: sudo mkdir -p $STATIC_DIR && sudo tar -xzf ... -C $STATIC_DIR --strip-components=0
+      #   # (정적을 Nginx로 서빙한다면 적절한 디렉터리에 해제)
+
+      - name: Set up Java (Temurin)                                      # [공식 액션] JDK 설치/Gradle 캐시
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin                                          #  - JDK 배포판 (권장: Temurin)
+          java-version: '17'                                             #  - 프로젝트 JDK 버전(변경 가능)
+          cache: gradle                                                  #  - Gradle 캐시 활성화
+
+      - name: Build Spring Boot (Gradle)                                 # [셸 명령] 백엔드 빌드
+        working-directory: ./backend                                     #  - 백엔드 루트로 이동 (사용자 경로에 맞게)
+        run: |
+          chmod +x ./gradlew                                            #  - 그레이들 래퍼 실행권한 (필요시)
+          ./gradlew clean build                                         #  - 로컬과 동일: 테스트 포함 빌드
+          # ./gradlew clean build -x test                               #  - (선택) 테스트 제외 시 사용
+
+      - name: Find built JAR path                                        # [셸 명령] 최신 JAR 탐색 후 출력값으로 전달
+        id: jar
+        working-directory: ./backend
+        run: |
+          JAR=$(ls -t build/libs/*.jar | head -n1)                      #  - 가장 최근 JAR 1개
+          echo "file=$JAR" >> "$GITHUB_OUTPUT"                          #  - steps.jar.outputs.file 로 노출
+
+      - name: Upload JAR to EC2 (SCP)                                    # [마켓 액션] 원격 서버로 JAR 복사
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}                                  #  - 비밀: EC2 호스트/IP 또는 도메인(duckdns 등)
+          username: ${{ secrets.SSH_USER }}                              #  - 비밀: SSH 사용자 (예: ec2-user)
+          key: ${{ secrets.SSH_KEY }}                                    #  - 비밀: PEM 개인키 내용
+          port: ${{ secrets.SSH_PORT || 22 }}                            #  - 비밀/옵션
+          source: "${{ steps.jar.outputs.file }}"                        #  - 로컬 빌드 산출 JAR
+          target: "${{ env.DEPLOY_DIR }}/"                               #  - 서버 배포 디렉터리
+
+      - name: Restart Spring service (SSH)                                # [마켓 액션] 원격 명령: 서비스 재시작/상태/로그
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+            sudo systemctl restart "${{ env.SERVICE_NAME }}"             #  - 서비스 재시작
+            sudo systemctl status  "${{ env.SERVICE_NAME }}" -n 50 --no-pager  #  - 최근 상태 로그 50줄
+            # 인터랙티브 명령 'less +F'는 CI에 부적합 → journalctl로 최근 로그 출력
+            sudo journalctl -u "${{ env.SERVICE_NAME }}" -n 200 --no-pager     #  - 최근 200줄 로그
