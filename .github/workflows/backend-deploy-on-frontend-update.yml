@@ -58,9 +58,10 @@ jobs:                                                                   # [워�
       - name: Build Spring Boot (Gradle)                                 # [셸 명령] 백엔드 빌드
         working-directory: ./backend                                     #  - 백엔드 루트로 이동 (사용자 경로에 맞게)
         run: |
+          ls -la
           chmod +x ./gradlew                                            #  - 그레이들 래퍼 실행권한 (필요시)
           ./gradlew clean build                                         #  - 로컬과 동일: 테스트 포함 빌드
-          # ./gradlew clean build -x test                               #  - (선택) 테스트 제외 시 사용
+          ./gradlew clean build -x test                               #  - (선택) 테스트 제외 시 사용
 
       - name: Find built JAR path                                        # [셸 명령] 최신 JAR 탐색 후 출력값으로 전달
         id: jar
