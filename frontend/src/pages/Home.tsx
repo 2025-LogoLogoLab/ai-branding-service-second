@@ -17,7 +17,7 @@ function Home() {
   
   return (
     <div>
-      <h1> Home Page 깃허브 액션 테스트하기 자동 배포!</h1>
+      <h1> Home Page 깃허브 액션 테스트하기 자동 배포</h1>
       <Link to={'Login'}> Login </Link><br></br>
       <Link to={'Mypage'}> My Page </Link><br></br>
       <Link to={'MyProducts'}> My Products </Link><br></br>
