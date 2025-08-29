@@ -1,4 +1,4 @@
-name: Frontend Build → Artifact → Commit                 # [워크플로 이름](변경 가능)
+name: Frontend Build → Artifact → Commit → Auto PR                 # [워크플로 이름](변경 가능)
 
 on:                                                      # [워크플로 구문](GitHub 제공)
   push:                                                  # [이벤트] frontend 브랜치에 푸시되면 실행
