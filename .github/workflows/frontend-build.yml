@@ -1,0 +1,77 @@
+name: Frontend Build
+
+on:
+    push:
+        branches:
+            - frontend
+        paths:
+            - 'frontend/**'
+            - '.github/workflows/frontend-build.yml'
+        paths-ignore:
+            - 'frontend/build/**'
+            - 'frontend/dist/**'
+    pull_request:
+        branches:
+            - frontend
+        types:
+            - closed
+        paths:
+            - 'frontend/**'
+    workflow_dispatch: 
+
+    
+jobs:
+    build:
+
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.merged == true }}
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: write
+
+        defaults:
+            run:
+                working-directory: ./frontend
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                fetch-depth : 0
+
+            - uses: actions/setup-node@v4
+              with:
+                node-version: 22.14.0
+                cache: npm
+                cache-dependency-path: frontend/package-lock.json
+
+            
+            - run: npm ci
+            - run: npm run build
+
+            - name: Pack build output
+              run: |
+                OUT=dist; [ -d build ] && OUT=build
+                tar -czf ../frontend.tar.gz $OUT
+            
+            - name: Upload artiffact
+              uses: actions/upload-artifacts@v4
+              with:
+                name: frontend-build
+                path: frontend.tar.gz
+                retention-days: 7
+
+            - name: Commit build files to fronted branch
+              run: |
+                OUT=dist; [ -d build ] && OUT=build
+                cd ..
+                git config user.name "github-actions"
+                git config user.email "actions@github.com"
+
+                git add -f frontend/$OUT
+                if git diff --cached --quiet; then
+                    echo "No built changes to commit."
+                else
+                    git commit -m "chore(frontend): commit built assets ($OUT) [ skip ci ]"
+                    git push origin HEAD:frontend
+                fi
+
