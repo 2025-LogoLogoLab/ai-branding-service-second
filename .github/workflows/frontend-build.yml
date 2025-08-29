@@ -49,7 +49,7 @@ jobs:
                 tar -czf ../frontend.tar.gz $OUT
             
             - name: Upload artiffact
-              uses: actions/upload-artifacts@v4
+              uses: actions/upload-artifact@v4
               with:
                 name: frontend-build
                 path: frontend.tar.gz
