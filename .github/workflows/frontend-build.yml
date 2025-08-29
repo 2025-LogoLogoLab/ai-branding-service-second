@@ -12,8 +12,6 @@ on:
             - frontend
         types:
             - closed
-        paths:
-            - 'frontend/**'
     workflow_dispatch: 
 
     
