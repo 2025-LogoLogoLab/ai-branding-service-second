@@ -10,9 +10,9 @@ function Home() {
   
   useEffect(()=> {
     console.log("user : " + user?.role + "\n");  // 디버깅용. user role 출력
-    console.log("api base : " + import.meta.env.VITE_API_BASE_URL + "\n");  // 디버깅용. user role 출력
-    console.log("kakao 콜백 : " + import.meta.env.VITE_CALL_BACK_KAKAO + "\n");  // 디버깅용. user role 출력
-    console.log("naver 콜백 : " + import.meta.env.VITE_CALL_BACK_NAVER + "\n");  // 디버깅용. user role 출력
+    // console.log("api base : " + import.meta.env.VITE_API_BASE_URL + "\n");  // 디버깅용. user role 출력
+    // console.log("kakao 콜백 : " + import.meta.env.VITE_CALL_BACK_KAKAO + "\n");  // 디버깅용. user role 출력
+    // console.log("naver 콜백 : " + import.meta.env.VITE_CALL_BACK_NAVER + "\n");  // 디버깅용. user role 출력
   }, [user])
   
   return (
