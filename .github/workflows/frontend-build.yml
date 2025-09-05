@@ -7,15 +7,15 @@ on:                                                      # [워크플로 구문]
       - 'frontend/build/**'                              #    (프로젝트에 맞춰 dist/도 추가 권장)
       - 'frontend/dist/**'                               #    (build 또는 dist 사용하는 툴에 맞게 조정)
       - 'backend/**'                                     # backend 변경 시 필요 없음.
-  pull_request:                                          # [이벤트] PR이 frontend를 대상으로 할 때
-    branches: [ frontend ]                               #  - 대상(base) 브랜치
-    types: [ closed ]                                    #  - PR이 "닫힐 때" 트리거
+  # pull_request:                                          # [이벤트] PR이 frontend를 대상으로 할 때
+  #   branches: [ frontend ]                               #  - 대상(base) 브랜치
+  #   types: [ closed ]                                    #  - PR이 "닫힐 때" 트리거
   workflow_dispatch:                                     # [이벤트] 수동 실행 허용
 
 jobs:
   build:
     # PR 닫힘 이벤트인 경우 "머지로 닫힘"에만 동작(단순 close 제외)
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.merged == true }} # [조건] 병합 여부 확인
+    # if: ${{ github.event_name != 'pull_request' || github.event.pull_request.merged == true }} # [조건] 병합 여부 확인
     runs-on: ubuntu-latest                               # [러너] GitHub 호스티드 러너 (변경 가능)
 
     permissions:                                         # [권한] 커밋/푸시 위해 contents: write 필요
