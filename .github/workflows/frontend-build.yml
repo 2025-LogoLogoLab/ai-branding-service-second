@@ -39,6 +39,10 @@ jobs:
 
       - run: npm ci                                      # [셸 명령] 락파일 기반 클린 설치
       - run: npm run build                               # [셸 명령] 프론트 빌드(build/ 또는 dist/ 생성)
+        env:
+            VITE_CALL_BACK_KAKAO: "https://logologolab.duckdns.org/app/oauth/callback?provider=kakao" # 카카오 콜백 uri
+            VITE_CALL_BACK_NAVER: "https://logologolab.duckdns.org/app/oauth/callback?provider=naver" # 네이버 콜백 uri
+            VITE_API_BASE_URL: "https://logologolab.duckdns.org/api"  # 기본 api 호출 url
 
       - name: Detect output dir & export                 # [셸] 산출 디렉터리 감지 후 ENV로 전파
         run: |
@@ -98,6 +102,3 @@ jobs:
           PR_BASE_BRANCH: main                          # PR BASE 브랜치
           PR_TITLE: "Merge frontend into main"          # PR 제목
           PR_BODY: "Auto-created by workflow."          # PR 설명
-          VITE_API_BASE_URL: "https://logologolab.duckdns.org/api"  # 기본 api 호출 url
-          VITE_CALL_BACK_KAKAO: "https://logologolab.duckdns.org/app/oauth/callback?provider=kakao" # 카카오 콜백 uri
-          VITE_CALL_BACK_NAVER: "https://logologolab.duckdns.org/app/oauth/callback?provider=naver" # 네이버 콜백 uri
