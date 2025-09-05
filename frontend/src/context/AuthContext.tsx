@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const temp = await getAuth();
                 const role = { role : temp.role };
                 setUser( role );
-                console.log("fetch auth로 컨텍스트에 받아온 유저 : " + temp.role);
+                console.log("fetch auth로 컨텍스트에 받아온 유저  : " + temp.role);
             }
             catch (err) {
                 console.log(err);
