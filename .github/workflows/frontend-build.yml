@@ -98,3 +98,6 @@ jobs:
           PR_BASE_BRANCH: main                          # PR BASE 브랜치
           PR_TITLE: "Merge frontend into main"          # PR 제목
           PR_BODY: "Auto-created by workflow."          # PR 설명
+          VITE_API_BASE_URL: "https://logologolab.duckdns.org/api"  # 기본 api 호출 url
+          VITE_CALL_BACK_KAKAO: "https://logologolab.duckdns.org/app/oauth/callback?provider=kakao" # 카카오 콜백 uri
+          VITE_CALL_BACK_NAVER: "https://logologolab.duckdns.org/app/oauth/callback?provider=naver" # 네이버 콜백 uri
