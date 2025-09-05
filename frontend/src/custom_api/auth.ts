@@ -8,12 +8,13 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL;
 const endPointLogin = baseUrl + '/login';
 const endPointSocialLogin = baseUrl + '/login/social';
 const logOutEndPoint = baseUrl + '/logout'
+const checkAuthEndPoint = baseUrl + '/protected';
 
-// export type SocailLoginResponse = {
-//     provider: string;
-//     code: string;
-// }
-
+// 토큰 유효성 확인 응답
+export type checkAuthResponse = {
+    message: string;
+    role: 'ADMIN' | 'USER';
+}
 
 // 로그인 요청 폼
 export type LoginRequest = {
@@ -30,11 +31,9 @@ export type LoginResponse = {
     // profilePic?: string | null;
 }
 
+// 소셜 로그인 응답도 일반 로그인 응답과 같은 타입
 export type SocailLoginResponse = LoginResponse;
-// 로그아웃 응답 폼.
-// export type LogOutResponse = {
-//     message: string;        // 어떤 메시지들이 올지는 다시 결정해봐야할 것 같음.
-// }
+
 
 // 소셜 로그인 종류 지정
 export type SocialProvider = 'kakao' | 'naver' | null;
@@ -143,4 +142,22 @@ export async function logOut(){
     
     console.log("백엔드에 로그아웃 요청 성공" + result);    
     // return data;
+}
+
+// 인증 정보 요청 클라이언트
+export async function checkAuth() : Promise<checkAuthResponse>{
+ 
+    console.log("토큰 유효성 검증 시작");
+    const res = await fetch(checkAuthEndPoint, {
+        method: 'GET',
+        credentials: 'include',
+    });
+
+    if( !res.ok ){
+        console.log("토큰 유효성 검증 오류 " + res);
+        throw new Error("토큰 유효성 검증 오류 " + res.status);
+    }
+    console.log("토큰 유효성 검증 성공");
+
+    return res.json();
 }
