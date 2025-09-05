@@ -7,15 +7,15 @@ on:                                                      # [워크플로 구문]
       - 'frontend/build/**'                              #    (프로젝트에 맞춰 dist/도 추가 권장)
       - 'frontend/dist/**'                               #    (build 또는 dist 사용하는 툴에 맞게 조정)
       - 'backend/**'                                     # backend 변경 시 필요 없음.
-  pull_request:                                          # [이벤트] PR이 frontend를 대상으로 할 때
-    branches: [ frontend ]                               #  - 대상(base) 브랜치
-    types: [ closed ]                                    #  - PR이 "닫힐 때" 트리거
+  # pull_request:                                          # [이벤트] PR이 frontend를 대상으로 할 때
+  #   branches: [ frontend ]                               #  - 대상(base) 브랜치
+  #   types: [ closed ]                                    #  - PR이 "닫힐 때" 트리거
   workflow_dispatch:                                     # [이벤트] 수동 실행 허용
 
 jobs:
   build:
     # PR 닫힘 이벤트인 경우 "머지로 닫힘"에만 동작(단순 close 제외)
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.merged == true }} # [조건] 병합 여부 확인
+    # if: ${{ github.event_name != 'pull_request' || github.event.pull_request.merged == true }} # [조건] 병합 여부 확인
     runs-on: ubuntu-latest                               # [러너] GitHub 호스티드 러너 (변경 가능)
 
     permissions:                                         # [권한] 커밋/푸시 위해 contents: write 필요
@@ -39,6 +39,10 @@ jobs:
 
       - run: npm ci                                      # [셸 명령] 락파일 기반 클린 설치
       - run: npm run build                               # [셸 명령] 프론트 빌드(build/ 또는 dist/ 생성)
+        env:
+            VITE_CALL_BACK_KAKAO: "https://logologolab.duckdns.org/app/oauth/callback?provider=kakao" # 카카오 콜백 uri
+            VITE_CALL_BACK_NAVER: "https://logologolab.duckdns.org/app/oauth/callback?provider=naver" # 네이버 콜백 uri
+            VITE_API_BASE_URL: "https://logologolab.duckdns.org/api"  # 기본 api 호출 url
 
       - name: Detect output dir & export                 # [셸] 산출 디렉터리 감지 후 ENV로 전파
         run: |
@@ -56,6 +60,7 @@ jobs:
           name: frontend-build                           #  - 아티팩트 이름(변경 가능)
           # path: frontend.tar.gz                          #  - 워크스페이스 기준 경로
           path: frontend/dist/**                          #  - 워크스페이스 기준 경로
+          # path: frontend/${{ env.OUT }}/**                          #  - 워크스페이스 기준 경로
           retention-days: 7                              #  - 보존 기간(변경 가능) 
 
       - name: Commit built files to frontend branch      # [셸 명령] 빌드 산출물 커밋/푸시(동일 브랜치)

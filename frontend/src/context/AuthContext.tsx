@@ -16,6 +16,7 @@ import {
     type LoginResponse,
     type LoginRequest,
     type SocailLoginResponse,
+    checkAuth as getAuth,
 } from '../custom_api/auth';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +51,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
 
     // 공유할 Context 들
-    const [user, setUser] = useState<LoginResponse | null>(null);
+    const [user, setUser] = useState<LoginResponse | SocailLoginResponse | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -61,11 +62,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // - 왜 사용하는지  : 새로고침 후에도 로그인 상태를 유지하기 위해
     //───────────────────────────────────────────────────────────────────────────
     useEffect(() => {
+        
         // TODO : async 로 profile 불러와서 user에 권한 세팅하기.
-        // 현재는 로딩 플래그만 해제
+        async function fetchAuth( ){
+            setLoading(true);
+            try {
+                const temp = await getAuth();
+                const role = { role : temp.role };
+                setUser( role );
+                console.log("fetch auth로 컨텍스트에 받아온 유저  : " + temp.role);
+            }
+            catch (err) {
+                console.log(err);
+                setError(err as string);
+            }
+            finally{
+                setLoading(false);
+            }
+        }
+        
+        fetchAuth();    
+        
+        // 로딩 플래그 해제
         setLoading(false);
     }, []);
+    
+    useEffect(() => {
 
+        console.log("유저 변경 확인1 : ", user);
+        console.log("유저 변경 확인2 : ", user?.role);
+        
+    }, [user]);
+    
     //───────────────────────────────────────────────────────────────────────────
     // 일반 로그인 함수
     // - 어디서 제공    : custom_api/auth.login()
