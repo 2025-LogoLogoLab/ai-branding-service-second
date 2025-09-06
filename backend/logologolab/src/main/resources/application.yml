@@ -62,3 +62,7 @@ cloud:
 
 s3:
   bucket: logologolab-photo  # 만든 S3 버킷 이름
+
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
