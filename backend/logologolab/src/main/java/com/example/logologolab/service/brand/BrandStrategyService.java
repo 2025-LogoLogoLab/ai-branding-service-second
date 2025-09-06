@@ -63,8 +63,12 @@ public class BrandStrategyService {
     }
 
     @Transactional(readOnly = true)
-    public Page<BrandStrategyListItem> listMine(String createdBy, Pageable pageable) {
-        return repo.findByCreatedBy(createdBy, pageable)
+    public Page<BrandStrategyListItem> listMine(String email, Pageable pageable) {
+        if (email == null || email.isBlank()) return Page.empty(pageable);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
+        return repo.findByCreatedBy(user, pageable)
                 .map(e -> new BrandStrategyListItem(e.getId(), e.getBriefKo(), e.getStyle(), e.getCreatedAt()));
     }
+
 }

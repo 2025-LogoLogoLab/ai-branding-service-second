@@ -85,8 +85,17 @@ public class ColorGuideService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ColorGuideListItem> listMine(String createdBy, Pageable pageable) {
-        return repo.findByCreatedBy(createdBy, pageable)
-                .map(e -> new ColorGuideListItem(e.getId(), e.getBriefKo(), e.getStyle(), e.getMainHex(), e.getPointHex(), e.getCreatedAt()));
+    public Page<ColorGuideListItem> listMine(String email, Pageable pageable) {
+        if (email == null || email.isBlank()) {
+            // 인증 필수라면 예외를 던지거나, 빈 페이지 반환 등 정책 결정
+            return Page.empty(pageable);
+        }
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
+        return repo.findByCreatedBy(user, pageable)
+                .map(e -> new ColorGuideListItem(
+                        e.getId(), e.getBriefKo(), e.getStyle(), e.getMainHex(), e.getPointHex(), e.getCreatedAt()
+                ));
     }
+
 }
