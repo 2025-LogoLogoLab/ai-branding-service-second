@@ -57,8 +57,7 @@ cloud:
       secret-key: 8ByNbpCozLLvWWqy2YjHKGWjUoIcrAn+bPlzyTRo
     region:
       static: ap-northeast-2  # 서울 리전
-    stack:
-      auto: false
+q      auto: false
 
 s3:
   bucket: logologolab-photo  # 만든 S3 버킷 이름
