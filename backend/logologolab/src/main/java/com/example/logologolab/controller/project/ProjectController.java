@@ -37,7 +37,7 @@ public class ProjectController {
     @PostMapping("/api/project/generate")
     public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody ProjectRequest req) {
         ProjectResponse response = projectService.createProject(req);
-        return ResponseEntity.created(URI.create("/api/projects/" + response.name())).body(response);
+        return ResponseEntity.created(URI.create("/api/projects/" + response.id())).body(response);
     }
 
     @Operation(summary = "프로젝트 상세 조회", description = "ID로 특정 프로젝트의 상세 정보를 조회합니다.")

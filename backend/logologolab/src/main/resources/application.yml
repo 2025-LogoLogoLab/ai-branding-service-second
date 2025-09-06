@@ -3,7 +3,7 @@ spring:
     name: logologolab
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://logologolab-db.cfemommyi6vf.ap-northeast-2.rds.amazonaws.com:3306/logologolab
+    url: jdbc:mysql://logologolab-db.cfemommyi6vf.ap-northeast-2.rds.amazonaws.com:3306/logologolab?zeroDateTimeBehavior=CONVERT_TO_NULL
     username: admin
     password: logologolab1234
 

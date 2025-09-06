@@ -1,30 +1,90 @@
 package com.example.logologolab.dto.project;
 
-import com.example.logologolab.domain.Project;
-import com.example.logologolab.domain.BrandStrategy;
-import com.example.logologolab.domain.ColorGuide;
-import com.example.logologolab.domain.Logo;
+import com.example.logologolab.domain.*;
+import lombok.Builder;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.time.OffsetDateTime;
 
+@Builder
 public record ProjectResponse(
+        Long id,
         String name,
-        List<ProjectContent> contents
+        List<ContentItem> contents
 ) {
-    public static ProjectResponse from(Project project) {
-        // Project에 연결된 모든 콘텐츠를 통합하여 DTO로 변환
-        List<ProjectContent> combinedContents = project.getBrandStrategies().stream()
-                .map(bs -> new ProjectContent(bs.getId(), "BrandStrategy", bs.getCreatedAt()))
-                .collect(Collectors.toList());
+    // 기존 from(Project) 단순 변환
+    public static ProjectResponse from(Project p) {
+        return new ProjectResponse(
+                p.getId(),
+                p.getName(),
+                new ArrayList<>() // contents는 비어 있음
+        );
+    }
 
-        combinedContents.addAll(project.getColorGuides().stream()
-                .map(cg -> new ProjectContent(cg.getId(), "ColorGuide", cg.getCreatedAt()))
-                .collect(Collectors.toList()));
+    // 새로 추가: 엔티티 + 연관된 컬렉션 리스트로 응답 구성
+    public static ProjectResponse of(Project p,
+                                     List<BrandStrategy> bsList,
+                                     List<ColorGuide> cgList,
+                                     List<Logo> lgList) {
+        List<ContentItem> items = new ArrayList<>();
 
-        combinedContents.addAll(project.getLogos().stream()
-                .map(l -> new ProjectContent(l.getId(), "Logo", l.getCreatedAt()))
-                .collect(Collectors.toList()));
+        for (BrandStrategy bs : bsList) {
+            items.add(ContentItem.ofBrandStrategy(bs));
+        }
+        for (ColorGuide cg : cgList) {
+            items.add(ContentItem.ofColorGuide(cg));
+        }
+        for (Logo lg : lgList) {
+            items.add(ContentItem.ofLogo(lg));
+        }
 
-        return new ProjectResponse(project.getName(), combinedContents);
+        // createdAt 기준 정렬 (원하면)
+        items.sort((a, b) -> b.createdAt.compareTo(a.createdAt));
+
+        return new ProjectResponse(
+                p.getId(),
+                p.getName(),
+                items
+        );
+    }
+
+    // 내부 서브 DTO
+    public record ContentItem(
+            String type,   // "BRAND_STRATEGY", "COLOR_GUIDE", "LOGO"
+            Long id,
+            String title,  // briefKo나 prompt 등 요약 텍스트
+            String imageUrl,
+            OffsetDateTime createdAt
+    ) {
+        static ContentItem ofBrandStrategy(BrandStrategy bs) {
+            return new ContentItem(
+                    "BRAND_STRATEGY",
+                    bs.getId(),
+                    bs.getBriefKo(),
+                    null,
+                    bs.getCreatedAt()
+            );
+        }
+
+        static ContentItem ofColorGuide(ColorGuide cg) {
+            return new ContentItem(
+                    "COLOR_GUIDE",
+                    cg.getId(),
+                    cg.getBriefKo(),
+                    null,
+                    cg.getCreatedAt()
+            );
+        }
+
+        static ContentItem ofLogo(Logo lg) {
+            return new ContentItem(
+                    "LOGO",
+                    lg.getId(),
+                    lg.getPrompt(),
+                    lg.getImageUrl(),
+                    lg.getCreatedAt()
+            );
+        }
     }
 }

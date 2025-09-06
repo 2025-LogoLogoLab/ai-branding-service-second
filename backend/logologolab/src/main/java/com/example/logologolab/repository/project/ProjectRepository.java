@@ -2,11 +2,23 @@ package com.example.logologolab.repository.project;
 
 import com.example.logologolab.domain.Project;
 import com.example.logologolab.domain.User;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import java.util.Optional;
 
-@Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
+
     Optional<Project> findByIdAndUser(Long id, User user);
+
+    // logos만 fetch join (다른 bag 컬렉션은 X) → MultipleBagFetchException 회피
+    @Query("""
+      select distinct p
+      from Project p
+      left join fetch p.logos
+      where p.id = :id and p.user = :user
+    """)
+    Optional<Project> findWithLogos(@Param("id") Long id, @Param("user") User user);
 }

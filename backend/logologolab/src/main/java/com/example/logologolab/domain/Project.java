@@ -44,4 +44,20 @@ public class Project extends BaseTimeEntity {
     @OrderBy("id DESC")
     @Builder.Default
     private List<BrandStrategy> brandStrategies = new ArrayList<>();
+
+    public void addLogo(Logo l) {
+        if (l == null) return;
+        logos.add(l);
+        l.setProject(this);
+    }
+    public void addColorGuide(ColorGuide c) {
+        if (c == null) return;
+        colorGuides.add(c);
+        c.setProject(this);
+    }
+    public void addBrandStrategy(BrandStrategy b) {
+        if (b == null) return;
+        brandStrategies.add(b);
+        b.setProject(this);
+    }
 }

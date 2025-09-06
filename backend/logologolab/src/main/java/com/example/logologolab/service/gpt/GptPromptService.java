@@ -10,6 +10,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +22,8 @@ public class GptPromptService {
 
     private static final Logger log = LoggerFactory.getLogger(GptPromptService.class);
 
-    // TODO: 운영에서는 환경변수/시크릿으로 관리하고, 현재 노출 키는 즉시 회전 권장
-    private static final String OPENAI_API_KEY = "Bearer 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";
+    @Value("${openai.api.key}")
+    private String openaiApiKey;
     private static final String OPENAI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
 
     // 이미지 입력 지원 모델(비전)
@@ -39,7 +40,7 @@ public class GptPromptService {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", OPENAI_API_KEY);
+        headers.setBearerAuth(openaiApiKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String systemPrompt = """
@@ -211,7 +212,7 @@ negative_prompt 규칙:
         RestTemplate rest = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", OPENAI_API_KEY);
+        headers.setBearerAuth(openaiApiKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String systemPrompt = """
@@ -279,7 +280,7 @@ negative_prompt 규칙:
         RestTemplate rest = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", OPENAI_API_KEY);
+        headers.setBearerAuth(openaiApiKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String systemPrompt = """
@@ -356,7 +357,7 @@ negative_prompt 규칙:
         RestTemplate rest = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", OPENAI_API_KEY);
+        headers.setBearerAuth(openaiApiKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String systemPrompt = """
@@ -428,7 +429,7 @@ SNS 중심 홍보: ...
         RestTemplate rest = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", OPENAI_API_KEY);
+        headers.setBearerAuth(openaiApiKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String systemPrompt = """

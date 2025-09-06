@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 @Service
 public class FluxGenerateService {
 
-    private static final String AI_SERVER_URL = "https://9pz4yosvga3ikk-8000.proxy.runpod.net/generate-logo";
+    private static final String AI_SERVER_URL = "https://3qfaqps5q6fz04-8000.proxy.runpod.net/generate-logo";
 
     private static final Set<String> ALLOWED_STYLES = Set.of(
             "simple","minimal","retro","vintage","cute","playful","luxury",
