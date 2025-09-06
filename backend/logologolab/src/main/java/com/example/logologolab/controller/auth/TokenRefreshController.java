@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import java.time.Duration;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "토큰 재발급", description = "토큰 재발급 API")
 public class TokenRefreshController {
 
     private final JwtTokenProvider jwtTokenProvider;

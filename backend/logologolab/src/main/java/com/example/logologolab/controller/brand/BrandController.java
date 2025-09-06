@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.Operation;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.MediaType;
@@ -32,6 +33,7 @@ import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "브랜딩 전략", description = "브랜딩 전략 관련 API")
 public class BrandController {
 
     private final GptPromptService gpt;

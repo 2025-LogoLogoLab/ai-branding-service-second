@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.MediaType;
@@ -29,6 +30,7 @@ import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "컬러 가이드", description = "컬러 가이드 관련 API")
 public class ColorController {
 
     private final GptPromptService gpt;
