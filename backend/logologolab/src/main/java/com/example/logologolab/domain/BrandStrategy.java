@@ -6,10 +6,13 @@ import lombok.*;
 @Entity
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
-@Table(name = "brand_strategy", indexes = {
-        @Index(name = "idx_brand_strategies_project", columnList = "projectId"),
-        @Index(name = "idx_brand_strategies_creator", columnList = "createdBy")
-})
+@Table(
+        name = "brand_strategy",
+        indexes = {
+                @Index(name = "idx_brand_strategies_project", columnList = "project_id"),
+                @Index(name = "idx_brand_strategies_creator", columnList = "created_by_id")
+        }
+)
 public class BrandStrategy extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +38,11 @@ public class BrandStrategy extends BaseTimeEntity {
     @Column(columnDefinition = "text", nullable = false)
     private String markdown;
 
-    @Column
-    private Long projectId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "project_id")
+    private Project project;
 
-    @Column(length = 128)
-    private String createdBy;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
 }

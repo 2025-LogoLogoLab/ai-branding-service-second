@@ -35,7 +35,6 @@ public class User {
     @Column(name = "role", nullable = false)
     private RoleType role;
 
-    // ★ 신규 필드
     @Column(name = "phone")
     private String phone;
 
