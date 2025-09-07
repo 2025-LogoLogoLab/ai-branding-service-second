@@ -63,4 +63,15 @@ public class ColorGuide extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by_id")
     private User createdBy;
+
+    public void updateGuide(String mainHex, String mainDesc, String subHex, String subDesc, String pointHex, String pointDesc, String backgroundHex, String backgroundDesc) {
+        this.mainHex = mainHex;
+        this.mainDesc = mainDesc;
+        this.subHex = subHex;
+        this.subDesc = subDesc;
+        this.pointHex = pointHex;
+        this.pointDesc = pointDesc;
+        this.backgroundHex = backgroundHex;
+        this.backgroundDesc = backgroundDesc;
+    }
 }

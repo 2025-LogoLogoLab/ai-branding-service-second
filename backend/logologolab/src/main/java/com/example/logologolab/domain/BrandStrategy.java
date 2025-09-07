@@ -15,7 +15,8 @@ import lombok.*;
 )
 public class BrandStrategy extends BaseTimeEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Version
@@ -45,4 +46,8 @@ public class BrandStrategy extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by_id")
     private User createdBy;
+
+    public void updateMarkdown(String markdown) {
+        this.markdown = markdown;
+    }
 }

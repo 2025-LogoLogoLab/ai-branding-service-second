@@ -7,6 +7,8 @@ import com.example.logologolab.dto.color.*;
 import com.example.logologolab.dto.common.PageResponse;
 import com.example.logologolab.security.CustomUserPrincipal;
 import com.example.logologolab.service.color.ColorGuideService;
+import com.example.logologolab.domain.User;
+import com.example.logologolab.security.LoginUserProvider;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,9 +17,9 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.MediaType;
@@ -27,6 +29,7 @@ import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.net.URI;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,6 +37,8 @@ import java.net.URI;
 public class ColorController {
 
     private final GptPromptService gpt;
+    private final ColorGuideService service;
+    private final LoginUserProvider loginUserProvider;
 
     @Operation(
             summary = "컬러 가이드 생성",
@@ -108,10 +113,6 @@ public class ColorController {
         }
     }
 
-    private final ColorGuideService service;
-
-
-
     @Operation(
             summary = "컬러가이드 저장(이미 생성된 결과 영속화)",
             description = "생성 API 응답(guide)을 포함하여 DB에 저장합니다.",
@@ -180,7 +181,6 @@ public class ColorController {
 
     @Operation(
             summary = "컬러가이드 상세 조회",
-            security = @SecurityRequirement(name = "bearerAuth"),
             parameters = @Parameter(name = "id", description = "ColorGuide ID", required = true)
     )
     @ApiResponses({
@@ -195,7 +195,7 @@ public class ColorController {
     }
 
     @Operation(
-            summary = "컬러가이드 목록 조회",
+            summary = "컬러가이드 리스트 조회",
             description = "projectId가 있으면 프로젝트 기준, 없으면 내 데이터(createdBy) 기준으로 최신순 조회.",
             security = @SecurityRequirement(name = "bearerAuth"),
             parameters = {
@@ -224,16 +224,64 @@ public class ColorController {
     })
     @GetMapping(value = "/api/color-guides", produces = MediaType.APPLICATION_JSON_VALUE)
     public PageResponse<ColorGuideListItem> list(
-            @AuthenticationPrincipal CustomUserPrincipal principal,
             @RequestParam(required = false) Long projectId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<ColorGuideListItem> p = (projectId != null)
-                ? service.listByProject(projectId, pageable)
-                : service.listMine((principal != null) ? principal.getEmail() : null, pageable);
+        Page<ColorGuideListItem> p;
+
+        if (projectId != null) {
+            // 1. projectId가 있으면 프로젝트 기준으로 조회 (공개)
+            p = service.listByProject(projectId, pageable);
+        } else {
+            User user = loginUserProvider.getLoginUserIfExists(); // 2. 로그인 상태 확인
+            if (user != null) {
+                // 3. 로그인 상태이면 '내 목록' 조회
+                p = service.listMine(user.getEmail(), pageable);
+            } else {
+                // 4. 비로그인 상태이면 '전체 목록' 조회
+                p = service.listPublic(pageable);
+            }
+        }
 
         return new PageResponse<>(p.getContent(), p.getNumber(), p.getSize(), p.getTotalElements(), p.getTotalPages(), p.isLast());
+    }
+
+    @Operation(
+            summary = "컬러 가이드 수정",
+            description = "ID로 컬러 가이드를 찾아 guide 내용을 수정합니다. 본인의 데이터만 수정 가능합니다.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "수정 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ColorGuideResponse.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "404", description = "항목을 찾을 수 없거나 권한 없음")
+    })
+    @PatchMapping("/api/color-guide/{id}")
+    public ResponseEntity<ColorGuideResponse> update(
+            @PathVariable Long id,
+            @RequestBody ColorGuideUpdateRequest req
+    ) {
+        var updated = service.update(id, req);
+        return ResponseEntity.ok(updated);
+    }
+
+    @Operation(summary = "컬러 가이드 삭제", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "삭제 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "404", description = "항목을 찾을 수 없거나 권한 없음")
+    })
+    @DeleteMapping("/api/color-guide/{id}")
+    public ResponseEntity<Map<String, String>> deleteColorGuide(@PathVariable Long id) {
+        service.deleteColorGuide(id);
+
+        Map<String, String> response = Map.of("message", "컬러 가이드 삭제가 완료되었습니다.");
+
+        return ResponseEntity.ok(response);
     }
 }

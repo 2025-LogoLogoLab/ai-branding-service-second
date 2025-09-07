@@ -99,7 +99,7 @@ public class LogoutController {
         addLegacyCookieDeletions(headers, "refresh-token");
 
         return ResponseEntity.ok()
-                .headers(headers) // ★ 변경
+                .headers(headers)
                 .build();
     }
 }

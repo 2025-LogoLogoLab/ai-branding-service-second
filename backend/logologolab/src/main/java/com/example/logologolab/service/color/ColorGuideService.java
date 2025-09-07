@@ -4,10 +4,14 @@ import com.example.logologolab.domain.*;
 import com.example.logologolab.dto.color.*;
 import com.example.logologolab.repository.color.ColorGuideRepository;
 import com.example.logologolab.repository.user.UserRepository;
+import com.example.logologolab.security.LoginUserProvider;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.NoSuchElementException;
 
 @Service
@@ -16,6 +20,7 @@ public class ColorGuideService {
 
     private final ColorGuideRepository repo;
     private final UserRepository userRepository;
+    private final LoginUserProvider loginUserProvider;
 
     private static String normHex(String hex) {
         if (hex == null) return null;
@@ -98,4 +103,53 @@ public class ColorGuideService {
                 ));
     }
 
+    @Transactional(readOnly = true)
+    public Page<ColorGuideListItem> listPublic(Pageable pageable) {
+        return repo.findAll(pageable)
+                .map(e -> new ColorGuideListItem(
+                        e.getId(), e.getBriefKo(), e.getStyle(), e.getMainHex(), e.getPointHex(), e.getCreatedAt()
+                ));
+    }
+
+    @Transactional
+    public ColorGuideResponse update(Long id, ColorGuideUpdateRequest req) {
+        // 1. 현재 로그인한 사용자 정보 가져오기
+        User currentUser = loginUserProvider.getLoginUser();
+
+        // 2. 수정할 데이터가 현재 사용자의 소유인지 확인하며 조회
+        ColorGuide entity = repo.findByIdAndCreatedBy(id, currentUser)
+                .orElseThrow(() -> new NoSuchElementException("수정할 컬러 가이드를 찾을 수 없거나 권한이 없습니다."));
+
+        // 3. 필드 업데이트
+        ColorGuideDTO newGuide = req.guide();
+        entity.updateGuide(
+                normHex(newGuide.main().hex()), newGuide.main().description(),
+                normHex(newGuide.sub().hex()), newGuide.sub().description(),
+                normHex(newGuide.point().hex()), newGuide.point().description(),
+                normHex(newGuide.background().hex()), newGuide.background().description()
+        );
+
+        // 4. 수정된 결과를 DTO로 변환하여 반환
+        return new ColorGuideResponse(
+                entity.getId(), entity.getBriefKo(), entity.getStyle(), entity.getCaseType(), entity.getSourceImage(),
+                entity.getCreatedBy().getEmail(), entity.getCreatedAt(), entity.getUpdatedAt(),
+                new ColorGuideDTO(
+                        new ColorGuideDTO.Role(entity.getMainHex(), entity.getMainDesc()),
+                        new ColorGuideDTO.Role(entity.getSubHex(), entity.getSubDesc()),
+                        new ColorGuideDTO.Role(entity.getPointHex(), entity.getPointDesc()),
+                        new ColorGuideDTO.Role(entity.getBackgroundHex(), entity.getBackgroundDesc())
+                )
+        );
+    }
+
+    @Transactional
+    public void deleteColorGuide(Long id) {
+        User user = loginUserProvider.getLoginUser(); // 로그인한 사용자 정보 조회
+
+        // ID와 사용자 정보로 데이터를 조회하여 소유권 확인
+        ColorGuide colorGuide = repo.findByIdAndCreatedBy(id, user)
+                .orElseThrow(() -> new NoSuchElementException("삭제할 컬러 가이드를 찾을 수 없거나 권한이 없습니다."));
+
+        repo.delete(colorGuide);
+    }
 }

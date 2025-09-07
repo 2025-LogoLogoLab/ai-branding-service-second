@@ -30,17 +30,29 @@ public class SecurityConfig {
                 .cors(c -> c.configurationSource(corsConfigurationSource()))  // <- 명시 연결
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 공개 엔드포인트
+
+                        // 1. 기존 공개 엔드포인트
                         .requestMatchers("/api/signup", "/api/login", "/api/login/social",
                                 "/swagger-ui/**", "/v3/api-docs/**", "/api/logout", "/error", "/app/**").permitAll()
-                        // 공개 정적/특정 GET만 화이트리스트
+                        .requestMatchers(HttpMethod.GET, "/", "/index.html", "/static/**", "/favicon.ico", "/assets/**").permitAll()
+
+                        // 2. 생성(Generate) API
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/logo/generate",
+                                "/api/color-guide/generate",
+                                "/api/brand-strategy/generate").permitAll()
+
+                        // 3. 조회(GET) API
                         .requestMatchers(HttpMethod.GET,
-                                "/", "/index.html", "/static/**", "/css/**", "/js/**", "/assets/**",
-                                "/favicon.ico", "/api/logos/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/color-guide/generate", "/api/brand-strategy/generate").permitAll()
-                        // 저장/조회는 인증 필요
-                        .requestMatchers("/api/color-guide/**", "/api/color-guides").authenticated()
-                        .requestMatchers("/api/brand-strategy/**", "/api/brand-strategies").authenticated()
+                                "/api/logo", "/api/logo/{id}",
+                                "/api/color-guides", "/api/color-guide/{id}",
+                                "/api/brand-strategies", "/api/brand-strategy/{id}").permitAll()
+
+                        .requestMatchers(
+                                "/api/logo/save", "/api/color-guide/save", "/api/brand-strategy/save",
+                                "/api/project/**" // 프로젝트 관련은 모두 인증 필요
+                        ).authenticated()
+
                         // 보호 엔드포인트
                         .requestMatchers("/api/protected").authenticated()
 
@@ -73,5 +85,3 @@ public class SecurityConfig {
     }
 
 }
-
-

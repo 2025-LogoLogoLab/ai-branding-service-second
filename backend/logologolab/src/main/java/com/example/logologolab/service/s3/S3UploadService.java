@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.UUID;
+import java.net.URL;
 
 @Service
 @RequiredArgsConstructor
@@ -87,4 +88,16 @@ public class S3UploadService {
     }
 
     private record ParseResult(String mime, String ext, String payload) {}
+
+    public void deleteObjectByUrl(String fileUrl) {
+        if (fileUrl == null || fileUrl.isBlank()) return;
+        try {
+            URL url = new URL(fileUrl);
+            String key = url.getPath().substring(1); // URL 경로에서 맨 앞 '/' 제거
+            s3.deleteObject(bucketName, key);
+        } catch (Exception e) {
+            // 로깅 추가 권장
+            System.err.println("S3 객체 삭제 실패: " + fileUrl + ", error: " + e.getMessage());
+        }
+    }
 }
