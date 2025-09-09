@@ -56,31 +56,14 @@ public class ColorGuideService {
 
         e = repo.save(e);
 
-        return new ColorGuideResponse(
-                e.getId(), e.getBriefKo(), e.getStyle(), e.getCaseType(), e.getSourceImage(),
-                e.getCreatedBy().getEmail(), e.getCreatedAt(), e.getUpdatedAt(),
-                new ColorGuideDTO(
-                        new ColorGuideDTO.Role(e.getMainHex(), e.getMainDesc()),
-                        new ColorGuideDTO.Role(e.getSubHex(), e.getSubDesc()),
-                        new ColorGuideDTO.Role(e.getPointHex(), e.getPointDesc()),
-                        new ColorGuideDTO.Role(e.getBackgroundHex(), e.getBackgroundDesc())
-                )
-        );
+        return ColorGuideResponse.from(e);
     }
 
     @Transactional(readOnly = true)
     public ColorGuideResponse get(Long id) {
         var e = repo.findById(id).orElseThrow(() -> new NoSuchElementException("컬러 가이드를 찾을 수 없습니다."));
-        return new ColorGuideResponse(
-                e.getId(), e.getBriefKo(), e.getStyle(), e.getCaseType(), e.getSourceImage(),
-                e.getCreatedBy().getEmail(), e.getCreatedAt(), e.getUpdatedAt(),
-                new ColorGuideDTO(
-                        new ColorGuideDTO.Role(e.getMainHex(), e.getMainDesc()),
-                        new ColorGuideDTO.Role(e.getSubHex(), e.getSubDesc()),
-                        new ColorGuideDTO.Role(e.getPointHex(), e.getPointDesc()),
-                        new ColorGuideDTO.Role(e.getBackgroundHex(), e.getBackgroundDesc())
-                )
-        );
+
+        return ColorGuideResponse.from(e);
     }
 
     @Transactional(readOnly = true)
@@ -130,16 +113,7 @@ public class ColorGuideService {
         );
 
         // 4. 수정된 결과를 DTO로 변환하여 반환
-        return new ColorGuideResponse(
-                entity.getId(), entity.getBriefKo(), entity.getStyle(), entity.getCaseType(), entity.getSourceImage(),
-                entity.getCreatedBy().getEmail(), entity.getCreatedAt(), entity.getUpdatedAt(),
-                new ColorGuideDTO(
-                        new ColorGuideDTO.Role(entity.getMainHex(), entity.getMainDesc()),
-                        new ColorGuideDTO.Role(entity.getSubHex(), entity.getSubDesc()),
-                        new ColorGuideDTO.Role(entity.getPointHex(), entity.getPointDesc()),
-                        new ColorGuideDTO.Role(entity.getBackgroundHex(), entity.getBackgroundDesc())
-                )
-        );
+        return ColorGuideResponse.from(entity);
     }
 
     @Transactional

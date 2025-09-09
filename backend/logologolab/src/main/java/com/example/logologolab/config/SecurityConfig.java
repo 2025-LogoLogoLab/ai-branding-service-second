@@ -50,6 +50,7 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 "/api/logo/save", "/api/color-guide/save", "/api/brand-strategy/save",
+                                "/api/logo/{id}/tags", "/api/color-guide/{id}/tags", "/api/brand-strategy/{id}/tags",
                                 "/api/project/**" // 프로젝트 관련은 모두 인증 필요
                         ).authenticated()
 

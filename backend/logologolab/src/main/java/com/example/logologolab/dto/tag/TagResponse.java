@@ -1,6 +1,9 @@
 package com.example.logologolab.dto.tag;
 
-public record TagResponse(
-        Long tagId,
-        String tagName
-) {}
+import com.example.logologolab.domain.Tag;
+
+public record TagResponse(Long id, String name) {
+    public static TagResponse from(Tag tag) {
+        return new TagResponse(tag.getId(), tag.getName());
+    }
+}

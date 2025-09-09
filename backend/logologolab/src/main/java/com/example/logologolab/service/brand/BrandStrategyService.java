@@ -47,19 +47,14 @@ public class BrandStrategyService {
 
         e = repo.save(e);
 
-        return new BrandStrategyResponse(
-                e.getId(), e.getBriefKo(), e.getStyle(), e.getCaseType(), e.getSourceImage(),
-                e.getCreatedBy().getEmail(), e.getCreatedAt(), e.getUpdatedAt(), e.getMarkdown()
-        );
+        return BrandStrategyResponse.from(e);
     }
 
     @Transactional(readOnly = true)
     public BrandStrategyResponse get(Long id) {
         var e = repo.findById(id).orElseThrow(() -> new NoSuchElementException("브랜딩 전략을 찾을 수 없습니다."));
-        return new BrandStrategyResponse(
-                e.getId(), e.getBriefKo(), e.getStyle(), e.getCaseType(), e.getSourceImage(),
-                e.getCreatedBy().getEmail(), e.getCreatedAt(), e.getUpdatedAt(), e.getMarkdown()
-        );
+
+        return BrandStrategyResponse.from(e);
     }
 
     @Transactional(readOnly = true)
@@ -96,10 +91,7 @@ public class BrandStrategyService {
         entity.updateMarkdown(req.markdown());
 
         // 4. 수정된 결과를 DTO로 변환하여 반환
-        return new BrandStrategyResponse(
-                entity.getId(), entity.getBriefKo(), entity.getStyle(), entity.getCaseType(), entity.getSourceImage(),
-                entity.getCreatedBy().getEmail(), entity.getCreatedAt(), entity.getUpdatedAt(), entity.getMarkdown()
-        );
+        return BrandStrategyResponse.from(entity);
     }
 
     @Transactional

@@ -1,7 +1,11 @@
 package com.example.logologolab.domain;
 
 import jakarta.persistence.*;
+
 import lombok.*;
+
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Getter @Setter
@@ -47,7 +51,22 @@ public class BrandStrategy extends BaseTimeEntity {
     @JoinColumn(name = "created_by_id")
     private User createdBy;
 
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "brand_strategy_tags",
+            joinColumns = @JoinColumn(name = "brand_strategy_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags = new HashSet<>();
+
+    // 태그 관리 편의 메소드
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
+    }
+
     public void updateMarkdown(String markdown) {
-        this.markdown = markdown;
+        if (markdown != null && !markdown.isBlank()) {
+            this.markdown = markdown;
+        }
     }
 }
