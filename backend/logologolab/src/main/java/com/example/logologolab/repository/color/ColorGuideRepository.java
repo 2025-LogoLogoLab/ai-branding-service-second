@@ -24,4 +24,7 @@ public interface ColorGuideRepository extends JpaRepository<ColorGuide, Long> {
     int detachAllByProjectId(@org.springframework.data.repository.query.Param("projectId") Long projectId);
 
     Optional<ColorGuide> findByIdAndCreatedBy(Long id, User createdBy);
+
+    List<ColorGuide> findAllByCreatedBy(User user);
+    List<ColorGuide> findByTags_NameAndCreatedBy(String tagName, User user);
 }

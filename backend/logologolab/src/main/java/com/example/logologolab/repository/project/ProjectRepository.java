@@ -2,11 +2,11 @@ package com.example.logologolab.repository.project;
 
 import com.example.logologolab.domain.Project;
 import com.example.logologolab.domain.User;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
@@ -21,4 +21,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
       where p.id = :id and p.user = :user
     """)
     Optional<Project> findWithLogos(@Param("id") Long id, @Param("user") User user);
+
+    List<Project> findByUserOrderByCreatedAtDesc(User user);
 }

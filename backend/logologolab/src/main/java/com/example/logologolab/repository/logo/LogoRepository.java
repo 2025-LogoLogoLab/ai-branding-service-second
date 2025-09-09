@@ -22,4 +22,7 @@ public interface LogoRepository extends JpaRepository<Logo, Long> {
 
     Optional<Logo> findByIdAndCreatedBy(Long id, User createdBy);
     Page<Logo> findByCreatedBy(User createdBy, Pageable pageable);
+
+    List<Logo> findAllByCreatedBy(User user);
+    List<Logo> findByTags_NameAndCreatedBy(String tagName, User user);
 }

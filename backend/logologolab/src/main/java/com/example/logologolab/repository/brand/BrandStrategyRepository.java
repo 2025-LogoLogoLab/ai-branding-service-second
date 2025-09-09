@@ -22,4 +22,7 @@ public interface BrandStrategyRepository extends JpaRepository<BrandStrategy, Lo
     int detachAllByProjectId(@org.springframework.data.repository.query.Param("projectId") Long projectId);
 
     Optional<BrandStrategy> findByIdAndCreatedBy(Long id, User createdBy);
+
+    List<BrandStrategy> findAllByCreatedBy(User user);
+    List<BrandStrategy> findByTags_NameAndCreatedBy(String tagName, User user);
 }
