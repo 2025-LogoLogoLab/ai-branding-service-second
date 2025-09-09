@@ -68,6 +68,7 @@ public class ColorGuide extends BaseTimeEntity {
     @JoinColumn(name = "created_by_id")
     private User createdBy;
 
+    @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "color_guide_tags",

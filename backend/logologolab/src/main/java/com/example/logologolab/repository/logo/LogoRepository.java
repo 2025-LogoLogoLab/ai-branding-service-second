@@ -14,6 +14,7 @@ import java.util.Optional;
 
 public interface LogoRepository extends JpaRepository<Logo, Long> {
     List<Logo> findByProjectId(Long projectId);
+    Page<Logo> findByProjectId(Long projectId, Pageable pageable);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update Logo l set l.project = null where l.project.id = :projectId")

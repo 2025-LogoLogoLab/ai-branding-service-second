@@ -36,6 +36,7 @@ public class Logo extends BaseTimeEntity {
     @JoinColumn(name = "created_by_id")
     private User createdBy;
 
+    @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "logo_tags",

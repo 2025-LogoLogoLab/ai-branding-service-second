@@ -2,6 +2,7 @@ package com.example.logologolab.service.logo;
 
 import com.example.logologolab.domain.Logo;
 import com.example.logologolab.domain.User;
+import com.example.logologolab.dto.color.ColorGuideListItem;
 import com.example.logologolab.security.LoginUserProvider;
 import com.example.logologolab.dto.common.PageResponse;
 import com.example.logologolab.dto.logo.LogoListItem;
@@ -29,6 +30,17 @@ public class LogoService {
         Logo logo = logoRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("로고를 찾을 수 없습니다."));
         return LogoResponse.from(logo);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<LogoListItem> listByProject(Long projectId, Pageable pageable) {
+        return logoRepository.findByProjectId(projectId, pageable)
+                .map(logo -> new LogoListItem(
+                        logo.getId(),
+                        logo.getPrompt(),
+                        logo.getImageUrl(),
+                        logo.getCreatedAt()
+                ));
     }
 
     public Page<LogoListItem> listMyLogos(Pageable pageable) {
