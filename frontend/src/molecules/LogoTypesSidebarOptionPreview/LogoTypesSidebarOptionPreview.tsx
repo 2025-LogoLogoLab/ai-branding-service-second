@@ -13,8 +13,8 @@ export type LogoTypesSidebarOptionPreviewProps = {
 // 로고 타입 이름과 예시 박스를 함께 보여주는 Molecule 컴포넌트
 export function LogoTypesSidebarOptionPreview ({ label, type } : LogoTypesSidebarOptionPreviewProps) {
     return (
-        <div className={styles.card}>
-            <div className={styles.header}>{label}</div>
+        <div className={styles.card} aria-label={label}>
+            {/* <div className={styles.header}>{label}</div> */}
             <LogoExampleBox type={type} />
         </div>
     );
