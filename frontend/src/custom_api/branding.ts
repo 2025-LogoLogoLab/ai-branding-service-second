@@ -106,6 +106,7 @@ export async function deleteBranding( {id} : BrandingDeleteRequest ) {
 export async function saveBranding({
     briefKo,        
     style,
+    imageUrl,
     projectId,
     markdown
 }: BrandingStroeRequest) : Promise<BrandingStroeResponse> {
@@ -119,7 +120,7 @@ export async function saveBranding({
             'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify( {briefKo, style, projectId, markdown})
+        body: JSON.stringify( {briefKo, style, imageUrl, projectId, markdown})
     });
 
     if( !result.ok ){
