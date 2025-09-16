@@ -3,16 +3,19 @@ package com.example.logologolab.service.color;
 import com.example.logologolab.domain.*;
 import com.example.logologolab.dto.color.*;
 import com.example.logologolab.repository.color.ColorGuideRepository;
+import com.example.logologolab.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
 public class ColorGuideService {
 
     private final ColorGuideRepository repo;
+    private final UserRepository userRepository;
 
     private static String normHex(String hex) {
         if (hex == null) return null;
@@ -30,13 +33,16 @@ public class ColorGuideService {
                 ? CaseType.WITH_LOGO : CaseType.WITHOUT_LOGO;
 
         var g = req.guide();
+        User creator = userRepository.findByEmail(createdBy)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
+
         ColorGuide e = ColorGuide.builder()
                 .briefKo(req.briefKo())
                 .style(style)
                 .caseType(caseType)
                 .sourceImage(req.imageUrl())
-                .projectId(req.projectId())
-                .createdBy(createdBy)
+                .project(null) // 프로젝트에 연결하지 않고 저장
+                .createdBy(creator)
                 .mainHex(normHex(g.main().hex())).mainDesc(g.main().description())
                 .subHex(normHex(g.sub().hex())).subDesc(g.sub().description())
                 .pointHex(normHex(g.point().hex())).pointDesc(g.point().description())
@@ -47,7 +53,7 @@ public class ColorGuideService {
 
         return new ColorGuideResponse(
                 e.getId(), e.getBriefKo(), e.getStyle(), e.getCaseType(), e.getSourceImage(),
-                e.getProjectId(), e.getCreatedBy(), e.getCreatedAt(), e.getUpdatedAt(),
+                e.getCreatedBy().getEmail(), e.getCreatedAt(), e.getUpdatedAt(),
                 new ColorGuideDTO(
                         new ColorGuideDTO.Role(e.getMainHex(), e.getMainDesc()),
                         new ColorGuideDTO.Role(e.getSubHex(), e.getSubDesc()),
@@ -59,10 +65,10 @@ public class ColorGuideService {
 
     @Transactional(readOnly = true)
     public ColorGuideResponse get(Long id) {
-        var e = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("not found: " + id));
+        var e = repo.findById(id).orElseThrow(() -> new NoSuchElementException("컬러 가이드를 찾을 수 없습니다."));
         return new ColorGuideResponse(
                 e.getId(), e.getBriefKo(), e.getStyle(), e.getCaseType(), e.getSourceImage(),
-                e.getProjectId(), e.getCreatedBy(), e.getCreatedAt(), e.getUpdatedAt(),
+                e.getCreatedBy().getEmail(), e.getCreatedAt(), e.getUpdatedAt(),
                 new ColorGuideDTO(
                         new ColorGuideDTO.Role(e.getMainHex(), e.getMainDesc()),
                         new ColorGuideDTO.Role(e.getSubHex(), e.getSubDesc()),

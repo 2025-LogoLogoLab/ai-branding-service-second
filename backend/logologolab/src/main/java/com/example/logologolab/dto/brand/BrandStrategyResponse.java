@@ -9,7 +9,6 @@ public record BrandStrategyResponse(
         Style style,
         CaseType caseType,
         String sourceImage,
-        Long projectId,
         String createdBy,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt,
