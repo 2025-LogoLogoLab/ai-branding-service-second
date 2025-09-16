@@ -1,26 +1,50 @@
 /* src/atoms/TextInput/TextInput.module.css */
+/* -----------------------------------------
+   기본 입력창(atom)
+   - 단독 사용 시 width, border, background 포함
+   - molecule(프롬프트바)에서 사용할 땐 .bare 조합
+------------------------------------------ */
+
 .input {
-    width: 400px;                   
-    height: 36px;
-    padding: 4px 12px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    outline: none;
-    box-sizing: border-box;
-    font-family: inherit;
-    transition: border-color 0.2s ease; 
+  width: 400px;
+  height: 36px;
+  padding: 4px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
 
-    /* 입력 포커스 시. &:어쩌구 는 .input:어쩌구와 같은 결과. 기본 css에서는 사용 불가*/
-    &:focus {   
-      border-color: #ff5722;       /* 입력 강조색 */
-    }   
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  background: #fff;
 
-    /* 비활성화 상태 */
-    &:disabled {
-      background-color: #f5f5f5;
-      border-color: #ddd;
-      color: #aaa;
-      cursor: not-allowed;
-    }
+  transition: border-color 0.2s ease;
+}
+
+/* 입력 포커스 */
+.input:focus {
+  border-color: #ff5722; /* 강조색 */
+}
+
+/* 비활성화 상태 */
+.input:disabled {
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* -----------------------------------------
+   변형: bare (프롬프트 입력바처럼 래퍼가 스타일을 줄 때)
+   - 보더/배경 제거, 패딩만 살짝 유지
+------------------------------------------ */
+.bare {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  width: 100%;          /* 래퍼가 가로폭을 제어 */
+  height: 32px;
+  padding: 0 8px;
+  font-size: 0.95rem;
 }
