@@ -1,0 +1,38 @@
+/* src/organisms/LogoTypeSidebar/LogoTypeSidebar.module.css */
+
+.sidebar {
+    width: 220px;
+    padding: 8px;
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 8px;
+    background: #fbfbfc;
+}
+.actions {
+    padding: 4px;
+}
+.list {
+    display: grid;
+    gap: 8px;
+}
+.allBtn {
+    margin-top: 6px;
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+}
+.allBtn:hover {
+    background: #f9fafb;
+}
+.allHeader {
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    padding: 12px 0;
+    color: #111827;
+}

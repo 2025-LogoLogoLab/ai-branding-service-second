@@ -2,7 +2,7 @@
 
 import { TextArea } from "../atoms/TextArea/TextArea";
 import { TextButton } from "../atoms/TextButton/TextButton";
-import { TextInput } from "../atoms/TextInput/TextInput";
+// import { TextInput } from "../atoms/TextInput/TextInput";
 
 // 부모에서 받아올 Props 타입 지정
 type LogoFormProps = {
@@ -10,12 +10,12 @@ type LogoFormProps = {
     error: string | null;
     onPromptChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
     onSubmit: () => void;
-    style: string;
-    onStyleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    negative_prompt: string;
-    onNegPromptChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-    numImages: number;
-    onNumImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    // style: string;
+    // onStyleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    // negative_prompt: string;
+    // onNegPromptChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    // numImages: number;
+    // onNumImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     isLoading: boolean;
 }
 
@@ -25,12 +25,12 @@ function LogoForm({
     error,
     onPromptChange,
     onSubmit,
-    style,
-    onStyleChange,
-    negative_prompt,
-    onNegPromptChange,
-    numImages,
-    onNumImageChange,
+    // style,
+    // onStyleChange,
+    // negative_prompt,
+    // onNegPromptChange,
+    // numImages,
+    // onNumImageChange,
     isLoading
 }: LogoFormProps){
     return(
@@ -39,9 +39,9 @@ function LogoForm({
             {/* 에러 메시지 */}
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {isLoading && <p style={{ color: 'orange' }}>로고 생성중...</p>}
-            <TextInput value={style} onChange={onStyleChange} placeholder="스타일" type="text"></TextInput>
-            <TextInput value={numImages} onChange={onNumImageChange} placeholder="로고 연속 생성 수" type="number"></TextInput>
-            <TextArea value={negative_prompt} onChange={onNegPromptChange} placeholder="로고에서 제외할 내용"/>
+            {/* <TextInput value={style} onChange={onStyleChange} placeholder="스타일" type="text"></TextInput> */}
+            {/* <TextInput value={numImages} onChange={onNumImageChange} placeholder="로고 연속 생성 수" type="number"></TextInput> */}
+            {/* <TextArea value={negative_prompt} onChange={onNegPromptChange} placeholder="로고에서 제외할 내용"/> */}
             <TextArea value={prompt} onChange={onPromptChange} placeholder="로고 설명" />   
             <TextButton label='로고 생성'onClick={onSubmit} variant="orange"/>
         </div>

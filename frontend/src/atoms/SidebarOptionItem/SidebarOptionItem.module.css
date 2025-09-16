@@ -1,0 +1,28 @@
+/* 
+src/atoms/SidebarOptionItem/SidebarOptionItem.module.css
+*/
+
+.item {
+    width: 100%;
+    display: block;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 10px;
+    text-align: left;
+    transition: background-color 0.2s ease, transform 0.05s ease;
+}
+.item:hover {
+    background-color: #f3f4f6;
+}
+.item:active {
+    transform: translateY(1px);
+}
+.active {
+    background-color: #e7ebff;
+}
+.label {
+    font-size: 14px;
+    color: #111827;
+}
