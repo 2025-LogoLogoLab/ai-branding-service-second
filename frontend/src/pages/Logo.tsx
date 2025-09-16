@@ -1,7 +1,7 @@
 // src/pages/Logo.tsx
 
 import LogoForm from '../organisms/LogoForm';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { generateLogo, saveLogo } from '../custom_api/logo';
 // import type { LogoGenResponse } from '../custom_api/logo';
 import { LogoCard } from '../organisms/LogoCard/LogoCard';
@@ -12,12 +12,17 @@ import { TextButton } from '../atoms/TextButton/TextButton';
 function Logo(){
 
     const [promptText, setPropmt] = useState<string>('');
-    const [negativ_prompt, setNegrtivePrompt] = useState<string>('');
+    const [negativ_prompt, setNegrtivePrompt] = useState<string>('no watermark');
     const [style, setStyle] = useState<string>('');
-    const [numImages, setNumImages] = useState<number>(1);
+    // const [numImages, setNumImages] = useState<number>(1);
     const [error, setError] = useState<string | null>(null);
     const [logoResult, setLogoResult] = useState<string[]|null>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    useEffect(()=>{
+        setNegrtivePrompt("no watermark");
+        setStyle('');
+    },[])
     
     // 로고 생성 처리 함수
     const handleLogoGenaration = async () => {
@@ -28,8 +33,10 @@ function Logo(){
 
         try {
 
-            const negP = negativ_prompt? negativ_prompt : "no watermark";
-            const numI = Math.max(numImages ?? 1, 1);   // 값이 없거나 음수 나오는 경우 방지
+            const negP = negativ_prompt? negativ_prompt : "no watermark";   // 워터 마크는 항상 없어야 함.
+            // const numI = Math.max(numImages ?? 1, 1);   // 값이 없거나 음수 나오는 경우 방지
+            const numI = 2  // 2개 생성으로 고정.
+
             setIsLoading(true);            
             const res = await generateLogo({ prompt: promptText, style, 
                 negative_prompt:negP, 
@@ -88,12 +95,12 @@ function Logo(){
                 error={error}
                 onPromptChange={(e) => setPropmt(e.target.value)}
                 onSubmit={handleLogoGenaration}
-                style={style}
-                onStyleChange={(e) => setStyle(e.target.value)}
-                negative_prompt={negativ_prompt}
-                onNegPromptChange={(e) => setNegrtivePrompt(e.target.value)}
-                numImages={numImages}
-                onNumImageChange={(e) => setNumImages(e.target.valueAsNumber)}
+                // style={style}
+                // onStyleChange={(e) => setStyle(e.target.value)}
+                // negative_prompt={negativ_prompt}
+                // onNegPromptChange={(e) => setNegrtivePrompt(e.target.value)}
+                // numImages={numImages}
+                // onNumImageChange={(e) => setNumImages(e.target.valueAsNumber)}
                 isLoading={isLoading}
             />
             {

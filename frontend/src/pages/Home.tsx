@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
 import LogOutButton from "../molecules/LogOutButton/LogOutButton";
 import ColorGuideExample from "../forTest/ColorGuideExample";
+import { DemoLogoTypeSidebar } from "../forTest/DemoLogoTypeSidebar";
 
 function Home() {
   const {user} = useAuth();
@@ -26,7 +27,8 @@ function Home() {
       <Link to={'branding'}> Branding </Link><br></br>
       <Link to={'colorGuide'}> Color Guide </Link><br></br>
       <Link to={'Admin'}> Admin </Link><br></br>
-      <ColorGuideExample></ColorGuideExample>
+      <DemoLogoTypeSidebar></DemoLogoTypeSidebar>
+      {/* <ColorGuideExample></ColorGuideExample> */}
       <LogOutButton></LogOutButton>
     </div>
   );
