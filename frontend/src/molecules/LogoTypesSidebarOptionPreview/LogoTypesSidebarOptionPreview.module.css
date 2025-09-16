@@ -1,0 +1,12 @@
+/* src/molecules/LogoTypesSidebarOptionPreview/LogoTypesSidebarOptionPreview.module.css */
+
+.card {
+    display: grid;
+    gap: 8px;
+    padding: 10px 8px 12px;
+}
+.header {
+    font-size: 14px;
+    color: #111827;
+    font-weight: 600;
+}
