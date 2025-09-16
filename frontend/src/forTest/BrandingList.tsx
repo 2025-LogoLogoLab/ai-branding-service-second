@@ -1,74 +1,76 @@
-// src/forTest/BrandingList.tsx
+// 추후 수정 필요.
 
-import { useEffect, useState } from "react";
-import BrandingCard from "../organisms/BrandingCard/BrandingCard";
-import { fetchAllBranding, deleteBranding, type BrandingResponse } from "../custom_api/branding";
+// // src/forTest/BrandingList.tsx
 
-function BrandingList(){
+// import { useEffect, useState } from "react";
+// import BrandingCard from "../organisms/BrandingCard/BrandingCard";
+// import { fetchAllBranding, deleteBranding, type BrandingResponse } from "../custom_api/branding";
 
-    const [brandingRes, setBrandingRes] = useState<BrandingResponse[]|null>();
+// function BrandingList(){
 
-    useEffect( () => {  // 처음에 브랜딩 전략 다 불러오기
-        async function fetch(){
-            const brandingRes = await fetchAllBranding();
+//     const [brandingRes, setBrandingRes] = useState<BrandingResponse[]|null>();
 
-            if(!brandingRes){
-                console.log('브랜딩 전체 불러오기 실패');
-                return;
-            }
+//     useEffect( () => {  // 처음에 브랜딩 전략 다 불러오기
+//         async function fetch(){
+//             const brandingRes = await fetchAllBranding({page:0, size:9});
 
-            setBrandingRes(brandingRes);
-        }
+//             if(!brandingRes){
+//                 console.log('브랜딩 전체 불러오기 실패');
+//                 return;
+//             }
 
-        fetch();
+//             setBrandingRes(brandingRes);
+//         }
 
-    }, [])
+//         fetch();
 
-    const handleDelte = async (brandingNum:number) => {
-        const result = await deleteBranding(brandingNum);
+//     }, [])
 
-        if(result){
-            console.log('삭제 성공');
-            setBrandingRes(brandingRes?.filter((branding) => branding.brandingNum !== brandingNum));
-        }
-        else{
-            console.log('삭제 실패');
-        }
-    }
+//     const handleDelte = async (brandingNum:number) => {
+//         const result = await deleteBranding({id:brandingNum});
 
-    const handleTagging = async (id:number) => {
-        console.log(id + '번에 태그 달기');
-    }
+//         if(result){
+//             console.log('삭제 성공');
+//             setBrandingRes(brandingRes?.filter((branding) => branding.brandingNum !== brandingNum));
+//         }
+//         else{
+//             console.log('삭제 실패');
+//         }
+//     }
 
-    const handleAddToProject = async (id:number) => {
-        console.log(id + '번을 프로젝트에 추가하기');
-    }
+//     const handleTagging = async (id:number) => {
+//         console.log(id + '번에 태그 달기');
+//     }
 
-    return(
-        <div style={styles.wrapper}>
-            {brandingRes?.map(branding => (
-                <BrandingCard 
-                    key={branding.brandingNum}
-                    brandingNum={branding.brandingNum} 
-                    promptText={branding.promptText}
-                    data={branding.data}
-                    onDelete={handleDelte}
-                    onTag={handleTagging}
-                    onInsertToProject={handleAddToProject}
-                />
-            ))}
-        </div>
-    );
-}
+//     const handleAddToProject = async (id:number) => {
+//         console.log(id + '번을 프로젝트에 추가하기');
+//     }
 
-const styles = {
-    wrapper: {
-        display: "flex" as const,
-        flexWrap: "wrap" as const,
-        gap: "16px",
-        padding: "16px",
-    }
-};
+//     return(
+//         <div style={styles.wrapper}>
+//             {brandingRes?.map(branding => (
+//                 <BrandingCard 
+//                     key={branding.brandingNum}
+//                     brandingNum={branding.id} 
+//                     promptText={branding.promptText}
+//                     data={branding.data}
+//                     onDelete={handleDelte}
+//                     onTag={handleTagging}
+//                     onInsertToProject={handleAddToProject}
+//                 />
+//             ))}
+//         </div>
+//     );
+// }
+
+// const styles = {
+//     wrapper: {
+//         display: "flex" as const,
+//         flexWrap: "wrap" as const,
+//         gap: "16px",
+//         padding: "16px",
+//     }
+// };
 
 
-export default BrandingList;
+// export default BrandingList;
