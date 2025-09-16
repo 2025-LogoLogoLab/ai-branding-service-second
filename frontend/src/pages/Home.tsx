@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
 import LogOutButton from "../molecules/LogOutButton/LogOutButton";
-import ColorGuideExample from "../forTest/ColorGuideExample";
+// import ColorGuideExample from "../forTest/ColorGuideExample";
 import { DemoLogoTypeSidebar } from "../forTest/DemoLogoTypeSidebar";
 
 function Home() {
