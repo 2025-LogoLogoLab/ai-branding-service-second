@@ -58,6 +58,9 @@ public class SecurityConfig {
                         // 보호 엔드포인트
                         .requestMatchers("/api/protected").authenticated()
 
+                        // 관리자 경로
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
                         // 나머지는 전부 인증 필요
                         .anyRequest().authenticated()
                 )
