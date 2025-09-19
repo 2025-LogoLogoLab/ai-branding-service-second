@@ -41,15 +41,33 @@ public class AdminService {
                 .orElseThrow(() -> new NoSuchElementException("ID에 해당하는 사용자가 없습니다: " + userId));
 
         // 닉네임 변경
-        if (request.nickname() != null && !request.nickname().isBlank()) {
-            user.updateNickname(request.nickname());
-        }
-        // 역할(Role) 변경
-        if (request.role() != null) {
-            user.updateRole(request.role()); // User Entity에 setRole 메소드 추가 필요
+        if (request.getNickname() != null && !request.getNickname().isBlank()) {
+            user.updateNickname(request.getNickname());
         }
 
-        return AdminUserResponse.from(user); // 변경 감지로 자동 저장됨
+        // 프로필 이미지 변경
+        if (request.getProfileImage() != null) {
+            user.updateProfileImageUrl(request.getProfileImage());
+        }
+
+        // 전화번호 변경
+        if (request.getPhone() != null) {
+            user.updatePhone(request.getPhone());
+        }
+
+        // 역할(Role) 변경
+        if (request.getRole() != null) {
+            user.updateRole(request.getRole());
+        }
+
+        // 알림 설정 변경
+        user.updateNotifications(
+                request.getEmailNoti(),
+                request.getSmsNoti(),
+                request.getNewsLetter()
+        );
+
+        return AdminUserResponse.from(user);
     }
 
     /** [어드민] 사용자 ID로 사용자 삭제 */
