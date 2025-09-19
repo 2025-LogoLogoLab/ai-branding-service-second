@@ -76,4 +76,5 @@ public class User {
         if (smsNoti != null)   this.smsNoti   = smsNoti;
         if (newsLetter != null) this.newsLetter = newsLetter;
     }
+    public void updateRole(RoleType role) { this.role = role; }
 }
