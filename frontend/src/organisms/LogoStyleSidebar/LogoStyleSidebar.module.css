@@ -1,0 +1,105 @@
+/*
+파일: src/organisms/LogoStyleSidebar/LogoStyleSidebar.module.css
+    .sidebar: 사이드바 전체 컨테이너
+    - 좌측 패널 같은 좁은 영역을 가정하여 고정 폭/여백을 설정
+    - 내부는 위에서 아래로 쌓이는(Grid) 레이아웃
+*/
+/* 사이드바 기본 폭(일반 모드) */
+.sidebar {
+    /* ✅ 기본 폭을 CSS 변수로 관리: 다른 곳에서도 재사용 가능 */
+    --ls-sidebar-w: 220px;       /* 일반 모드 폭 */
+    --ls-card-h: 220px;          /* 카드 높이(일반 모드) */
+    --ls-img-max: 160px;         /* 이미지 최대 가로폭(일반 모드) */
+
+    width: var(--ls-sidebar-w);
+    padding: 8px;
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 8px;
+    background: #fbfbfc;
+    box-sizing: border-box;
+    transition: width 180ms ease;   /* 폭 전환 시 부드럽게 */
+}
+
+/*
+    전체보기 모드에서 사이드바 확장
+    - 사이드바 자체를 넓혀 카드/이미지 영역에 여유 제공
+    - clamp: 모바일에서 너무 넓어지지 않도록 상·하한 설정
+*/
+.expanded {
+    --ls-sidebar-w: clamp(320px, 60vw, 980px); /* 뷰포트 기준으로 적당히 확장. min 320, max 720, 그 사이는 뷰포트의 48% 차지 */
+    --ls-card-h: 220px;                        /* 카드 높이도 함께 키움 */
+    --ls-img-max: 260px;                       /* 이미지 최대 가로폭 확대 */
+}
+
+/*
+    .actions: 일반 모드에서 상단 pill(선택된 스타일) 영역
+    - 전체보기 모드에서는 렌더링하지 않음
+*/
+.actions {
+    padding: 4px;
+}
+
+/*
+    .list: 일반 모드의 목록 컨테이너
+    - 선택 예시(카드) 1개 + 나머지 버튼 항목들이 세로로 배치됨
+*/
+.list {
+    display: grid;
+    gap: 8px;
+}
+
+/*
+    .allHeader: 전체보기 모드에서 상단에 표시되는 제목 텍스트
+    - 사용자에게 현재 모드를 명확히 전달
+*/
+.allHeader {
+    font-size: 24px;
+    font-weight: 900;
+    /* text-align: center; */
+    padding: 12px 0;
+    color: #111827;
+}
+
+/*
+    .gridAll: 전체보기 그리드 컨테이너 (반응형 1→2→4열)
+    - 모바일: 1열(스크롤)
+    - 태블릿(>=768px): 2열 → 2x4 구성
+    - 데스크톱(>=1024px): 4열 → 4x2 구성
+*/
+.gridAll {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr; /* 기본(모바일): 한 줄에 1개 */
+}
+
+@media (min-width: 768px) {
+    .gridAll {
+        grid-template-columns: repeat(2, 1fr); /* 태블릿: 2열 (2x4) */
+    }
+}
+
+@media (min-width: 1024px) {
+    .gridAll {
+        grid-template-columns: repeat(4, 1fr); /* 데스크톱: 4열 (4x2) */
+    }
+}
+
+/*
+    .allBtn: 일반 모드 하단의 "전체보기" 버튼
+    - 클릭 시 상위 콜백을 호출하여 전체보기 모드로 전환
+*/
+.allBtn {
+    margin-top: 6px;
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+}
+.allBtn:hover {
+    background: #f9fafb; /* hover 시 아주 미묘하게 밝아짐 */
+}
