@@ -14,12 +14,15 @@ src/atoms/SidebarOptionItem/SidebarOptionItem.module.css
     transition: background-color 0.2s ease, transform 0.05s ease;
 }
 .item:hover {
-    background-color: #f3f4f6;
+    /* background-color: #f3f4f6; */
+    background-color: var(--color-hover-on-white);
 }
 .item:active {
     transform: translateY(1px);
 }
 .active {
+    font-weight: 800;
+    /* text-align: center; */
     background-color: #e7ebff;
 }
 .label {
