@@ -13,8 +13,8 @@
     background-color: #ffffff; /* 카드 배경은 흰색 */
     display: flex; /* 세로 정렬을 위해 flex 사용 */
     /* 카드 내 패딩 적용 */    
-    padding-bottom: 8px;   
-    padding-top: 16px;
+    padding-bottom: 20px;   
+    padding-top: 20px;
     flex-direction: column;
     align-items: center;
     justify-content: center; /* 전체 콘텐츠를 수직/수평 중앙에 위치 */
