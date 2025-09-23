@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
 import LogOutButton from "../molecules/LogOutButton/LogOutButton";
 // import ColorGuideExample from "../forTest/ColorGuideExample";
-import { DemoLogoTypeSidebar } from "../forTest/DemoLogoTypeSidebar";
+// import { DemoLogoTypeSidebar } from "../forTest/DemoLogoTypeSidebar";
 import { DemoLogoStyleSidebar } from "../forTest/DemoLogoStyleSidebar";
 
 function Home() {
