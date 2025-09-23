@@ -20,6 +20,8 @@ src/atoms/SidebarOptionItem/SidebarOptionItem.module.css
     transform: translateY(1px);
 }
 .active {
+    font-weight: 800;
+    /* text-align: center; */
     background-color: #e7ebff;
 }
 .label {
