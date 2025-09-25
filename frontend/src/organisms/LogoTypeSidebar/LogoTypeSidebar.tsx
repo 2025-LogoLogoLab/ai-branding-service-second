@@ -10,9 +10,10 @@ export type LogoTypeSidebarProps = {
     showAll?: boolean;          // true일 때 전체보기 모드
     onSelect?: (type: LogoType) => void;
     onShowAll?: () => void;
+    onPickFromAll?: (type: LogoType) => void;
 };
 
-export function LogoTypeSidebar({ selected, showAll, onSelect, onShowAll }: LogoTypeSidebarProps) {
+export function LogoTypeSidebar({ selected, showAll, onSelect, onShowAll, onPickFromAll}: LogoTypeSidebarProps) {
     // 정렬: 전체보기면 그대로, 아니면 선택항목을 최상단으로
     const ordered = useMemo(() => {
         if (showAll) return LOGO_TYPES;
@@ -44,7 +45,14 @@ export function LogoTypeSidebar({ selected, showAll, onSelect, onShowAll }: Logo
             {showAll ? (
                 <div className={styles.list}>
                     {ordered.map(({ key, label }) => (
-                        <LogoTypesSidebarOptionPreview key={key} label={label} type={key} />
+                        <LogoTypesSidebarOptionPreview key={key} label={label} type={key} onClick={()=> {
+                            if(onPickFromAll) {
+                                onPickFromAll(key);
+                            }
+                            else {
+                                onSelect?.(key);
+                            }
+                        }}/>
                     ))}
                 </div>
             ) : (
