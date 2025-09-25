@@ -7,6 +7,7 @@ import  OnlyImage  from '../../assets/images/logo_types/OnlyImage.png';
 import { Image } from '../Image/Image';
 import Text from '../../assets/images/logo_types/Text.png';
 import ImageAndText from '../../assets/images/logo_types/ImageAndText.png';
+import { LOGO_TYPES } from '../../types/logoTypes';
 
 export type LogoExampleBoxProps = {
     type: LogoType;
@@ -18,28 +19,25 @@ export function LogoExampleBox ({ type } : LogoExampleBoxProps) {
         <div className={styles.box} aria-label={`예시: ${type}`}>
             {type === 'TEXT' && (
                 <div className={styles.centerCol}>
-                    {/* <div className={styles.bigWord}>LOGO</div> */}
-                    <Image src={Text}/>
-                    <div className={styles.caption}>타입 예시</div>
+                    <Image src={Text} variant='logoExpCard'/>
+                    <div className={styles.title}>{LOGO_TYPES[0].label}</div>
+                    <div className={styles.caption}>텍스트만 있는 로고 설명</div>
                 </div>
             )}
 
             {type === 'ICON' && (
                 <div className={styles.centerCol}>
-                    {/* <div className={styles.iconCircle} /> */}
-                    <Image src={OnlyImage}></Image>
-                    <div className={styles.caption}>그림만 있는 로고</div>
+                    <Image src={OnlyImage} variant='logoExpCard'></Image>
+                    <div className={styles.title}>{LOGO_TYPES[1].label}</div>
+                    <div className={styles.caption}>그림만 있는 로고 설명</div>
                 </div>
             )}
 
             {type === 'COMBO' && (
                 <div className={styles.centerCol}>
-                    <div className={styles.comboRow}>
-                        {/* <div className={styles.iconSquare} /> */}
-                        {/* <div className={styles.comboText}>COMPANY LOGO</div> */}
-                        <Image src={ImageAndText}/>                    
-                    </div>
-                    <div className={styles.caption}>그림과 텍스트가 함께 있는 로고</div>
+                        <Image src={ImageAndText} variant='logoExpCard'/>                    
+                        <div className={styles.title}>{LOGO_TYPES[2].label}</div>
+                    <div className={styles.caption}>그림과 텍스트가 함께 있는 로고 설명</div>
                 </div>
             )}
         </div>

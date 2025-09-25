@@ -24,6 +24,10 @@ export function DemoLogoTypeSidebar() {
                     setSelected(type);
                 }}
                 onShowAll={selectAll}
+                onPickFromAll={(type) => {
+                    setSelected(type);
+                    setAll(false);
+                }}
             />
             {/* <div>
                 <button onClick={() => setAll((v) => !v)}>
