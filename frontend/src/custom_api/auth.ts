@@ -1,6 +1,6 @@
 // src/components/custom_api/auth.tsx
 /*
-    로그인 관련 api 클라이언트 모음
+    로그인 및 인증 관련 api 클라이언트 모음
 */
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -23,12 +23,7 @@ export type LoginRequest = {
 }
 
 export type LoginResponse = {
-    // accessToken: string; // HttpOnly + Secure 쿠키 사용 할 거라 이제 안 쓸 듯.
-    // id: string;          // 이건 지워도 될지도?
     role: 'ADMIN' | 'USER';
-    // email?: string;
-    // nickname?: string;
-    // profilePic?: string | null;
 }
 
 // 소셜 로그인 응답도 일반 로그인 응답과 같은 타입
@@ -39,24 +34,39 @@ export type SocailLoginResponse = LoginResponse;
 export type SocialProvider = 'kakao' | 'naver' | null;
 
 // 소셜 로그인 url 리턴하는 객체
-export const socialAuthConfig = {
-  kakao: {
-    // clientId: encodeURIComponent(import.meta.env.VITE_CLIENT_ID_KAKAO),
-    clientId: import.meta.env.VITE_CLIENT_ID_KAKAO,
-    // redirectUri: encodeURIComponent(import.meta.env.VITE_CALL_BACK_KAKAO),
-    redirectUri: import.meta.env.VITE_CALL_BACK_KAKAO,
-    getAuthUrl: function () {
-        return `https://kauth.kakao.com/oauth/authorize?client_id=${this.clientId}&redirect_uri=${this.redirectUri}&response_type=code`;
-    },
-  },
-  naver: {
-    clientId: import.meta.env.VITE_CLIENT_ID_NAVER,
-    redirectUri: encodeURIComponent(import.meta.env.VITE_CALL_BACK_NAVER),
-    getAuthUrl: function (state: string) {
-        return `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${encodeURIComponent(state)}`;
-    }
-  },
-};
+// export const socialAuthConfig = {
+//   kakao: {
+//     // clientId: encodeURIComponent(import.meta.env.VITE_CLIENT_ID_KAKAO),
+//     clientId: import.meta.env.VITE_CLIENT_ID_KAKAO,
+//     // redirectUri: encodeURIComponent(import.meta.env.VITE_CALL_BACK_KAKAO),
+//     redirectUri: import.meta.env.VITE_CALL_BACK_KAKAO,
+//     getAuthUrl: function () {
+//         return `https://kauth.kakao.com/oauth/authorize?client_id=${this.clientId}&redirect_uri=${this.redirectUri}&response_type=code`;
+//     },
+//   },
+//   naver: {
+//     clientId: import.meta.env.VITE_CLIENT_ID_NAVER,
+//     redirectUri: encodeURIComponent(import.meta.env.VITE_CALL_BACK_NAVER),
+//     getAuthUrl: function (state: string) {
+//         return `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${encodeURIComponent(state)}`;
+//     }
+//   },
+// };
+
+export function getKakaoAuthUrl(): string {
+  const clientId = import.meta.env.VITE_CLIENT_ID_KAKAO as string;
+  const redirectUri = import.meta.env.VITE_CALL_BACK_KAKAO as string;
+  if (!clientId || !redirectUri) throw new Error('Kakao env missing');
+  return `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
+}
+
+export function getNaverAuthUrl(state: string): string {
+  const clientId = import.meta.env.VITE_CLIENT_ID_NAVER as string;
+  const redirectUri = import.meta.env.VITE_CALL_BACK_NAVER as string;
+  if (!clientId || !redirectUri) throw new Error('Naver env missing');
+  return `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`;
+}
+
 
 // 일반, 관리자 로그인 api 클라이언트
 export async function login( {email, password}: LoginRequest ): Promise<LoginResponse>{
@@ -83,16 +93,7 @@ export async function login( {email, password}: LoginRequest ): Promise<LoginRes
     
 }
 
-// 테스트용
-// export async function login( {email, password}: LoginRequest ): Promise<LoginResponse>{
 
-//     email; 
-//     password;
-//     const result:LoginResponse = { role:'user' };
-
-//     return result;
-    
-// }
 
 // 소셜 로그인 api 클라이언트
 export async function socialLogin( code:string, provider:SocialProvider ): Promise<SocailLoginResponse>{
@@ -161,3 +162,15 @@ export async function checkAuth() : Promise<checkAuthResponse>{
 
     return res.json();
 }
+
+
+// 테스트용
+// export async function login( {email, password}: LoginRequest ): Promise<LoginResponse>{
+
+//     email; 
+//     password;
+//     const result:LoginResponse = { role:'user' };
+
+//     return result;
+    
+// }

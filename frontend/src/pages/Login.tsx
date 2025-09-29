@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import LoginForm from '../organisms/LoginForm';
 import type { SocialProvider, } from '../custom_api/auth';
-import { socialAuthConfig } from '../custom_api/auth';
+import { getKakaoAuthUrl, getNaverAuthUrl } from '../custom_api/auth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -69,9 +69,9 @@ function Login() {
         const state = generateRandomState();
 
         if (provider === 'kakao') {
-            window.location.href = socialAuthConfig.kakao.getAuthUrl();         // 카카오 로그인 url로 이동
+            window.location.href = getKakaoAuthUrl();         // 카카오 로그인 url로 이동
         } else {
-            window.location.href = socialAuthConfig.naver.getAuthUrl(state);    // 네이버 로그인 url로 이동
+            window.location.href = getNaverAuthUrl(state);    // 네이버 로그인 url로 이동
         }
     };
 
