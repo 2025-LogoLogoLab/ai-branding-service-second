@@ -1,7 +1,6 @@
-// src/atoms/TextArea/TextArea.tsx
-import React, { useRef, useEffect } from 'react';
-import type { KeyboardEvent } from 'react';
-import styles from './TextArea.module.css';
+import React, { useRef, useEffect } from "react";
+import type { KeyboardEvent } from "react";
+import styles from "./TextArea.module.css";
 
 export type TextAreaProps = {
     value: string;
@@ -15,66 +14,54 @@ export type TextAreaProps = {
 
 /**
  * 자동 높이 조절 + Enter 전송 기능을 포함한 TextArea 컴포넌트
- * - ChatGPT 스타일 입력창처럼 작동
- * - 키보드 입력 이벤트와 textarea 높이 조절 모두 처리
+ * - ChatGPT 스타일: 입력이 늘면 영역이 아래로 계속 커짐(내부 스크롤바 없음)
  */
 export function TextArea({
     value,
     onChange,
-    placeholder = '',
+    placeholder = "",
     name,
     id,
     disabled = false,
-    onSubmit,
+    onSubmit
 }: TextAreaProps) {
-    // DOM에 직접 접근하기 위한 ref 설정
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    /**
-     * 자동 높이 조절 로직 (value가 변경될 때마다 실행)
-     * - textarea의 scrollHeight를 기준으로 높이를 늘림
-     * - `requestAnimationFrame()`을 사용해 브라우저 페인팅 타이밍에 맞춰 안전하게 높이 변경
-     *   → 높이 깜빡임이나 누락 방지
-     */
+    // value가 바뀔 때마다 내용 높이에 맞춰 자동 리사이즈
     useEffect(() => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
+        const el = textareaRef.current;
+        if (!el) return;
 
+        // 레이아웃 계산 전 높이를 초기화 → 실제 scrollHeight 측정
         requestAnimationFrame(() => {
-            textarea.style.height = 'auto'; // 높이 초기화
-            textarea.style.height = `${textarea.scrollHeight}px`; // scrollHeight에 맞게 자동 확장
+            el.style.height = "auto";
+            el.style.height = `${el.scrollHeight}px`; // ✅ 제한 없이 커짐
         });
-    }, [value]); // value가 바뀔 때마다 실행됨 (입력 변화, props 변화 포함)
+    }, [value]);
 
-    /**
-     * 키보드 입력 처리
-     * - Shift+Enter: 줄바꿈 허용 (기본 동작 유지)
-     * - Enter 단독: 제출 (onSubmit 호출)
-     * - disabled 상태일 경우 아무 동작도 하지 않음 (방어 처리)
-     */
+    // Enter(단독) 제출, Shift+Enter 줄바꿈
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-        if (disabled) return; // 비활성 상태에서는 아무 동작도 하지 않음
-
-        // 단독 Enter 입력 (줄바꿈 아님)
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault(); // 기본 줄바꿈 동작 차단
-            if (onSubmit) onSubmit(); // 제출 핸들러 호출
+        if (disabled) return;
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            onSubmit?.();
         }
-        // Shift + Enter는 줄바꿈이므로 따로 처리하지 않고 기본 동작 유지
     };
 
     return (
         <textarea
-            ref={textareaRef}             // DOM에 직접 접근할 수 있도록 ref 연결
-            className={styles.textarea}  // 외부 스타일 클래스 적용
-            value={value}                // 현재 입력된 값
-            onChange={onChange}          // 입력 변경 이벤트 핸들러
-            onKeyDown={handleKeyDown}    // 키보드 이벤트 핸들러 (Enter 제출)
+            ref={textareaRef}
+            className={styles.textarea}
+            value={value}
+            onChange={onChange}
+            onKeyDown={handleKeyDown}
             placeholder={placeholder}
             name={name}
             id={id}
             disabled={disabled}
-            rows={1}                     // 기본 1줄부터 시작 (자동 확장)
+            rows={1}
+            aria-disabled={disabled}
+            aria-label={placeholder || "입력"}
         />
     );
 }

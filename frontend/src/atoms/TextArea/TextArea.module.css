@@ -1,30 +1,53 @@
-/* src/atoms/TextArea/TextArea.module.css */
 .textarea {
     width: 100%;
-    min-width: 400px;
+    /* grid 컨텍스트에서 열을 밀어내지 않도록 */
+    min-width: 0;                     
+    max-width: 100%;
+
     padding: 10px 12px;
     font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-family: inherit;
     line-height: 1.5;
-    transition: border-color 0.2s ease;
+    font-family: inherit;
+    box-sizing: border-box;
+
+    border: 1px solid var(--color-divider-border);
+    border-radius: 12px;
     outline: none;
 
-    resize: none; /* 사용자가 수동으로 크기 조절 못하게 함 (JS로 처리하므로) */
+    background-color: var(--color-text-input-bg);
 
-    /* 입력 포커스 시. &:어쩌구 는 .textarea:어쩌구와 같은 결과. 기본 css에서는 사용 불가 */
-    &:focus {
-        border-color: #ff5722;
-    }
-
-    /* 비활성화 상태 */
-    &:disabled {
-        background-color: #f5f5f5;
-        border-color: #ddd;
-        color: #aaa;
-        cursor: not-allowed;
-    }
+    resize: none;                     /* 크기 수동 조절은 비활성화(자동 높이만) */
+    overflow-y: hidden;               /* ✅ 내부 스크롤바 숨김 (계속 확장) */
+    scrollbar-width: none;            /* Firefox 보조 */
+    -ms-overflow-style: none;         /* IE/Edge(legacy) 보조 */
+}
+.textarea::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
 }
 
+/* 긴 텍스트 줄바꿈(지피티와 동일한 보기) */
+.textarea {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* 포커스 */
+.textarea:focus {
+    border-color: var(--color-button-primary-bg);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-button-primary-bg) 30%, transparent);
+}
+
+/* 비활성 */
+.textarea:disabled {
+    background-color: var(--color-hover-on-white);
+    border-color: var(--color-divider-border);
+    color: var(--color-font-weak);
+    cursor: not-allowed;
+}
+
+/* 플레이스홀더 */
+.textarea::placeholder {
+    color: var(--color-font-input-label);
+}
