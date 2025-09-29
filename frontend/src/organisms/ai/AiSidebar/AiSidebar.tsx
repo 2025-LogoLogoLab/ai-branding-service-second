@@ -6,7 +6,7 @@ import styles from "./AiSidebar.module.css";
  * - 좌측 고정 사이드바에서 3가지 모드(로고 / 브랜딩 전략 / 컬러 가이드)를 전환
  * - BrowserRouter basename("/app") 환경: to="/logo" 처럼 베이스 제외 경로 사용
  * - PNG 아이콘은 src/assets/icons 에 존재
- * - 라우팅: React Router NavLink 의 isActive 로 활성 상태 스타일링
+ * - 라우팅: React Router NavLink 의 isActive 로 활성 상태 스타일링UI
  */
 
 // ⚠️ 경로 주의: 현재 파일 위치가 src/organisms/ai/AiSidebar 일 때, assets 는 ../../../assets
