@@ -6,6 +6,8 @@ import { generateLogo, saveLogo } from '../custom_api/logo';
 // import type { LogoGenResponse } from '../custom_api/logo';
 import { LogoCard } from '../organisms/LogoCard/LogoCard';
 import { TextButton } from '../atoms/TextButton/TextButton';
+import type { LogoStyleKey } from '../types/logoStyles';
+import type { LogoType } from '../types/logoTypes';
 
 
 // 로고 생성 페이지
@@ -13,7 +15,8 @@ function Logo(){
 
     const [promptText, setPropmt] = useState<string>('');
     const [negativ_prompt, setNegrtivePrompt] = useState<string>('no watermark');
-    const [style, setStyle] = useState<string>('');
+    const [style, setStyle] = useState<LogoStyleKey|undefined>(undefined);
+    const [type, setType] = useState<LogoType|undefined>(undefined);
     // const [numImages, setNumImages] = useState<number>(1);
     const [error, setError] = useState<string | null>(null);
     const [logoResult, setLogoResult] = useState<string[]|null>();
@@ -21,7 +24,8 @@ function Logo(){
 
     useEffect(()=>{
         setNegrtivePrompt("no watermark");
-        setStyle('');
+        setStyle('cute');
+        setType('TEXT');
     },[])
     
     // 로고 생성 처리 함수
@@ -34,12 +38,12 @@ function Logo(){
         try {
 
             const negP = negativ_prompt? negativ_prompt : "no watermark";   // 워터 마크는 항상 없어야 함.
-            // const numI = Math.max(numImages ?? 1, 1);   // 값이 없거나 음수 나오는 경우 방지
             const numI = 2  // 2개 생성으로 고정.
 
             setIsLoading(true);            
             const res = await generateLogo({ prompt: promptText, style, 
                 negative_prompt:negP, 
+                type,
                 num_images:numI 
             });
 
@@ -90,20 +94,16 @@ function Logo(){
 
     return(
         <div>
+            {/* 로고 생성 프롬프트 작성용 Form */}
             <LogoForm 
                 promptText={promptText}
                 error={error}
                 onPromptChange={(e) => setPropmt(e.target.value)}
                 onSubmit={handleLogoGenaration}
-                // style={style}
-                // onStyleChange={(e) => setStyle(e.target.value)}
-                // negative_prompt={negativ_prompt}
-                // onNegPromptChange={(e) => setNegrtivePrompt(e.target.value)}
-                // numImages={numImages}
-                // onNumImageChange={(e) => setNumImages(e.target.valueAsNumber)}
                 isLoading={isLoading}
             />
             {
+                // 생성 된 로고 표출 UI
                 logoResult?.map((logo, id) => (
                 <div>
                     <LogoCard 
@@ -113,8 +113,9 @@ function Logo(){
                         onDelete={(id) => handleLogoDelete(id)}
                         onSave={(id)=> handleLogoSave(id)}
                     />
-                    <TextButton label='이 로고를 기반으로 브랜딩 전략 생성하기' onClick={() => console.log('브랜딩 전략 생성')} variant='orange'></TextButton>
-                    <TextButton label='이 로고를 기반으로 컬러 가이드 생성하기' onClick={() => console.log('컬러 가이드 생성')} variant='orange'></TextButton>
+                    {/* 로고 선택 및 브랜딩 전략 생성용 UI 표출 기능이 추가되어야 함 */}
+                    <TextButton label='이 로고를 기반으로 브랜딩 전략 생성하기' onClick={() => console.log('브랜딩 전략 생성')} variant='blue'></TextButton>
+                    <TextButton label='이 로고를 기반으로 컬러 가이드 생성하기' onClick={() => console.log('컬러 가이드 생성')} variant='blue'></TextButton>
                 </div>
                 ) )
             }
