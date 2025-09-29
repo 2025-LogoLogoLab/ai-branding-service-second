@@ -49,3 +49,13 @@
     color: #ff5722;
     /* border: 2px solid #2f2f2f; */
 }
+
+/* 변경된 청색 */
+.blue {
+    background-color: var(--color-button-primary-bg);
+    color: var(--color-font-button-white);
+}
+
+.blue:hover {
+    background-color: var(--color-button-hover-bg);
+}
