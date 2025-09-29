@@ -1,0 +1,42 @@
+/* src/components/LogoForm.module.css */
+.card {
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    gap: 12px;
+
+    background: var(--color-bg-base); /* 폼 래퍼는 항상 흰색 */
+    /* border: 1px solid var(--color-divider-border); */
+    border-radius: 12px;
+    padding: 16px;
+    box-sizing: border-box;
+
+    /* ✅ 부모가 좁으면 100%로 확장, 넓으면 최대 1080px까지만 */
+    width: 100%;
+    max-width: 1080px;
+}
+
+.title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-font-header);
+}
+
+.label {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-font-basic-content);
+}
+
+.error {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-font-critical);
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    /* justify-content: flex-start; */
+    justify-content: right;
+}
