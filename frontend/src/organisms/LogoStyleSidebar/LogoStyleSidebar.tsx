@@ -17,7 +17,10 @@ export type LogoStyleSidebarProps = {
     // "전체보기" 버튼 클릭 콜백 (상위에서 모드 토글)
     onShowAll?: () => void;
     // 전체보기에서 항목을 클릭했을 때 호출 (선택 + 전체보기 종료 같은 상위 로직을 묶어서 처리)
-    onPickFromAll?: (styleKey: LogoStyleKey) => void;};
+    onPickFromAll?: (styleKey: LogoStyleKey) => void;
+    onStyleChanges?: (styleKey: LogoStyleKey) => void;
+
+};
 
 export const LogoStyleSidebar: React.FC<LogoStyleSidebarProps> = ({ selected, showAll, onSelect, onShowAll, onPickFromAll }) => {
     // 정렬 규칙: 전체보기면 기본 순서 유지, 일반 모드면 선택 항목을 최상단으로 올림

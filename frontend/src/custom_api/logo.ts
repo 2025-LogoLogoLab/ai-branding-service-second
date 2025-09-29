@@ -1,5 +1,8 @@
 // src/custom_api/logo.ts
 
+import type { LogoStyleKey } from "../types/logoStyles";
+import type { LogoType } from "../types/logoTypes";
+
 // import { useAuth } from "../context/AuthContext";
 
 const basePath = import.meta.env.VITE_API_BASE_URL;
@@ -12,7 +15,8 @@ const logoDeleteEndPoint = basePath + '/logo'
 export type LogoRequest = { // 로고 요청 타입
     // logoName: string;   // 빠질 수 있음.
     prompt: string;
-    style: string;
+    style: LogoStyleKey | undefined;
+    type: LogoType | undefined;
     negative_prompt?: string;
     num_images?: number;
 }
@@ -56,8 +60,9 @@ export type LogoStoreRequest = {    // 로고 저장 요청용
 export async function generateLogo( {
     prompt,
     style = "cute",
+    type,
     negative_prompt = "no watermark",
-    num_images= 1,
+    num_images= 2,
 } : LogoRequest ) 
     : Promise<LogoGenResponse> {
     // 로고 생성 api 클라이언트
@@ -78,6 +83,7 @@ export async function generateLogo( {
         body: JSON.stringify( {
             prompt,
             style,
+            type,
             negative_prompt,
             num_images, 
         } )
