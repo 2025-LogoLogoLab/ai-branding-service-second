@@ -1,0 +1,116 @@
+/* src/pages/LogoPage.module.css */
+/* 페이지는 3행 그리드: 헤더 / 본문 / 푸터 */
+.page {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100dvh;
+    background: var(--color-bg-base);
+}
+
+/* 헤더/푸터는 현재 자리만 확보(실제 컴포넌트로 교체 예정) */
+.headerInner,
+.footerInner {
+    height: 64px;
+}
+
+/* 본문 3열 그리드
+   - 좌/중 컬럼은 콘텐츠 폭에 맞추기(max-content)
+   - 우 컬럼은 남은 공간을 모두 차지(1fr)
+   - 이렇게 하면 사이드바가 내부 컴포넌트 크기에 따라 자연스럽게 폭이 잡힘
+*/
+.container {
+    width: min(100%, 1200px);
+    margin-inline: auto;                 /* 가운데 정렬, 필요 시 0으로 바꿔 풀폭 */
+    display: grid;
+    grid-template-columns: max-content max-content minmax(0, 1fr); /* ← 중요 */
+    column-gap: 16px;
+    align-items: start;
+}
+
+
+/* 좌/중 공통 컬럼 박스(사이드바 영역)
+   - wireframe 가이드용 점선 테두리
+   - overflow/z-index는 사용하지 않음(전체보기 시 폼 자체를 숨기므로 겹침 이슈 없음)
+*/
+.col {
+    border: 0;                      /* ✅ 점선 제거 */
+    border-radius: 12px;
+    padding: 12px;
+    background: var(--color-bg-base);
+}
+
+/* 우측 메인(폼/결과) */
+.main {
+    /* border 제거/유지 여부는 네 스타일 가이드에 맞춰 */
+    border: 0;                      /* ✅ 점선/테두리 제거 (원하면 유지) */
+    border-radius: 12px;
+    padding: 16px;
+    background: var(--color-bg-base);
+    display: grid;
+    gap: 8px;
+
+    align-content: start;           /* ✅ 내부 콘텐츠 위쪽 정렬 */
+    align-items: start;             /* ✅ 자식 요소 ‘늘어남’ 방지 */
+    justify-items: stretch;           /* ✅ 가로도 내용 폭 기준 정렬 */
+}
+
+/* 폼 상단 타이틀 */
+.mainTitle {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: var(--color-font-header);
+}
+
+/* 폼 카드(페이지 배경과 대비) */
+.formCard {
+    border: 1px solid var(--color-divider-border);
+    border-radius: 12px;
+    padding: 12px;
+
+    /* ❗️여기가 회색이었다면 원인: 상위에 텍스트 입력 배경을 썼을 가능성 */
+    background: var(--color-bg-base);               /* ✅ 폼 카드 배경은 흰색만 */
+    /* 필요 시 너비 제한 */
+    max-width: 520px;               /* ✅ 우측 폼 가로 폭 제한(선택) */
+}
+
+/* 폼 라벨 */
+.label {
+    color: var(--color-font-basic-content);
+}
+
+/* 결과 카드 그리드 */
+.grid {
+    margin: 16px 0 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+/* 결과 카드 */
+.card {
+    display: grid;
+    gap: 8px;
+    border: 1px solid var(--color-divider-border);
+    border-radius: 12px;
+    padding: 12px;
+    background: var(--color-bg-base);
+}
+
+.cardActions {
+    display: grid;
+    gap: 6px;
+}
+
+/* 반응형: 폭이 좁아지면 단일 컬럼로 전환 */
+@media (max-width: 920px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    .col,
+    .main {
+        padding: 12px;
+    }
+}
