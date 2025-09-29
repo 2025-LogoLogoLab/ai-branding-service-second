@@ -1,0 +1,70 @@
+/* 좌측 AI 스튜디오 사이드바 컨테이너 */
+.sidebar {
+    width: 100%;
+}
+
+/* 항목 리스트(세로 스택) */
+.list {
+    margin: 0;
+    padding: 8px;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+/* 기본 항목 스타일: 링크를 버튼처럼 보이게 */
+.item {
+    display: grid;
+    grid-template-columns: 28px 1fr;  /* 아이콘 + 라벨 */
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--color-divider-border);
+    background: #fff;
+
+    color: var(--color-font-basic-content);
+    font-size: 14px;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+
+/* 호버 피드백 */
+.item:hover {
+    background: var(--color-hover-on-white);
+}
+
+/* 액티브(누른 순간) 약간의 스케일 다운 */
+.item:active {
+    transform: scale(0.99);
+}
+
+/* PNG 아이콘: 동일한 시각 크기를 위해 고정 높이 */
+.icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    display: block;
+
+    /* 비활성일 때는 살짝 흐리게, hover/active 시 선명하게 */
+    opacity: 0.9;
+}
+
+/* 라벨 텍스트: 한 줄로 잘림 방지 처리 */
+.label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 활성 페이지 강조(이미지 레퍼런스와 동일한 느낌) */
+.active {
+    background: var(--color-menu-selected-bg);
+    border-color: var(--color-menu-selected-bg);
+}
+
+/* 활성 상태에서 아이콘 선명도 */
+.active .icon {
+    opacity: 1;
+}
