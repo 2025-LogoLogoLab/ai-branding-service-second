@@ -20,7 +20,7 @@ export default function AiSidebar() {
                 {/* AI 로고 생성 */}
                 <li>
                     <NavLink
-                        to="/app/ai/logo"
+                        to="/logo"
                         className={({ isActive }) =>
                             `${styles.item} ${isActive ? styles.active : ""}`
                         }
@@ -34,7 +34,7 @@ export default function AiSidebar() {
                 {/* 브랜딩 전략 생성 */}
                 <li>
                     <NavLink
-                        to="/app/ai/branding"
+                        to="/branding"
                         className={({ isActive }) =>
                             `${styles.item} ${isActive ? styles.active : ""}`
                         }
@@ -48,7 +48,7 @@ export default function AiSidebar() {
                 {/* 컬러가이드 생성 */}
                 <li>
                     <NavLink
-                        to="/app/ai/colors"
+                        to="/colorGuide"
                         className={({ isActive }) =>
                             `${styles.item} ${isActive ? styles.active : ""}`
                         }

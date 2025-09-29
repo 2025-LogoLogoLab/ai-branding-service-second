@@ -6,6 +6,7 @@ import LogOutButton from "../molecules/LogOutButton/LogOutButton";
 // import ColorGuideExample from "../forTest/ColorGuideExample";
 import { DemoLogoTypeSidebar } from "../forTest/DemoLogoTypeSidebar";
 import { DemoLogoStyleSidebar } from "../forTest/DemoLogoStyleSidebar";
+import AiSidebar from "../organisms/ai/AiSidebar/AiSidebar";
 
 function Home() {
   const {user} = useAuth();
@@ -30,6 +31,7 @@ function Home() {
       <Link to={'Admin'}> Admin </Link><br></br>
       <DemoLogoTypeSidebar></DemoLogoTypeSidebar>
       <DemoLogoStyleSidebar></DemoLogoStyleSidebar>
+      <AiSidebar></AiSidebar>
       {/* <ColorGuideExample></ColorGuideExample> */}
       <LogOutButton></LogOutButton>
     </div>
