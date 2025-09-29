@@ -1,0 +1,42 @@
+/* src/organisms/layout/SectionLayout/SectionLayout.module.css */
+
+/* --mw: 섹션 컨테이너 최대 폭(커스텀 속성으로 받음) */
+.wrap {
+    --mw: 1200px;
+    width: min(100%, var(--mw));
+    margin-inline: auto;         /* 가운데 정렬 */
+    padding: 16px 24px;
+    box-sizing: border-box;
+}
+
+/* 2열 레이아웃: 좌(사이드바 고정폭) / 우(콘텐츠 가변) */
+.container {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: start;
+}
+
+/* 좌측 사이드바: 스크롤 시 헤더 아래 고정되도록 sticky */
+.sidebar {
+    position: sticky;
+    top: 72px;                   /* 헤더 높이에 맞게 조정 */
+    align-self: start;
+}
+
+/* 우측 콘텐츠 */
+.content {
+    min-width: 0;                /* 그리드 자식 오버플로 방지 */
+    display: block;
+}
+
+/* 모바일에서는 1열로 전환 */
+@media (max-width: 920px) {
+    .container {
+        grid-template-columns: 1fr;
+        row-gap: 12px;
+    }
+    .sidebar {
+        position: static;
+    }
+}
