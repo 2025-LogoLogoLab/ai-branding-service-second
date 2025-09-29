@@ -1,0 +1,17 @@
+/* src/organisms/layout/AppShell/AppShell.module.css */
+.page {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100dvh;
+    background: var(--color-bg-base);
+}
+
+.headerInner,
+.footerInner {
+    height: 64px; /* 실제 컴포넌트 연결 시 제거 가능 */
+}
+
+.main {
+    /* 전역 본문은 가운데 정렬된 컨테이너(섹션 레이아웃이 내부에서 다시 그리드 구성) */
+    display: block;
+}
