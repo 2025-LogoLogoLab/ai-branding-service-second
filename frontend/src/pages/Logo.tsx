@@ -182,7 +182,7 @@ export default function Logo() {
 
                 {/* 우: 폼 + 결과(폼은 전체보기일 때 숨김) */}
                 <main className={s.main} aria-label="로고 생성 영역" aria-busy={isLoading}>
-                    {!isAnyAllOpen && (
+                    {!logoResult && !isAnyAllOpen && (
                         <LogoForm
                             value={promptText}
                             error={error}
@@ -206,21 +206,21 @@ export default function Logo() {
                                             onDelete={handleLogoDelete}
                                             onSave={handleLogoSave}
                                         />
-                                        <div className={s.cardActions}>
-                                            <TextButton
-                                                label="이 로고를 기반으로 브랜딩 전략 생성하기"
-                                                onClick={() => console.log("브랜딩 전략 생성")}
-                                                variant="blue"
-                                            />
-                                            <TextButton
-                                                label="이 로고를 기반으로 컬러 가이드 생성하기"
-                                                onClick={() => console.log("컬러 가이드 생성")}
-                                                variant="blue"
-                                            />
-                                        </div>
                                     </li>
                                 ))}
                             </ul>
+                            <div className={s.cardActions}>
+                                <TextButton
+                                    label="이 로고를 기반으로 브랜딩 전략 생성하기"
+                                    onClick={() => alert("브랜딩 전략 생성 UI 적용 필요")}
+                                    variant="blue"
+                                />
+                                <TextButton
+                                    label="이 로고를 기반으로 컬러 가이드 생성하기"
+                                    onClick={() => alert("컬러 가이드 생성 UI 적용 필요")}
+                                    variant="blue"
+                                />
+                            </div>
                         </>
                     )}
                 </main>
