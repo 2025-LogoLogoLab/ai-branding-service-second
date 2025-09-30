@@ -28,6 +28,9 @@ jobs:                                                                   # [워�
     steps:
       - name: Checkout                                                  # [공식 액션] 리포지토리 체크아웃
         uses: actions/checkout@v4                                       #  - 버전 고정 권장 (변경 가능)
+        with:
+          ref: backend                                                  # 최신 백엔드 변경사항 적용을 위해 백엔드 브랜치에서 실행하도록 변경
+          fetch-depth: 1                                                # 백엔드의 최신 커밋만 가지고 처리
 
       - name: Download frontend artifact                                # [공식 액션] 프론트 빌드 아티팩트 수신
         uses: actions/download-artifact@v4                              #  - v4 권장
