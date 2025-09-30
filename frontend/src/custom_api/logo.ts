@@ -6,8 +6,8 @@ import type { LogoType } from "../types/logoTypes";
 // import { useAuth } from "../context/AuthContext";
 
 const basePath = import.meta.env.VITE_API_BASE_URL;
-const logoGenEndPoint = basePath + '/logos/generate'
-const logoSaveEndPoint = basePath + '/logos/save'
+const logoGenEndPoint = basePath + '/logo/generate'
+const logoSaveEndPoint = basePath + '/logo/save'
 const fetchAllEndPoint = basePath + '/logo'
 const logoDeleteEndPoint = basePath + '/logo'
 
