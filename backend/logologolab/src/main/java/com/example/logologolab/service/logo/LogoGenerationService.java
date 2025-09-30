@@ -25,6 +25,7 @@ public class LogoGenerationService {
     public List<String> generateLogo(
             String userPromptKo,
             String style,
+            String type,
             String negativePrompt,
             Integer steps,
             Double guidanceScale,
@@ -33,7 +34,7 @@ public class LogoGenerationService {
             Integer numImages
     ) {
         // 1) 한글 → 영어 (prompt + negativePrompt 동시 변환)
-        PromptBundle bundle = gptPromptService.generatePrompts(userPromptKo, negativePrompt, style);
+        PromptBundle bundle = gptPromptService.generatePrompts(userPromptKo, negativePrompt, style, type);
         String englishPrompt = bundle.prompt();
         String englishNegative = bundle.negativePrompt(); // "" 가능
         log.info("Using English Prompt: {}", englishPrompt);

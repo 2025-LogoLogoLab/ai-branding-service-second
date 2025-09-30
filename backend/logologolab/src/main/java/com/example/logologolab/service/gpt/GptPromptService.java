@@ -34,9 +34,19 @@ public class GptPromptService {
             "tattoo","futuristic","cartoon","watercolor"
     );
 
+    // 타입에 따른 영어 키워드를 매핑
+    private static final Map<String, String> TYPE_KEYWORDS = Map.of(
+            "TEXT", "text-only design",
+            "ICON", "icon only",
+            "COMBO", "icon with text"
+    );
+
     /* -------------------- 신규: prompt + negative_prompt 동시 변환 -------------------- */
-    public PromptBundle generatePrompts(String userPromptKo, String negativePromptKo, String style) {
+    public PromptBundle generatePrompts(String userPromptKo, String negativePromptKo, String style, String type) {
         String normalizedStyle = normalizeStyle(style);
+
+        // 타입에 맞는 영어 키워드 조회 (기본값은 "icon with text")
+        String typeKeyword = TYPE_KEYWORDS.getOrDefault(type.toUpperCase(), "icon with text");
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -63,13 +73,8 @@ public class GptPromptService {
 - 한국어 문구(상호명, 학교명 등)는 자연스러운 영어 표기(로마자 표기)로 변환한다. 예: "홍익대" → "Hongik University", "하연" → "Hayeon"
 - Prompt 문장 안에 텍스트 문구가 들어갈 경우에는 " 대신 ' 로 감싸도록 변환한다. 예: 'Coco'
 - 77 token을 넘지 않는다.
-
-- 웹에서 사용자가 선택한 로고 유형(이미지+텍스트, 텍스트만, 이미지만)에 따라 해당하는 단일 Stable Diffusion/FLUX 프롬프트를 생성한다.
-- 스타일 키워드를 반드시 포함하고, 선택한 유형별 형태 키워드를 추가한다:
-  - 이미지+텍스트 로고 → "icon with text"
-  - 텍스트만 로고 → "text-only design"
-  - 이미지만 로고 → "icon only"
 - 색상, 형태, 폰트, 텍스트 포함 여부 등을 영어로 자연스럽고 상세하게 추가하여, 최종적으로 한 문장으로 완성된 단일 prompt를 출력한다.
+- 사용자가 선택한 로고 유형에 따라, 프롬프트에 다음 영어 키워드를 반드시 포함시켜라: [%s]
 
 스타일별 프롬프트 규칙:
 - simple, minimal: "white background, simple black icon, clean lines, minimal logo, modern sans_serif font"
@@ -87,14 +92,14 @@ negative_prompt 규칙:
 
 반드시 아래 **JSON 한 줄**만 응답해:
 {"prompt":"...", "negative_prompt":"...", "style":"..."}
-""";
+""".formatted(typeKeyword);
 
         String userContent = String.format("""
 설명(한국어): %s
 스타일(고정값): %s
 네거티브 프롬프트(한국어, 없으면 빈 값 허용): %s
 로고 유형은 프런트에서 결정된 값을 따르며, 설명에 포함된 텍스트/색/형태를 반영해 단일 영어 문장 프롬프트를 만들어줘.
-""", userPromptKo, normalizedStyle, (negativePromptKo == null ? "" : negativePromptKo));
+""", userPromptKo, normalizedStyle, (negativePromptKo == null ? "" : negativePromptKo), typeKeyword);
 
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-4.1-nano",
@@ -135,7 +140,7 @@ negative_prompt 규칙:
 
     /* -------------------- 기존 호환: prompt만 필요할 때 -------------------- */
     public String generatePrompt(String userPromptKo, String style) {
-        PromptBundle b = generatePrompts(userPromptKo, null, style);
+        PromptBundle b = generatePrompts(userPromptKo, null, style, "COMBO");
         return b.prompt();
     }
 

@@ -51,6 +51,7 @@ public class LogoController {
                     {
                       "prompt": "빈티지 스타일의 홍익대 로고 만들어줘",
                       "style": "vintage",
+                      "type": "COMBO",
                       "negative_prompt": "no watermark, no extra text",
                       "steps": 50,
                       "guidanceScale": 3.5,
@@ -88,6 +89,7 @@ public class LogoController {
         List<String> images = logoGenerationService.generateLogo(
                 req.getPrompt(),
                 req.getStyle(),
+                req.getType(),
                 req.getNegative_prompt(),     // DTO가 snake_case 게터를 제공한다고 가정
                 req.getSteps(),
                 req.getGuidanceScale(),
