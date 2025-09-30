@@ -1,7 +1,8 @@
 /* --mw: 섹션 컨테이너 최대 폭(커스텀 속성으로 주입) */
 .wrap {
     --mw: 1200px;
-    width: min(100%, var(--mw));
+    /* width: min(100%, var(--mw)); */
+    width: max(100%, var(--mw));
     margin-inline: auto;
     padding: 16px 24px;
     box-sizing: border-box;
@@ -10,7 +11,7 @@
 /* 2열: 좌(고정폭) / 우(유동폭) */
 .container {
     display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     column-gap: 16px;
     align-items: start;
 }
@@ -18,7 +19,8 @@
 /* 사이드바는 스크롤 시 헤더 아래서 고정되도록 sticky (헤더 높이에 맞춰 top 조절) */
 .sidebar {
     position: sticky;
-    top: 72px; /* 전역 헤더 높이에 맞춰 조정 */
+    /* 전역 헤더 높이에 맞춰 조정 */
+    top: 72px; 
     align-self: start;
 }
 

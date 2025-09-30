@@ -16,6 +16,8 @@ import ColorGuide from '../pages/ColorGuide'
 import { ProtectedRoute } from './ProtectedRoute'
 import Admin from '../pages/Admin'
 import UnAuth from '../pages/UnAuth'
+import SectionLayout from '../organisms/layout/SectionLayout/SectionLayout'
+import AiSidebar from '../organisms/ai/AiSidebar/AiSidebar'
 // import Tester from '../forTest/UItestPage'
 
 const AppRoutes = () => {
@@ -27,9 +29,37 @@ const AppRoutes = () => {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signUp" element={<SignUp />} />
-      <Route path="/logo" element={<Logo />} />
+
+      {/* <Route path="/logo" element={<Logo />} />
       <Route path="/branding" element={<Branding />} />
-      <Route path="/colorGuide" element={<ColorGuide />} />
+      <Route path="/colorGuide" element={<ColorGuide />} /> */}
+      
+      {/* AI 섹션: 좌측 사이드바 + 우측 페이지 조합 */}
+      <Route
+          path="/logo"
+          element={
+              <SectionLayout sidebar={<AiSidebar />}>
+                  <Logo />
+              </SectionLayout>
+          }
+      />
+      <Route
+          path="/branding"
+          element={
+              <SectionLayout sidebar={<AiSidebar />}>
+                  <Branding />
+              </SectionLayout>
+          }
+      />
+      <Route
+          path="/colorGuide"
+          element={
+              <SectionLayout sidebar={<AiSidebar />}>
+                  <ColorGuide />
+              </SectionLayout>
+          }
+      />
+
       {/* <Route path="/auth/callback" element={<AuthCallback />} /> */}
       <Route path="/oauth/callback" element={<AuthCallback />} />
       {/* <Route path="oauth/callback?provider=naver" element={<AuthCallback />} /> */}
