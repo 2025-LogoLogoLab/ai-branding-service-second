@@ -20,7 +20,7 @@
 .compact {
     /* 아이콘 전용 폭 */
     /* width: 64px;             */
-    width: auto;
+    width: fit-content;
     --ai-pad-right: var(--ai-pad-left);
 }
 
