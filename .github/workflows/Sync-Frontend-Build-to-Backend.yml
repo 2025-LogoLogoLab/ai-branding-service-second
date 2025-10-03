@@ -1,0 +1,62 @@
+# .github/workflows.Sync-Frontend-Build-to-Backend.yml
+name: Sync Frontend Build to Backend
+
+on: 
+  workflow_run:
+    workflows: [ "Frontend Build → Artifact → Commit → Auto PR" ]
+    types: [ completed ]
+    branches: [ frontend ]
+#   workflow_dispatch:
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    runs-on: ubuntu-latest                                              # [러너] GitHub 호스티드 러너 (변경 가능)
+
+    permissions:
+      contents: write
+      actions: read
+
+    env:                                                                # [환경 변수] 배포에 쓰는 값 (사용자 변경 권장)
+      FRONTEND_BUNDLE_DIR: ./_artifact                                    # [고정/사용자 변경] download-artifact 저장 위치
+      SPRING_STATIC_DIR: ./backend/logologolab/src/main/resources/static  # [사용자 변경] 스프링 정적 리소스 폴더        
+        
+    steps:
+      - name: Checkout                                                  # [공식 액션] 리포지토리 체크아웃
+        uses: actions/checkout@v4                                       #  - 버전 고정 권장 (변경 가능)
+        with:
+          ref: backend                                                  # 최신 백엔드 변경사항 적용을 위해 백엔드 브랜치에서 실행하도록 변경
+          fetch-depth: 1                                                # 백엔드의 최신 커밋만 가지고 처리
+
+      - name: Download frontend artifact                                # [공식 액션] 프론트 빌드 아티팩트 수신
+        uses: actions/download-artifact@v4                              #  - v4 권장
+        with:
+          name: frontend-build                                          #  - 프론트 워크플로에서 올린 아티팩트 이름과 동일해야 함(변경 가능)
+          run-id: ${{ github.event.workflow_run.id }}                   # [중요] 트리거한 **소스 런**의 ID를 지정 (크로스-런)
+          github-token: ${{ secrets.GITHUB_TOKEN }}                     # [권장] 리포 권한 토큰(기본 제공) 
+          path: ${{ env.FRONTEND_BUNDLE_DIR }}                                             #  - 저장 경로 (변경 가능)
+
+      - name: Sync frontend → Spring static                               # [셸] 프론트 정적 리소스를 스프링에 반영
+        run: |
+          ls -al ${{ env.FRONTEND_BUNDLE_DIR }}
+          set -e                                                          # [셸] 에러 시 즉시 실패
+          mkdir -p "${{ env.SPRING_STATIC_DIR }}"                         # [사용자 변경] static 폴더 보장 생성
+          rm -rf "${{ env.SPRING_STATIC_DIR }}"/*                         # [주의] 기존 파일 정리(필요 시 주석 처리)
+          cp -a "${{ env.FRONTEND_BUNDLE_DIR }}"/. "${{ env.SPRING_STATIC_DIR }}"/
+                                                                          # [핵심] 아티팩트(예: dist의 index.html, assets/) 내용을 그대로 복사
+          ls -la "${{ env.SPRING_STATIC_DIR }}"                           # [검증] 복사된 파일 목록 출력
+
+      - name: Commit frontend built files to backend branch
+        run: | 
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          
+          git add -f ${{ env.SPRING_STATIC_DIR }}
+          if git diff --cached --quiet; then
+            echo "No built changes to commit."
+          else
+            # 루프 방지: [skip ci] 포함 → push/pull_request 워크플로 스킵 
+            git commit -m "chore(backend): sync frontend built assets (${{env.SPRING_STATIC_DIR}}) [skip ci]"
+            git push origin HEAD:backend
+          fi
