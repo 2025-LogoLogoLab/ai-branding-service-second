@@ -2,7 +2,7 @@
 
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 ////////////////////////////////////////////////////////////////////////////////
 // ProtectedRoute 컴포넌트
@@ -60,21 +60,35 @@ export function ProtectedRoute({
 
 
 // 별도 컴포넌트로 분리해서 alert을 useEffect 안에서 한 번만 실행
+// function RedirectWithAlert({ to, message }: { to: string; message: string }) {
+//     const location = useLocation();
+//     const alerted = new Set<string>(); 
+
+//   useEffect(() => {
+//     if ( !alerted.has(message) ){       // 한번만 수행하게 하려고...
+//         alert(message);
+//         alerted.add(message);
+//     }
+
+//     return() => {
+//         // 가장 먼저 실행할 코드...
+//     }
+
+//   }, [message]);
+
+//   return <Navigate to={to} state={{ from: location }} replace />;
+// }
+
 function RedirectWithAlert({ to, message }: { to: string; message: string }) {
     const location = useLocation();
-    const alerted = new Set<string>(); 
+    const shownRef = useRef(false);
 
-  useEffect(() => {
-    if ( !alerted.has(message) ){       // 한번만 수행하게 하려고...
-        alert(message);
-        alerted.add(message);
-    }
+    useEffect(() => {
+        if (!shownRef.current) {
+            alert(message);
+            shownRef.current = true;
+        }
+    }, [message]);
 
-    return() => {
-        // 가장 먼저 실행할 코드...
-    }
-
-  }, [message]);
-
-  return <Navigate to={to} state={{ from: location }} replace />;
+    return <Navigate to={to} state={{ from: location }} replace />;
 }
