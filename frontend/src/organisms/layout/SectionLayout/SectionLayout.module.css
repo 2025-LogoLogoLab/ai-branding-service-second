@@ -21,13 +21,16 @@
     position: sticky;
     /* 전역 헤더 높이에 맞춰 조정 */
     top: 72px; 
-    align-self: start;
+    /* align-self: start; */
 }
 
 /* 우측 콘텐츠: 그리드 자식 오버플로 방지 */
 .content {
     min-width: 0;
     display: block;
+    /* align-items: start; */
+    /* justify-content: start; */
+    justify-self: flex-start;
 }
 
 /* 모바일: 1열 전환 */
