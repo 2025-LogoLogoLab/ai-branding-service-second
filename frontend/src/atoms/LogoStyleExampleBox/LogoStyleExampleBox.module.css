@@ -24,16 +24,12 @@
 /*
     .imageWrap: 이미지 컨테이너
     - 이미지가 너무 크거나 작아도 적당한 영역에 들어가도록 제어
-    - Image 컴포넌트의 variant로 제어하도록 변경.
 */
 .imageWrap {
-    /* 카드 너비 대비 80% */
-    width: 80%; 
-    /* 데스크톱에서 이미지 최대 너비 제한 */
-    max-width: var(--ls-img-max, 160px); 
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    gap: 16px;
 }
 
 /*
