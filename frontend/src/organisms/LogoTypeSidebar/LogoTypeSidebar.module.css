@@ -1,13 +1,9 @@
 /* src/organisms/LogoTypeSidebar/LogoTypeSidebar.module.css */
 
 .sidebar {
-    /* 카드 사이즈 동기화를 위한 변수 (LogoExampleBox/LogoStyleExampleBox에서 사용) */
-    --ls-card-h: 300px;
-    --ls-img-max: 160px;
-
     /* 부모(Grid 컬럼)의 폭을 그대로 채움 → 좌/중 패널 폭을 동일하게 보이게 함 */
     width: 100%;
-    padding: 8px;
+    /* padding: 8px; */
     display: grid;
     grid-auto-rows: max-content;
     gap: 8px;

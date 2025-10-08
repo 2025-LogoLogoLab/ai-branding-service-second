@@ -37,6 +37,16 @@
 
 .logoExpCard {
     width: 80%;
+    max-width: var(--ls-img-max, 220px); /* unify with preview sizing variable */
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Style preview card image (used in LogoStyleExampleBox) */
+.logoStyleCard {
+    width: 80%;
+    max-width: var(--ls-img-max, 220px);
     height: auto;
     object-fit: cover;
     border-radius: 8px;
@@ -44,6 +54,7 @@
 
 .logoStyleCard {
     width: 80%;
+    max-width: var(--ls-img-max, 220px); /* unify with preview sizing variable */
     height: auto;
     object-fit: cover;
     border-radius: 8px;
