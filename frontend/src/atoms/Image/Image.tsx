@@ -4,7 +4,7 @@ import styles from './Image.module.css'
 type ImageProps = {
     src: string;
     alt?: string;
-    variant?: 'thumbnail' | 'profile' | 'banner' | 'card' | 'logo' | 'logoExpCard';
+    variant?: 'thumbnail' | 'profile' | 'banner' | 'card' | 'logo' | 'logoExpCard' | 'logoStyleCard';
 };
 
 export function Image({ src, alt = '', variant = 'thumbnail' }: ImageProps) {
