@@ -1,0 +1,37 @@
+/* src/organisms/BrandingResult/BrandingResult.module.css */
+.wrap {
+  display: grid;
+  gap: 12px;
+}
+
+.userRow { display: grid; }
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title {
+  color: var(--color-font-basic-content);
+  font-weight: 600;
+}
+
+.panel {
+  /* Remove hard border; keep subtle background and radius if desired */
+  border: none;
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.toolbarRow { display: none; }
+.panelToolbar { display: flex; justify-content: flex-end; }
+
+/* Keep the markdown block and its toolbar as a single unit */
+.messageGroup {
+  display: grid;
+  gap: 8px;
+}
