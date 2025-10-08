@@ -1,0 +1,140 @@
+/* src/organisms/layout/GlobalHeader/GlobalHeader.module.css */
+.bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  height: 64px; /* SectionLayout sticky top과 맞춤 (약간 여유 주려면 72px 사용) */
+  padding: 0 24px;
+  background: #fff;
+  border-bottom: 1px solid var(--color-divider-border);
+}
+
+.brandArea {
+  display: flex;
+  align-items: center;
+}
+
+.menuToggler {
+  display: none; /* 모바일에서만 보임 */
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--color-white-button-border);
+  background: #fff;
+  margin-right: 6px;
+}
+.menuToggler span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--color-font-basic-content);
+  margin: 2px 0;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-font-site-title);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.spark { color: var(--color-font-site-title); }
+.brandText { font-size: 18px; line-height: 1; }
+
+.navWrap { position: relative; }
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navItem {
+  color: var(--color-font-basic-content);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  /* 경계선 없애기 위해 추가한 코드 */
+  border: none;
+  /* 배경 색 없애기 위해 내가 추가한 코드 */
+  background-color: var(--color-bg-base);
+}
+
+.navItem:hover {
+  background: var(--color-hover-on-white);
+}
+
+.authArea {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.linkButton {
+  color: var(--color-font-basic-content);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.primaryButton {
+  background: var(--color-button-primary-bg);
+  color: var(--color-font-button-white);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 10px;
+}
+
+.primaryButton:hover {
+  background: #2646a5; /* 살짝 진하게 */
+}
+
+/* Dropdown styling */
+.dropdown { position: relative; }
+.dropdownPanel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid var(--color-divider-border);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+  z-index: 10;
+}
+.dropdownItem {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--color-font-basic-content);
+  text-decoration: none;
+}
+.dropdownItem:hover { background: var(--color-hover-on-white); }
+
+/* Responsive: collapse nav under 920px */
+@media (max-width: 920px) {
+  .menuToggler { display: inline-flex; }
+
+  .nav {
+    position: absolute;
+    inset: 64px 0 auto 0; /* header height */
+    display: none;
+    flex-direction: column;
+    background: #fff;
+    padding: 12px;
+    border-bottom: 1px solid var(--color-divider-border);
+    gap: 8px;
+  }
+  .nav[data-open] { display: flex; }
+
+  .dropdown { position: static; }
+  .dropdownPanel { position: static; box-shadow: none; border-radius: 10px; margin: 4px 0; }
+}
