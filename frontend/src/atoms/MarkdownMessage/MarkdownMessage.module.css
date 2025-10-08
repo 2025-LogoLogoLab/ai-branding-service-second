@@ -17,16 +17,18 @@
 .systemMessage {
     background-color: #f7f7f8;
     color: #000;
-    align-self: flex-start;
+    align-self: start;      /* for flex parents */
+    justify-self: start;    /* for grid parents */
     margin-bottom: 8px;
     border-radius: 16px 16px 16px 0px; /* 좌측 하단은 각지게, 나머지는 둥글게 */
 }
 
 /* 사용자 메시지: 우측 하단 각짐 */
 .userMessage {
-    background-color: #ff5722;
-    color: #fff;
-    align-self: flex-end;
+    background-color: var(--color-button-primary-bg);
+    color: var(--color-font-button-white);
+    align-self: end;        /* for flex parents */
+    justify-self: end;      /* for grid parents */
     margin-bottom: 8px;
     border-radius: 16px 16px 0 16px; /* 우측 하단만 각지게 */
 }

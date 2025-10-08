@@ -11,8 +11,10 @@ import {
   type BrandingResponse, // string alias
 } from '../custom_api/branding';
 
-import BrandingCard from '../organisms/BrandingCard/BrandingCard';
-import BrandingForm from '../organisms/BrandingForm';
+// old card/form kept for reference but not used in new UI
+import PromptComposer from '../organisms/PromptComposer/PromptComposer';
+import BrandingResult from '../organisms/BrandingResult/BrandingResult';
+import { MarkdownMessage } from '../atoms/MarkdownMessage/MarkdownMessage';
 import { useAuth } from '../context/AuthContext';
 
 function Branding() {
@@ -28,12 +30,12 @@ function Branding() {
 
   // 결과(없을 수 있으므로 null 허용)
   const [brandingResult, setBrandingResult] = useState<string | undefined>(undefined);
+  // 마지막 사용자 프롬프트(말풍선 표시용)
+  const [lastPrompt, setLastPrompt] = useState<string>('');
 
+  // 초기 진입 시에는 아무 결과도 표시하지 않습니다.
   useEffect(() => {
-    // [테스트] 초기 더미 데이터 주입
-    // - 이 코드는 개발 중 화면 스켈레톤 확인용
-    // - 결과: 페이지 진입 시 더미 마크다운이 표시됨
-    setBrandingResult('브랜딩 전략 **내용 예시**\n- 항목1\n- 항목2');
+    setBrandingResult(undefined);
     setBase64(undefined);
   }, []);
 
@@ -47,14 +49,19 @@ function Branding() {
 
     try {
       setError(null);
+      setLastPrompt(promptText);
       const markdown: BrandingResponse = await generateBranding({ briefKo: promptText });
       // 결과: UI용 뷰 모델에 담아 상태 갱신
       setBrandingResult(markdown);
+      if (!markdown || !markdown.trim()) {
+        setError('응답이 비어 있습니다. 잠시 후 다시 시도해 주세요.');
+      }
       // UI 상에서 알림 필요 시 추가 가능
       // alert('브랜딩 전략 생성 성공!');
     } catch (err) {
       console.error(err);
-      setError('브랜딩 전략 생성 오류 발생');
+      const msg = err instanceof Error ? err.message : '브랜딩 전략 생성 오류 발생';
+      setError(msg);
     }
   };
 
@@ -96,25 +103,34 @@ function Branding() {
   };
 
   return (
-    <div style={{ padding: 24 }}>
-      {/* 입력 폼: onSubmit에서 generate 호출 */}
-      <BrandingForm
-        promptText={promptText}
-        error={error}
-        onPromptChange={(e) => setPropmt(e.target.value)}
+    <div style={{ padding: '12px 16px', display: 'grid', gap: 16 }}>
+      {/* 상단 프롬프트 말풍선 (있을 때만) */}
+      {lastPrompt && (
+        <MarkdownMessage content={lastPrompt} isUser />
+      )}
+
+      {/* 결과 패널 */}
+      {brandingResult && (
+        <BrandingResult
+          id={0}
+          userPrompt={undefined}
+          markdown={brandingResult}
+          onDelete={handleBrandingDelete}
+          onSave={handleBrandingSave}
+        />
+      )}
+
+      {/* 하단 입력 컴포저 */}
+      <PromptComposer
+        value={promptText}
+        placeholder="메시지를 입력하세요..."
+        onChange={(e) => setPropmt(e.target.value)}
         onSubmit={handleBrandingGeneration}
       />
 
-      {/* 결과 카드: 존재할 때만 표시 */}
-      {brandingResult && (
-        <BrandingCard
-          brandingNum={0}
-          promptText={promptText}
-          data={brandingResult}
-          onDelete={handleBrandingDelete} // (id) => void
-          onSave={handleBrandingSave}     // (id) => void
-          // onDownload, onTag, onInsertToProject는 추후 연결
-        />
+      {/* 에러 배너 */}
+      {error && (
+        <div role="alert" style={{ color: 'var(--color-font-critical)' }}>{error}</div>
       )}
     </div>
   );
