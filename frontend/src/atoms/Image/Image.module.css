@@ -41,3 +41,10 @@
     object-fit: cover;
     border-radius: 8px;
 }
+
+.logoStyleCard {
+    width: 80%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+}
