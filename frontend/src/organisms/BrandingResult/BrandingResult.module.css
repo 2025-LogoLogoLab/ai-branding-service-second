@@ -25,6 +25,8 @@
   padding: 12px;
   display: grid;
   gap: 8px;
+  /* unified width token for message bubble + toolbar */
+  --msg-max-width: min(80%, 800px);
 }
 
 .toolbarRow { display: none; }
@@ -32,6 +34,14 @@
 
 /* Keep the markdown block and its toolbar as a single unit */
 .messageGroup {
-  display: grid;
+  display: inline-grid; /* shrink-to-fit based on children */
   gap: 8px;
+  /* Keep message+toolbar bounded consistently via a single token */
+  max-width: var(--msg-max-width);
 }
+
+/* ensure the bubble itself shrink-wraps but stays within group width */
+.bubble { display: inline-block; max-width: 100%; }
+
+/* Make toolbar match the messageGroup width so it cannot protrude */
+.panelToolbar { width: 100%; justify-content: flex-end; }

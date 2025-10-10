@@ -4,14 +4,19 @@
 }
 
 .inner {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto; /* attach | textarea | mic | send */
-  align-items: end;
+  display: flex;              /* flex로 변경: 아이콘 유무에 따라 자연 정렬 */
+  align-items: flex-end;
   gap: 8px;
   padding: 8px;
   border: 1px solid var(--color-divider-border);
   border-radius: 18px;
-  background: #fff;
+  /* Match the current TextArea background color */
+  background: var(--color-text-input-bg);
+}
+
+.inputWrap {
+  flex: 1;
+  min-width: 0;
 }
 
 .iconBtn {
@@ -21,8 +26,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  border: 1px solid var(--color-white-button-border);
-  background: #fff;
+  border: none;               /* remove border */
+  background: transparent;    /* blend into input background */
 }
 
 .sendBtn {
@@ -32,7 +37,7 @@
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 12px;
+  border-radius: 50%;         /* circular button */
   background: var(--color-button-primary-bg);
   color: var(--color-font-button-white);
 }
@@ -41,4 +46,6 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.iconImg { width: 18px; height: 18px; display: block; }
 

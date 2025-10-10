@@ -10,6 +10,8 @@ export type TextAreaProps = {
     id?: string;
     disabled?: boolean;
     onSubmit?: () => void; // Enter 단독 입력 시 호출될 콜백 함수
+    className?: string;    // 외부에서 추가 스타일 주입
+    variant?: 'default' | 'bare'; // bare: borderless + transparent bg (container 색상 사용)
 };
 
 /**
@@ -23,7 +25,9 @@ export function TextArea({
     name,
     id,
     disabled = false,
-    onSubmit
+    onSubmit,
+    className,
+    variant = 'default'
 }: TextAreaProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -51,7 +55,11 @@ export function TextArea({
     return (
         <textarea
             ref={textareaRef}
-            className={styles.textarea}
+            className={[
+                styles.textarea,
+                variant === 'bare' ? styles.bare : '',
+                className ?? ''
+            ].join(' ').trim()}
             value={value}
             onChange={onChange}
             onKeyDown={handleKeyDown}

@@ -9,6 +9,9 @@ export type PromptComposerProps = {
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onSubmit: () => void;
   className?: string;
+  // 옵션: 아이콘 표시 토글 — 개발 중 쉽게 숨기거나 보이게 할 수 있음
+  showAttach?: boolean;   // 기본값 false (현재는 숨김 상태가 기본)
+  showMic?: boolean;      // 기본값 false
 };
 
 export default function PromptComposer({
@@ -18,27 +21,44 @@ export default function PromptComposer({
   onChange,
   onSubmit,
   className,
+  showAttach = false,
+  showMic = false,
 }: PromptComposerProps) {
   return (
     <div className={`${styles.wrap} ${className ?? ""}`}> 
       <div className={styles.inner}>
-        {/* 첨부 아이콘 자리 (비활성 UI) */}
-        <button className={styles.iconBtn} type="button" title="첨부" disabled>
-          <PaperclipIcon />
-        </button>
+        {/* 첨부 아이콘 — 개발 중 토글(showAttach)로 표시/숨김 */}
+        {showAttach && (
+          <button className={styles.iconBtn} type="button" title="첨부" disabled>
+            <PaperclipIcon />
+            {/** 로컬 아이콘 사용 예시 (주석 해제하여 사용)
+             * import attachPng from '../../assets/icons/attach.png';
+             * <img src={attachPng} alt="첨부" className={styles.iconImg} />
+             */}
+          </button>
+        )}
 
-        <TextArea
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          onSubmit={onSubmit}
-          disabled={!!disabled}
-        />
+        <div className={styles.inputWrap}>
+          <TextArea
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            onSubmit={onSubmit}
+            disabled={!!disabled}
+            variant="bare"
+          />
+        </div>
 
-        {/* 음성 아이콘 자리 (비활성 UI) */}
-        <button className={styles.iconBtn} type="button" title="음성 입력" disabled>
-          <MicIcon />
-        </button>
+        {/* 음성 아이콘 — 개발 중 토글(showMic)로 표시/숨김 */}
+        {showMic && (
+          <button className={styles.iconBtn} type="button" title="음성 입력" disabled>
+            <MicIcon />
+            {/** 로컬 아이콘 사용 예시 (주석 해제하여 사용)
+             * import micPng from '../../assets/icons/mic.png';
+             * <img src={micPng} alt="음성 입력" className={styles.iconImg} />
+             */}
+          </button>
+        )}
 
         {/* 보내기 */}
         <button className={styles.sendBtn} type="button" onClick={onSubmit} disabled={!!disabled}>
