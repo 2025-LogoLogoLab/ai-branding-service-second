@@ -1,0 +1,37 @@
+/* src/organisms/ColorGuideResult/ColorGuideResult.module.css */
+.wrap { display: grid; gap: 12px; }
+
+.headerRow { display: flex; align-items: center; gap: 10px; }
+.title { color: var(--color-font-basic-content); font-weight: 600; }
+
+.panel {
+  border: none;
+  border-radius: 14px;
+  background: #fff;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  /* 더 넓은 폭에서 4열을 허용하기 위해 기본 폭 토큰을 상향 */
+  --msg-max-width: min(100%, 1200px);
+  align-items: start;   /* do not stretch group */
+  justify-items: start; /* keep group left-aligned */
+}
+
+.messageGroup {
+  display: grid;
+  gap: 8px;
+  max-width: var(--msg-max-width);
+  width: 100%;
+  justify-items: start;
+  /* 컨테이너 쿼리는 messageGroup(고정 폭 한계 적용) 기준으로 동작 */
+  container-type: inline-size;
+}
+.panelToolbar { display: flex; justify-content: flex-end; width: 100%; align-self: end; }
+/* bubble wrapper for the result content */
+.bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: fit-content;
+}
+.contentBox { display: none; }

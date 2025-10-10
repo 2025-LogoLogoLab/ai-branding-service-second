@@ -27,21 +27,25 @@
   gap: 8px;
   /* unified width token for message bubble + toolbar */
   --msg-max-width: min(80%, 800px);
+  /* Prevent grid items from stretching to full width */
+  align-items: start;
+  justify-items: start;
 }
 
 .toolbarRow { display: none; }
-.panelToolbar { display: flex; justify-content: flex-end; }
+.panelToolbar { display: flex; justify-content: flex-end; width: 100%; align-self: end; }
 
 /* Keep the markdown block and its toolbar as a single unit */
 .messageGroup {
-  display: inline-grid; /* shrink-to-fit based on children */
+  display: grid;        /* occupy panel width; children control their own size */
   gap: 8px;
-  /* Keep message+toolbar bounded consistently via a single token */
   max-width: var(--msg-max-width);
+  width: 100%;          /* do not shrink container; prevents affecting siblings */
+  justify-items: start; /* keep bubble left-aligned */
 }
 
 /* ensure the bubble itself shrink-wraps but stays within group width */
 .bubble { display: inline-block; max-width: 100%; }
 
-/* Make toolbar match the messageGroup width so it cannot protrude */
+/* Toolbar spans the messageGroup width and aligns icons to the right */
 .panelToolbar { width: 100%; justify-content: flex-end; }
