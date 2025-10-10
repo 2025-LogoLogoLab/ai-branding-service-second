@@ -26,16 +26,16 @@
     - 이미지가 너무 크거나 작아도 적당한 영역에 들어가도록 제어
 */
 .imageWrap {
-    width: 80%; /* 카드 너비 대비 80% */
-    max-width: var(--ls-img-max, 160px); /* 데스크톱에서 이미지 최대 너비 제한 */
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    gap: 16px;
 }
 
 /*
     .image: 실제 예시 이미지 스타일
     - 이미지 비율 유지, 가로세로 중 하나만 맞추고 다른 축은 auto
+    Image 컴포넌트의 variant 사용하도록 변경.
 */
 .image {
     width: 100%;

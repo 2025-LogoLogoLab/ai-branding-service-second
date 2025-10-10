@@ -35,8 +35,8 @@ export function LogoExampleBox ({ type } : LogoExampleBoxProps) {
 
             {type === 'COMBO' && (
                 <div className={styles.centerCol}>
-                        <Image src={ImageAndText} variant='logoExpCard'/>                    
-                        <div className={styles.title}>{LOGO_TYPES[2].label}</div>
+                    <Image src={ImageAndText} variant='logoExpCard'/>                    
+                    <div className={styles.title}>{LOGO_TYPES[2].label}</div>
                     <div className={styles.caption}>그림과 텍스트가 함께 있는 로고 설명</div>
                 </div>
             )}

@@ -76,7 +76,9 @@ export async function generateBranding( { briefKo: briefKo, style, base64 } : Br
     }
 
     console.log("브랜딩 전략 생성 요청 성공");        
-    return result.json();
+    // 서버는 text/markdown 형태를 반환하므로 텍스트로 파싱
+    const markdown = await result.text();
+    return markdown;
 
 }
 

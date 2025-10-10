@@ -1,0 +1,44 @@
+/* src/organisms/PromptComposer/PromptComposer.module.css */
+.wrap {
+  margin-top: 12px;
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto; /* attach | textarea | mic | send */
+  align-items: end;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--color-divider-border);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.iconBtn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid var(--color-white-button-border);
+  background: #fff;
+}
+
+.sendBtn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-button-primary-bg);
+  color: var(--color-font-button-white);
+}
+
+.sendBtn:disabled, .iconBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

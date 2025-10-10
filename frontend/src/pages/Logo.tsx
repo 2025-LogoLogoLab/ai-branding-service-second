@@ -137,10 +137,6 @@ export default function Logo() {
 
     return (
         <div className={s.page}>
-            {/* 헤더(placeholder) */}
-            <header className={s.header} aria-label="페이지 헤더">
-                <div className={s.headerInner} />
-            </header>
 
             {/* 본문: [타입] [스타일] [폼/결과] */}
             <div className={s.container}>
@@ -226,10 +222,6 @@ export default function Logo() {
                 </main>
             </div>
 
-            {/* 푸터(placeholder) */}
-            <footer className={s.footer} aria-label="페이지 푸터">
-                <div className={s.footerInner} />
-            </footer>
         </div>
     );
 }

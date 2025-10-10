@@ -13,6 +13,7 @@ import imgSimple from '../../assets/images/logo_styles/simple.png';
 import imgTattoo from '../../assets/images/logo_styles/tattoo.png';
 import imgVintage from '../../assets/images/logo_styles/vintage.png';
 import imgWatercolor from '../../assets/images/logo_styles/watercolor.png';
+import { Image } from '../Image/Image';
 
 export type LogoStyleExampleBoxProps = {
     // 표시할 스타일 키 (8개 중 하나)
@@ -45,17 +46,16 @@ export const LogoStyleExampleBox: React.FC<LogoStyleExampleBoxProps> = ({ styleK
         <div className={`${styles.box} ${className ?? ''}`} aria-label={`스타일 예시: ${styleKey}`}>
             {/* .imageWrap: 이미지 비율을 보존하고 가운데 정렬하기 위한 래퍼 */}
             <div className={styles.imageWrap}>
-                <img
+                <Image
                     src={src}
                     alt={`${styleKey} 스타일 예시 이미지`}
-                    className={styles.image}
-                    loading="lazy"
+                    variant={'logoStyleCard'}
                 />
+                {/* 스타일 이름 굵은 글씨로 추가 */}
+                {label && <div className={styles.title}>{label}</div>}
+                {/* .caption: 예시 하단 설명 텍스트 (옵션) */}
+                {showCaption && <div className={styles.caption}>스타일 예시</div>}
             </div>
-            {/* ✅ 스타일 이름 굵은 글씨로 추가 */}
-            {label && <div className={styles.title}>{label}</div>}
-            {/* .caption: 예시 하단 설명 텍스트 (옵션) */}
-            {showCaption && <div className={styles.caption}>스타일 예시</div>}
         </div>
     );
 };

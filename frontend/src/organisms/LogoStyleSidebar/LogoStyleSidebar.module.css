@@ -6,13 +6,9 @@
 */
 /* 사이드바 기본 폭(일반 모드) */
 .sidebar {
-    /* ✅ 기본 폭을 CSS 변수로 관리: 다른 곳에서도 재사용 가능 */
-    --ls-sidebar-w: 220px;       /* 일반 모드 폭 */
-    --ls-card-h: 220px;          /* 카드 높이(일반 모드) */
-    --ls-img-max: 160px;         /* 이미지 최대 가로폭(일반 모드) */
-
-    width: var(--ls-sidebar-w);
-    padding: 8px;
+    /* 부모(Grid 컬럼)의 폭을 그대로 채움 → 좌/중 패널 폭을 동일하게 보이게 함 */
+    width: 100%;
+    /* padding: 8px; */
     display: grid;
     grid-auto-rows: max-content;
     gap: 8px;
@@ -27,9 +23,8 @@
     - clamp: 모바일에서 너무 넓어지지 않도록 상·하한 설정
 */
 .expanded {
-    --ls-sidebar-w: clamp(320px, 60vw, 980px); /* 뷰포트 기준으로 적당히 확장. min 320, max 720, 그 사이는 뷰포트의 48% 차지 */
-    --ls-card-h: 220px;                        /* 카드 높이도 함께 키움 */
-    --ls-img-max: 260px;                       /* 이미지 최대 가로폭 확대 */
+    /* 전체보기에서는 이미지 최대폭만 확장 (카드 높이는 상위에서 통일 관리) */
+    --ls-img-max: 260px;
 }
 
 /*

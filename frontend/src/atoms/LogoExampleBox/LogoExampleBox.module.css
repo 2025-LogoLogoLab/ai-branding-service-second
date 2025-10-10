@@ -2,14 +2,15 @@
 
 .box {
     width: 100%;
-    /* height: 148px; */
+    /* 높이 통일: 타입/스타일 예시 카드가 동일한 높이를 갖도록 CSS 변수 사용 */
+    height: var(--ls-card-h, 180px);
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     background-color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-bottom: 3%;
+    padding: 20px 0; /* 상하 여백을 고정값으로 통일 */
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
 }
 .centerCol {

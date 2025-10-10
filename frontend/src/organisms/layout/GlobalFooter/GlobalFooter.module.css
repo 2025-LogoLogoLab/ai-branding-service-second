@@ -1,0 +1,69 @@
+/* src/organisms/layout/GlobalFooter/GlobalFooter.module.css */
+.wrap {
+  background: #fff;
+  border-top: 1px solid var(--color-divider-border);
+}
+
+.topRow {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 24px;
+  padding: 24px;
+}
+
+.brandCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-font-site-title);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.spark { color: var(--color-font-site-title); }
+.brandText { font-size: 18px; line-height: 1; }
+
+.socials {
+  display: flex;
+  gap: 12px;
+}
+
+.linksGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 24px;
+}
+
+.linksGrid a {
+  display: block;
+  color: var(--color-font-basic-content);
+  text-decoration: none;
+  margin: 6px 0;
+}
+
+.linksGrid a:hover {
+  text-decoration: underline;
+}
+
+.head {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.bottomRow {
+  padding: 12px 24px;
+  border-top: 1px solid var(--color-divider-border);
+  color: var(--color-font-gray);
+}
+
+@media (max-width: 920px) {
+  .topRow { grid-template-columns: 1fr; }
+  .linksGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
