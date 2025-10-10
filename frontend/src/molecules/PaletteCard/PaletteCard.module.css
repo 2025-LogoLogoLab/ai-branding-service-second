@@ -2,12 +2,14 @@
 .card {
   display: flex;
   flex-direction: column;
-  width: 220px;
+  /* 고정 폭 카드: 토큰으로 제어 (기본 240px) */
+  width: var(--palette-card-w, 240px);
   gap: 8px;
 }
 
 .swatch {
-  height: 120px;
+  /* 고정 높이 스와치: 토큰으로 제어 (기본 140px) */
+  height: var(--palette-swatch-h, 140px);
   border-radius: 12px;
   border: 1px solid rgba(0,0,0,0.08);
   display: flex;

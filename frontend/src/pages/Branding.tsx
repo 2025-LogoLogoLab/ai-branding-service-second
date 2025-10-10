@@ -15,6 +15,7 @@ import {
 import PromptComposer from '../organisms/PromptComposer/PromptComposer';
 import BrandingResult from '../organisms/BrandingResult/BrandingResult';
 import { MarkdownMessage } from '../atoms/MarkdownMessage/MarkdownMessage';
+import LoadingMessage from '../organisms/LoadingMessage/LoadingMessage';
 import { useAuth } from '../context/AuthContext';
 
 function Branding() {
@@ -32,6 +33,7 @@ function Branding() {
   const [brandingResult, setBrandingResult] = useState<string | undefined>(undefined);
   // 마지막 사용자 프롬프트(말풍선 표시용)
   const [lastPrompt, setLastPrompt] = useState<string>('');
+  const [loading, setLoading] = useState(false);
 
   // 초기 진입 시에는 아무 결과도 표시하지 않습니다.
   useEffect(() => {
@@ -50,6 +52,7 @@ function Branding() {
     try {
       setError(null);
       setLastPrompt(promptText);
+      setLoading(true);
       const markdown: BrandingResponse = await generateBranding({ briefKo: promptText });
       // 결과: UI용 뷰 모델에 담아 상태 갱신
       setBrandingResult(markdown);
@@ -62,6 +65,8 @@ function Branding() {
       console.error(err);
       const msg = err instanceof Error ? err.message : '브랜딩 전략 생성 오류 발생';
       setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -110,6 +115,7 @@ function Branding() {
       )}
 
       {/* 결과 패널 */}
+      {loading && <LoadingMessage />}
       {brandingResult && (
         <BrandingResult
           id={0}
@@ -126,6 +132,7 @@ function Branding() {
         placeholder="메시지를 입력하세요..."
         onChange={(e) => setPropmt(e.target.value)}
         onSubmit={handleBrandingGeneration}
+        disabled={loading}
       />
 
       {/* 에러 배너 */}
