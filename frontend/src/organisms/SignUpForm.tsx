@@ -1,7 +1,8 @@
 // src/components/SignUpForm.tsx
 // 회원 가입 위한 입력 UI + 사용자의 입력 이벤트 상위 컴포넌트에 전달
 
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { TextInput } from "../atoms/TextInput/TextInput";
 import styles from './SignUpForm.module.css';
 

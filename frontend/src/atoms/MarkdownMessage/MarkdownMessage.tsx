@@ -6,6 +6,7 @@ export type MarkdownMessageProps = {
     content: string;         // 마크다운으로 구성된 응답 텍스트
     isUser?: boolean;        // 사용자 메시지 여부 (기본값: false → 시스템 응답)
     className?: string;      // 외부에서 추가 스타일 주입
+    variant?: 'default' | 'compact';
 };
 
 export function MarkdownMessage({
