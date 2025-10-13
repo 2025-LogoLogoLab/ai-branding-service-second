@@ -57,11 +57,6 @@ export async function generateColorGuide( { briefKo: promptText, style, imageUrl
     // 컬러 가이드 생성 클라이언트
 
     console.log("컬러 가이드 생성 요청 시작");    
-    // const token = localStorage.getItem('token');
-    // if ( !token ){
-    //     console.log('토큰 없음');
-    //     // navigate('/login');
-    // }                                                // JWT 토큰은 쿠키로 관리.
 
     const result = await fetch(colorguideGenEndPoint, {
         method: 'POST',
@@ -86,12 +81,6 @@ export async function generateColorGuide( { briefKo: promptText, style, imageUrl
 export async function deleteColorGuide( colorGuideNum:number ) {
     // 컬러 가이드 삭제 클라이언트. 리턴 타입 모름.
     console.log("컬러 가이드 삭제 요청 시작");    
-
-    // const token = localStorage.getItem('token');
-    // if ( !token ){
-    //     console.log('토큰 없음');
-    //     // navigate('/login');
-    // }                                                // JWT 토큰은 쿠키로 관리.
 
     const result = await fetch(colorguideDeleteEndPoint, {
         method: 'DELETE',
@@ -118,12 +107,6 @@ export async function saveColorGuide({ briefKo, guide}: colorGuideStoreRequest) 
     // 컬러 가이드 저장 클라이언트. 리턴 타입 모름.
     console.log("컬러 가이드 저장 요청 시작");    
 
-    // const token = localStorage.getItem('token');
-    // if ( !token ){
-    //     console.log('토큰 없음');
-    //     // navigate('/login');
-    // }                                                // JWT 토큰은 쿠키로 관리.
-
     const result = await fetch(colorguideStoreEndPoint, {
         method: 'POST',
         headers:{
@@ -146,12 +129,6 @@ export async function saveColorGuide({ briefKo, guide}: colorGuideStoreRequest) 
 export async function fetchAllColorGuide(): Promise<colorGuideResponse[]> {
     // 전체 컬러 가이드 가져오는 함수. 
     console.log("컬러 가이드 전체 가져오기 요청 시작");    
-
-    // const token = localStorage.getItem('token');
-    // if ( !token ){
-    //     console.log('토큰 없음');
-    //     // navigate('/login');
-    // }                                                // JWT 토큰은 쿠키로 관리.
 
     const result = await fetch(fetchAllColorguideEndPoint, {
         method: 'GET',

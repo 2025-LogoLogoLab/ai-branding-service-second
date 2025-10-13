@@ -24,6 +24,18 @@
     --ai-pad-right: var(--ai-pad-left);
 }
 
+/* When a selected logo is present, show a two-column panel:
+   - left: compact icon toolbar
+   - right: selected logo preview (larger)
+*/
+.withSelected {
+    width: fit-content;
+    display: grid;
+    grid-template-columns: min-content 280px; /* narrow toolbar + flexible preview */
+    align-items: start;
+    gap: 12px;
+}
+
 .list {
     margin: 0;
     padding: 8px;

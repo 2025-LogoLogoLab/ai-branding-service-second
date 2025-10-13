@@ -1,8 +1,12 @@
 // src/components/SignUpForm.tsx
 // 회원 가입 위한 입력 UI + 사용자의 입력 이벤트 상위 컴포넌트에 전달
 
-import { TextButton } from "../atoms/TextButton/TextButton";
+import { FormEvent, useEffect, useState } from 'react';
 import { TextInput } from "../atoms/TextInput/TextInput";
+import styles from './SignUpForm.module.css';
+
+type SocialProvider = 'kakao' | 'naver';
+type social = SocialProvider | null;
 
 type SignUpFormProps = {
     // 부모에서 받아올 Props 타입 지정
@@ -16,7 +20,13 @@ type SignUpFormProps = {
     onPasswordConfirmChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onNickNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onSubmit: () => void;
+    onKakaoLogin: (provider: social) => void;
+    onNaverLogin: (provider: social) => void;
+    onTermsToggle: (checked: boolean) => void;
+    termsAccepted: boolean;
 }
+
+type FieldKey = 'email' | 'password' | 'passwordConfirm' | 'nickname';
 
 function SignUpForm({
     // 회원가입 폼 컴포넌트 정의
@@ -29,34 +39,185 @@ function SignUpForm({
     onPasswordChange,
     onPasswordConfirmChange,
     onNickNameChange,
-    onSubmit
+    onSubmit,
+    onKakaoLogin,
+    onNaverLogin,
+    onTermsToggle,
+    termsAccepted,
 }: SignUpFormProps){
+    const [fieldErrors, setFieldErrors] = useState<Record<FieldKey, string>>({
+        email: '',
+        password: '',
+        passwordConfirm: '',
+        nickname: '',
+    });
+
+    const setFieldError = (field: FieldKey, message: string) => {
+        setFieldErrors((prev) =>
+            prev[field] === message ? prev : { ...prev, [field]: message }
+        );
+    };
+
+    const clearFieldError = (field: FieldKey) => {
+        setFieldErrors((prev) => (prev[field] === '' ? prev : { ...prev, [field]: '' }));
+    };
+
+    const passwordMismatch =
+        passwordConfirm.length > 0 && password.length > 0 && passwordConfirm !== password;
+
+    useEffect(() => {
+        if (passwordMismatch) {
+            setFieldError('passwordConfirm', '비밀번호 확인 값이 일치하지 않습니다.');
+        } else {
+            clearFieldError('passwordConfirm');
+        }
+    }, [passwordMismatch, password, passwordConfirm]);
+
+    const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        onSubmit();
+    };
+
     return(
-        <div style={styles.container}>
-            <h1>회원가입</h1> 
-            {/* 에러 메시지 */}
-            {error && <p style={{ color: 'red' }}>{error}</p>}      
-            <TextInput type="email" value={email} onChange={onEmailChange} placeholder="이메일" />
-            <TextInput type="password" value={password} onChange={onPasswordChange} placeholder="비밀번호" />   
-            <TextInput type="password" value={passwordConfirm} onChange={onPasswordConfirmChange} placeholder="비밀번호 확인" />   
-            <TextInput type="text" value={nickname} onChange={onNickNameChange} placeholder="닉네임" />   
-            
-            <TextButton label='회원가입' onClick={onSubmit} variant="outlined"></TextButton>
-            {/* 카카오로 계속하기 네이버로 계속하기 버튼을 여기도 추가할지는 미정. 비밀번호 찾기 혹은 초기화 기능 구현할건지도 미정. */}
+        <div className={styles.page}>
+            <div className={styles.card}>
+                <div className={styles.titleGroup}>
+                    <h1 className={styles.title}>로그로고랩에 오신 것을 환영합니다</h1>
+                    <p className={styles.subtitle}>계정을 생성하고 서비스를 이용하세요.</p>
+                </div>
+
+                {error && <p className={styles.error}>{error}</p>}
+
+                <form className={styles.form} onSubmit={handleFormSubmit} noValidate>
+                    <TextInput
+                        type="email"
+                        value={email}
+                        onChange={onEmailChange}
+                        placeholder="이메일 주소"
+                        required
+                        ariaInvalid={Boolean(fieldErrors.email)}
+                        onInvalid={(e) => {
+                            e.preventDefault();
+                            setFieldError('email', '올바른 이메일 주소를 입력해주세요.');
+                        }}
+                        onInput={() => clearFieldError('email')}
+                        className={styles.input}
+                    />
+                    {fieldErrors.email && (
+                        <span className={styles.fieldError}>{fieldErrors.email}</span>
+                    )}
+                    <TextInput
+                        type="password"
+                        value={password}
+                        onChange={onPasswordChange}
+                        placeholder="비밀번호"
+                        required
+                        minLength={8}
+                        ariaInvalid={Boolean(fieldErrors.password)}
+                        onInvalid={(e) => {
+                            e.preventDefault();
+                            const message =
+                                e.currentTarget.value.length < 8
+                                    ? '비밀번호는 최소 8자 이상이어야 합니다.'
+                                    : '비밀번호를 입력해주세요.';
+                            setFieldError('password', message);
+                        }}
+                        onInput={() => clearFieldError('password')}
+                        className={styles.input}
+                    />
+                    {fieldErrors.password && (
+                        <span className={styles.fieldError}>{fieldErrors.password}</span>
+                    )}
+                    <TextInput
+                        type="password"
+                        value={passwordConfirm}
+                        onChange={onPasswordConfirmChange}
+                        placeholder="비밀번호 확인"
+                        required
+                        ariaInvalid={Boolean(fieldErrors.passwordConfirm)}
+                        onInvalid={(e) => {
+                            e.preventDefault();
+                            setFieldError('passwordConfirm', '비밀번호 확인을 입력해주세요.');
+                        }}
+                        onInput={() => clearFieldError('passwordConfirm')}
+                        className={styles.input}
+                    />
+                    {fieldErrors.passwordConfirm && (
+                        <span className={styles.fieldError}>{fieldErrors.passwordConfirm}</span>
+                    )}
+                    <TextInput
+                        type="text"
+                        value={nickname}
+                        onChange={onNickNameChange}
+                        placeholder="닉네임"
+                        required
+                        minLength={2}
+                        ariaInvalid={Boolean(fieldErrors.nickname)}
+                        onInvalid={(e) => {
+                            e.preventDefault();
+                            const message =
+                                e.currentTarget.value.length < 2
+                                    ? '닉네임은 최소 2자 이상이어야 합니다.'
+                                    : '닉네임을 입력해주세요.';
+                            setFieldError('nickname', message);
+                        }}
+                        onInput={() => clearFieldError('nickname')}
+                        className={styles.input}
+                    />
+                    {fieldErrors.nickname && (
+                        <span className={styles.fieldError}>{fieldErrors.nickname}</span>
+                    )}
+                    <button
+                        type="submit"
+                        className={styles.primaryButton}
+                        disabled={!termsAccepted}
+                    >
+                        가입하기
+                    </button>
+                </form>
+
+                <div className={styles.divider}>
+                    <span className={styles.dividerLine} aria-hidden="true" />
+                    <span className={styles.dividerText}>or continue with</span>
+                    <span className={styles.dividerLine} aria-hidden="true" />
+                </div>
+
+                <div className={styles.socialList}>
+                    <button
+                        type="button"
+                        className={styles.socialButton}
+                        onClick={() => onKakaoLogin('kakao')}
+                    >
+                        <span className={`${styles.socialIcon} ${styles.kakao}`} aria-hidden="true">K</span>
+                        Kakao
+                    </button>
+                    <button
+                        type="button"
+                        className={styles.socialButton}
+                        onClick={() => onNaverLogin('naver')}
+                    >
+                        <span className={`${styles.socialIcon} ${styles.naver}`} aria-hidden="true">N</span>
+                        Naver
+                    </button>
+                </div>
+
+                <label className={styles.agreementRow}>
+                    <input
+                        type="checkbox"
+                        checked={termsAccepted}
+                        onChange={(e) => onTermsToggle(e.target.checked)}
+                    />
+                    이용 약관에 동의합니다.
+                </label>
+
+            </div>
         </div>
     );
 }
-
-// JS 객체로 스타일 넘기기
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '10px',
-    height: '100vh',
-  },
-};
 
 export default SignUpForm

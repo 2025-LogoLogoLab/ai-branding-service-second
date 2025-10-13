@@ -14,6 +14,7 @@
 // - 페이지 레이아웃은 Grid (max-content, max-content, 1fr)로 구성
 
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import s from "./LogoPage.module.css";
 
 import { LogoTypeSidebar } from "../organisms/LogoTypeSidebar/LogoTypeSidebar";
@@ -26,6 +27,7 @@ import { LogoCard } from "../organisms/LogoCard/LogoCard";
 import { TextButton } from "../atoms/TextButton/TextButton";
 
 import { generateLogo, saveLogo } from "../custom_api/logo";
+import { useSelectionStore } from "../context/selectionStore";
 
 const NUM_IMAGES_DEFAULT = 2; // 생성 이미지 개수(정책상 현재 2장 고정)
 
@@ -54,6 +56,9 @@ export default function Logo() {
     // 결과 상태
     // -----------------------------
     const [logoResult, setLogoResult] = useState<string[] | null>(null);
+    const [selectPurpose, setSelectPurpose] = useState<null | "branding" | "colorGuide">(null);
+    const navigate = useNavigate();
+    const { setLogo } = useSelectionStore();
 
     // 최초 기본값
     useEffect(() => {
@@ -104,6 +109,7 @@ export default function Logo() {
             });
 
             setLogoResult(res.images);
+            setSelectPurpose(null); // 새로 생성 시 선택 모드 초기화
         } catch (e) {
             console.error(e);
             setError("로고 생성에 실패했습니다.");
@@ -134,6 +140,16 @@ export default function Logo() {
 
     // 결과 섹션 제목(필요 시 사용)
     const resultTitle = useMemo(() => "생성된 로고", []);
+
+    const handleSelectLogo = (logoBase64: string) => {
+        if (!selectPurpose) return;
+        setLogo(logoBase64);
+        if (selectPurpose === "branding") {
+            navigate("/branding");
+        } else if (selectPurpose === "colorGuide") {
+            navigate("/colorGuide");
+        }
+    };
 
     return (
         <div className={s.page}>
@@ -190,7 +206,7 @@ export default function Logo() {
                     )}
 
                     {/* 결과 그리드: 폼과 독립적으로 표시 */}
-                    {logoResult && (
+                    {logoResult && !selectPurpose && (
                         <>
                             <h3 className={s.resultTitle}>{resultTitle}</h3>
                             <ul className={s.grid} role="list">
@@ -208,13 +224,43 @@ export default function Logo() {
                             <div className={s.cardActions}>
                                 <TextButton
                                     label="이 로고를 기반으로 브랜딩 전략 생성하기"
-                                    onClick={() => alert("브랜딩 전략 생성 UI 적용 필요")}
+                                    onClick={() => setSelectPurpose("branding")}
                                     variant="blue"
                                 />
                                 <TextButton
                                     label="이 로고를 기반으로 컬러 가이드 생성하기"
-                                    onClick={() => alert("컬러 가이드 생성 UI 적용 필요")}
+                                    onClick={() => setSelectPurpose("colorGuide")}
                                     variant="blue"
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    {logoResult && selectPurpose && (
+                        <>
+                            <h3 className={s.resultTitle}>
+                                {selectPurpose === "branding"
+                                    ? "브랜딩 전략 생성을 위해 가장 마음에 드는 로고를 선택해주세요."
+                                    : "컬러 가이드 생성을 위해 사용할 로고를 선택해주세요."}
+                            </h3>
+                            <ul className={s.grid} role="list">
+                                {logoResult.map((logo, id) => (
+                                    <li className={s.card} key={`select-logo-${id}`}>
+                                        <LogoCard id={id} logoBase64={logo} />
+                                        <div className={s.cardActions}>
+                                            <TextButton
+                                                label="선택 하기"
+                                                onClick={() => handleSelectLogo(logo)}
+                                                variant="blue"
+                                            />
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className={s.cardActions}>
+                                <TextButton
+                                    label="취소"
+                                    onClick={() => setSelectPurpose(null)}
                                 />
                             </div>
                         </>

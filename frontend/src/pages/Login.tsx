@@ -75,10 +75,6 @@ function Login() {
         }
     };
 
-    const handleAdminLogin = () => {
-        // 관리자 로그인 로직. 아마도 백엔드에서 role 구분으로 끝나지 않을까 싶음.
-    };
-
     return (
         <LoginForm      // 로그인 Form UI 객체
             email={email}
@@ -89,7 +85,6 @@ function Login() {
             onSubmit={handleLogin}
             onNaverLogin={handleSocialLogin}
             onKakaoLogin={handleSocialLogin}
-            onAdminLogin={handleAdminLogin}
         />
     );
 }

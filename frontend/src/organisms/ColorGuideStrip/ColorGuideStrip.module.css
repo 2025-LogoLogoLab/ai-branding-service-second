@@ -1,27 +1,14 @@
 /* src/components/ColorGuideStrip/ColorGuideStrip.module.css */
 
-/* Responsive grid using the parent container width: 4 → 2 → 1 columns */
+/* Responsive grid that adapts column count by available width */
 .row {
+  --palette-card-min-size: var(--palette-card-min, 160px);
+  --palette-card-max-size: var(--palette-card-max, 240px);
   display: grid;
-  /* 고정 폭 카드에 맞춰 셀도 고정 폭으로 구성 */
-  grid-template-columns: repeat(4, var(--palette-card-w, 240px));
+  grid-template-columns: repeat(auto-fit, minmax(var(--palette-card-min-size), 1fr));
   gap: var(--palette-gap, 16px);
   align-items: start;
+  justify-content: center;
+  justify-items: center;
   width: 100%;
-}
-
-/* 좁은 화면에서 2열로 보기 좋게 */
-@media (max-width: 1440px) {
-  /* 2열 */
-  .row {
-    grid-template-columns: repeat(2, var(--palette-card-w, 240px));
-    gap: var(--palette-gap, 16px);
-  }
-}
-
-@media (max-width: 520px) {
-  /* 1열 */
-  .row {
-    grid-template-columns: 1fr;
-  }
 }

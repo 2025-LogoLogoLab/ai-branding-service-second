@@ -2,14 +2,19 @@
 .card {
   display: flex;
   flex-direction: column;
-  /* 고정 폭 카드: 토큰으로 제어 (기본 240px) */
-  width: var(--palette-card-w, 240px);
+  /* 부모 그리드에 맞춰 확장하되 토큰 범위 안에서 제한 */
+  width: clamp(var(--palette-card-min, 160px), 100%, var(--palette-card-max, 240px));
   gap: 8px;
+  height: 100%;
+  box-sizing: border-box;
+  flex: 1 1 auto;
 }
 
 .swatch {
-  /* 고정 높이 스와치: 토큰으로 제어 (기본 140px) */
-  height: var(--palette-swatch-h, 140px);
+  /* 정방형 유지: 너비에 맞춰 높이 자동 조정 */
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
   border-radius: 12px;
   border: 1px solid rgba(0,0,0,0.08);
   display: flex;
@@ -29,6 +34,7 @@
 .meta {
   display: grid;
   gap: 2px;
+  flex: 1 1 auto;
 }
 
 .label {

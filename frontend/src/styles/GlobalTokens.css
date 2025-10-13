@@ -46,4 +46,9 @@
     --color-icon-white: #FBFCFE;
     --color-icon-black: #1B1E28;
 
+    /* 컬러 가이드 카드 사이즈 토큰 */
+    --palette-card-min: 160px;
+    --palette-card-max: 240px;
+    --palette-gap: 16px;
+
 }

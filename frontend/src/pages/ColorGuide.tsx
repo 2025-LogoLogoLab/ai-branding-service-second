@@ -1,31 +1,40 @@
 // src/pages/ColorGuide.tsx
 
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelectionStore } from '../context/selectionStore';
 import { generateColorGuide, saveColorGuide,  type colorGuideGenResponse } from '../custom_api/colorguide';
 import PromptComposer from '../organisms/PromptComposer/PromptComposer';
 import { MarkdownMessage } from '../atoms/MarkdownMessage/MarkdownMessage';
 import LoadingMessage from '../organisms/LoadingMessage/LoadingMessage';
 import ColorGuideResult from '../organisms/ColorGuideResult/ColorGuideResult';
+import { TextButton } from '../atoms/TextButton/TextButton';
 
 
 // 컬러 가이드 생성 페이지
 function ColorGuide(){
 
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const [promptText, setPropmt] = useState<string>('');
     const [style, setStyle] = useState<string>('');
     const [imageUrl, setImg] = useState<string>('');
+    const [brandingMarkdown, setBrandingMarkdown] = useState<string>('');
+    const location = useLocation();
+    const { state: selection, setColorGuide, clearColorGuide } = useSelectionStore();
     const [error, setError] = useState<string | null>(null);
     const [colorGuideGenResult, setColorGuideGenResult] = useState<colorGuideGenResponse|null>(null);
     const [lastPrompt, setLastPrompt] = useState<string>('');
     const [loading, setLoading] = useState(false);
 
-    useEffect( () => {  // 테스트용
-        // setColorGuideGenResult({ colorGuideNum:10, promptText:'컬러 가이드 프롬프트 예시', data:'컬러 가이드 내용 예시' })
+    useEffect( () => {
         setStyle('');
-        setImg('');
-    },[])
+        const incomingLogo = (location.state as any)?.selectedLogoBase64 as string | undefined;
+        const incomingBranding = (location.state as any)?.selectedBrandingMarkdown as string | undefined;
+        // 우선순위: store → location.state
+        setImg(selection.logoBase64 ?? incomingLogo ?? '');
+        setBrandingMarkdown(selection.brandingMarkdown ?? incomingBranding ?? '');
+    },[location.state, selection.logoBase64, selection.brandingMarkdown])
     
     // 컬러 가이드 생성 처리 함수
     const handleColorGuideGeneration = async () => {
@@ -37,8 +46,12 @@ function ColorGuide(){
         try {
             setError(null);
             setLoading(true);
-            setLastPrompt(promptText);
-            const res = await generateColorGuide({ briefKo: promptText, style, imageUrl});
+            clearColorGuide();
+            const combined = brandingMarkdown
+                ? `${promptText}\n\n[Branding Strategy]\n${brandingMarkdown}`
+                : promptText;
+            setLastPrompt(combined);
+            const res = await generateColorGuide({ briefKo: combined, style, imageUrl});
             setColorGuideGenResult(res);
 
         } catch (err) {
@@ -53,6 +66,7 @@ function ColorGuide(){
         // 생성된 컬러 가이드 삭제 함수. 프론트에서만 삭제해도 상관 없을 듯? 백에서도 지워야하려나?
         console.log('color guide delete');
         setColorGuideGenResult(null);
+        clearColorGuide();
     }
 
     const handleColorGuideSave = async () => {
@@ -76,9 +90,27 @@ function ColorGuide(){
         
     }
 
+    const goToBrandingWithContext = () => {
+        if (!colorGuideGenResult) {
+            alert('먼저 컬러 가이드를 생성해주세요.');
+            return;
+        }
+
+        if (colorGuideGenResult) {
+            setColorGuide(colorGuideGenResult);
+        }
+        navigate('/branding', {
+            state: {
+                selectedLogoBase64: selection.logoBase64 ?? imageUrl ?? '',
+                selectedColorGuide: colorGuideGenResult,
+            },
+        });
+    };
+
     return(
         <div style={{ padding: '12px 16px', display: 'grid', gap: 16 }}>
             {/* 상단 프롬프트 말풍선 */}
+            <h2 style={{ margin: 0 }}>로고를 기반으로 컬러 가이드 작성</h2>
             {lastPrompt && <MarkdownMessage content={lastPrompt} isUser />}
 
             {/* 결과 표시 */}
@@ -92,14 +124,34 @@ function ColorGuide(){
                 />
             )}
 
+            {colorGuideGenResult && (
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    {selection.brandingMarkdown ? (
+                        <TextButton
+                            label="추가기능"
+                            onClick={() => alert('추가기능 준비 중입니다.')}
+                            variant="outlined"
+                        />
+                    ) : (
+                        <TextButton
+                            label="이 컬러 가이드로 브랜딩 전략 생성하기"
+                            onClick={goToBrandingWithContext}
+                            variant="blue"
+                        />
+                    )}
+                </div>
+            )}
+
             {/* 하단 입력 */}
-            <PromptComposer
-                value={promptText}
-                placeholder="색상 조합을 입력하세요..."
-                onChange={(e) => setPropmt(e.target.value)}
-                onSubmit={handleColorGuideGeneration}
-                disabled={loading}
-            />
+            {!colorGuideGenResult && (
+                <PromptComposer
+                    value={promptText}
+                    placeholder="색상 조합을 입력하세요..."
+                    onChange={(e) => setPropmt(e.target.value)}
+                    onSubmit={handleColorGuideGeneration}
+                    disabled={loading}
+                />
+            )}
 
             {/* 에러 배너 */}
             {error && (

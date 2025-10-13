@@ -12,13 +12,15 @@
 .container {
     width: 100%;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    /* grid-template-columns: auto minmax(1fr, 1080px); */
+    grid-template-columns: min-content auto;
     column-gap: 10px;
     align-items: start;
 }
 
 /* 사이드바는 스크롤 시 헤더 아래서 고정되도록 sticky (헤더 높이에 맞춰 top 조절) */
 .sidebar {
+    /* width: 560px; */
     position: sticky;
     /* 전역 헤더 높이에 맞춰 조정 */
     top: 64px; 
@@ -28,9 +30,10 @@
 /* 우측 콘텐츠: 그리드 자식 오버플로 방지 */
 .content {
     min-width: 0;
-    display: block;
+    /* display: block; */
     /* 콘텐츠 폭: 뷰포트 전체를 기본으로, 최대 1440px */
-    width: min(100%, 1440px);
+    width: min(100%, 1500px);
+    /* width: auto; */
     /* align-items: start; */
     /* justify-content: start; */
     justify-self: flex-start;

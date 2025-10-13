@@ -1,0 +1,188 @@
+.page {
+  display: flex;
+  justify-content: center;
+  padding: 96px 16px 160px;
+  min-height: calc(100vh - 120px);
+  box-sizing: border-box;
+}
+
+.card {
+  width: min(420px, 100%);
+  display: grid;
+  gap: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  padding: 32px;
+}
+
+.titleGroup {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+.input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  padding: 14px 16px;
+  font-size: 15px;
+  background: rgba(248, 250, 252, 0.9);
+  color: #0f172a;
+}
+
+.input:focus,
+.input:focus-visible {
+  border-color: var(--color-button-primary-bg);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.2);
+  outline: none;
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--color-font-critical);
+}
+
+.primaryButton {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--color-button-primary-bg);
+  color: var(--color-font-button-white);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.primaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--color-button-hover-bg);
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-font-critical);
+  text-align: center;
+}
+
+.fieldError {
+  margin: -6px 0 8px 4px;
+  font-size: 12px;
+  color: var(--color-font-critical);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #94a3b8;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.4);
+}
+
+.dividerText {
+  white-space: nowrap;
+}
+
+.socialList {
+  display: grid;
+  gap: 12px;
+}
+
+.socialButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  padding: 12px 16px;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.socialButton:hover {
+  border-color: rgba(15, 23, 42, 0.3);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+}
+
+.socialIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  background: #e0e7ff;
+  color: #1d4ed8;
+}
+
+.socialIcon.kakao {
+  background: #fee500;
+  color: #181600;
+}
+
+.socialIcon.naver {
+  background: #03c75a;
+  color: #fff;
+}
+
+.agreementRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.agreementRow input {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 72px 12px 120px;
+  }
+
+  .card {
+    padding: 28px 24px;
+  }
+}

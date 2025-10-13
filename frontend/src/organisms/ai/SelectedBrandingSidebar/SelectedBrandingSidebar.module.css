@@ -1,0 +1,23 @@
+ .wrap {
+   display: grid;
+   gap: 10px;
+ }
+ .title {
+   display: inline-block;
+   padding: 6px 10px;
+   border-radius: 10px;
+   background: var(--color-menu-selected-bg);
+   color: var(--color-font-basic-content);
+   font-weight: 600;
+ }
+.box {
+  border-radius: 12px;
+  background: var(--color-bg-base);
+  padding: 10px;
+  width: auto;
+}
+.toolbarOuter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

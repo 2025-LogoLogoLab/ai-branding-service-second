@@ -3,23 +3,28 @@
 // 결과를 BrandingCard(오가니즘)에 전달해 렌더링한다.
 
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelectionStore } from '../context/selectionStore';
 // ✅ 여기서 사용하는 API는 전부 src/custom_api/branding.ts 제공본
 import {
   generateBranding,      // POST /brand-strategy/generate → string(마크다운) 반환
   saveBranding,          // POST /brand-strategy/save → 저장 메타 반환
   type BrandingResponse, // string alias
 } from '../custom_api/branding';
+import type { colorGuideGenResponse } from '../custom_api/colorguide';
 
 // old card/form kept for reference but not used in new UI
 import PromptComposer from '../organisms/PromptComposer/PromptComposer';
 import BrandingResult from '../organisms/BrandingResult/BrandingResult';
 import { MarkdownMessage } from '../atoms/MarkdownMessage/MarkdownMessage';
 import LoadingMessage from '../organisms/LoadingMessage/LoadingMessage';
+import { TextButton } from '../atoms/TextButton/TextButton';
 import { useAuth } from '../context/AuthContext';
 
 function Branding() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { state: selection, setBranding, clearBranding, setColorGuide } = useSelectionStore();
 
   // 사용자 권한 불러오기
   const { user }= useAuth();
@@ -37,12 +42,42 @@ function Branding() {
 
   // 초기 진입 시에는 아무 결과도 표시하지 않습니다.
   useEffect(() => {
-    setBrandingResult(undefined);
-    setBase64(undefined);
-  }, []);
+    const incomingLogo = (location.state as any)?.selectedLogoBase64 as string | undefined;
+    const incomingBranding = (location.state as any)?.selectedBrandingMarkdown as string | undefined;
+    const incomingColorGuide = (location.state as any)?.selectedColorGuide as colorGuideGenResponse | undefined;
+
+    // 우선순위: store → location.state
+    setBase64(selection.logoBase64 ?? incomingLogo);
+    const hydratedBranding = selection.brandingMarkdown ?? incomingBranding;
+    if (hydratedBranding !== undefined) {
+      setBrandingResult(hydratedBranding);
+    }
+    if (incomingColorGuide) {
+      setColorGuide(incomingColorGuide);
+    }
+  }, [location.state, selection.logoBase64, selection.brandingMarkdown, setColorGuide]);
 
   // 생성: custom_api.generateBranding 호출 → string(마크다운) 수신
   // 결과: string을 BrandingVM으로 감싸서 카드에 전달
+  const serializeColorGuide = () => {
+    const g = selection.colorGuide;
+    if (!g) return '';
+    const lines: string[] = [];
+    lines.push('[Color Guide]');
+    const entries: Array<[keyof typeof g, string]> = [
+      ['main', 'Main'],
+      ['sub', 'Sub'],
+      ['point', 'Point'],
+      ['background', 'Background'],
+    ];
+    for (const [key, label] of entries) {
+      const p = g[key];
+      if (!p) continue;
+      lines.push(`- ${label}: ${p.hex} - ${p.description}`);
+    }
+    return lines.join('\n');
+  };
+
   const handleBrandingGeneration = async () => {
     if (!promptText.trim()) {
       setError('브랜딩 전략 설명은 필수 입력 항목입니다.');
@@ -51,9 +86,13 @@ function Branding() {
 
     try {
       setError(null);
-      setLastPrompt(promptText);
       setLoading(true);
-      const markdown: BrandingResponse = await generateBranding({ briefKo: promptText });
+      clearBranding();
+      const withColorGuide = base64 && selection.colorGuide
+        ? `${promptText}\n\n${serializeColorGuide()}`
+        : promptText;
+      setLastPrompt(withColorGuide);
+      const markdown: BrandingResponse = await generateBranding({ briefKo: withColorGuide, base64 });
       // 결과: UI용 뷰 모델에 담아 상태 갱신
       setBrandingResult(markdown);
       if (!markdown || !markdown.trim()) {
@@ -75,6 +114,7 @@ function Branding() {
   const handleBrandingDelete = () => {
     // id를 이용해 여러 개 중 특정 카드만 지우도록 확장 가능
     setBrandingResult(undefined);
+    clearBranding();
   };
 
   // 저장: custom_api.saveBranding 규약에 맞춰 요청
@@ -107,8 +147,27 @@ function Branding() {
     }
   };
 
+  // 선택된 결과를 바탕으로 컬러 가이드 생성으로 이동
+  const goToColorGuideWithContext = () => {
+    if (!brandingResult) {
+      alert('먼저 브랜딩 전략을 생성해주세요.');
+      return;
+    }
+    if (brandingResult) {
+      setBranding(brandingResult);
+    }
+    navigate('/colorGuide', {
+      state: {
+        selectedLogoBase64: base64,
+        selectedBrandingMarkdown: brandingResult,
+      }
+    });
+  };
+
   return (
     <div style={{ padding: '12px 16px', display: 'grid', gap: 16 }}>
+      {/* 페이지 타이틀 */}
+      <h2 style={{ margin: 0 }}>로고를 기반으로 브랜딩 전략 생성</h2>
       {/* 상단 프롬프트 말풍선 (있을 때만) */}
       {lastPrompt && (
         <MarkdownMessage content={lastPrompt} isUser />
@@ -126,14 +185,35 @@ function Branding() {
         />
       )}
 
+      {/* 컬러 가이드 생성으로 이동 */}
+      {brandingResult && (
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          {selection.colorGuide ? (
+            <TextButton
+              label="추가기능"
+              onClick={() => alert('추가기능 준비 중입니다.')}
+              variant="outlined"
+            />
+          ) : (
+            <TextButton
+              label="만들어진 내용을 바탕으로 컬러가이드를 생성하기"
+              onClick={goToColorGuideWithContext}
+              variant="blue"
+            />
+          )}
+        </div>
+      )}
+
       {/* 하단 입력 컴포저 */}
-      <PromptComposer
-        value={promptText}
-        placeholder="메시지를 입력하세요..."
-        onChange={(e) => setPropmt(e.target.value)}
-        onSubmit={handleBrandingGeneration}
-        disabled={loading}
-      />
+      {!brandingResult && (
+        <PromptComposer
+          value={promptText}
+          placeholder="메시지를 입력하세요..."
+          onChange={(e) => setPropmt(e.target.value)}
+          onSubmit={handleBrandingGeneration}
+          disabled={loading}
+        />
+      )}
 
       {/* 에러 배너 */}
       {error && (

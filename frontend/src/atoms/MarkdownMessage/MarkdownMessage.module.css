@@ -31,5 +31,11 @@
     border-radius: 16px 16px 0 16px; /* 우측 하단만 각지게 */
 }
 
+.compact {
+    padding: 0;
+    max-width: 100%;
+    margin: 0;
+}
+
 
 /* 부모 컨테이너가 flex column 정렬일 경우 align-self 사용됨 */

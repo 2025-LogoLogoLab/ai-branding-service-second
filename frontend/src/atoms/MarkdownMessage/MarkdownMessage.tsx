@@ -12,6 +12,7 @@ export function MarkdownMessage({
     content,
     isUser = false,
     className,
+    variant = 'default',
 }: MarkdownMessageProps) {
     // 일부 백엔드가 ATX 헤딩(###제목)에서 공백을 누락한 형태로 반환하는 경우가 있어
     // CommonMark 규칙에 맞도록 최소한의 정규화 작업을 수행한다.
@@ -20,6 +21,7 @@ export function MarkdownMessage({
         <div
             className={[
                 isUser ? styles.userMessage : styles.systemMessage,
+                variant === 'compact' ? styles.compact : '',
                 className ?? ''
             ].join(' ').trim()}
         >
