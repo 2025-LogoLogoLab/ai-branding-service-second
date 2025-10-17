@@ -13,6 +13,8 @@ function UserInfo(){
     const navigate = useNavigate();
 
     const [error, setError] = useState<string | null>(null);
+    const [initialUserInfo, setInitialUserInfo] = useState<UserInfoResponse | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
 
     const [userInfo, setUserInfo] = useState<UserInfoResponse>({
         profileImageData: null,
@@ -32,6 +34,8 @@ function UserInfo(){
 
                 const userData = await fetchUserInfo();
                 setUserInfo(userData);
+                setInitialUserInfo(userData);
+                setIsEditing(false);
             }
     
             catch (err) {
@@ -49,11 +53,12 @@ function UserInfo(){
             setError('닉네임은 필수 입력 항목입니다.');
             return;
         }
-        
         try {
             const res = await modifyUserInfo(userInfo);
             setUserInfo(res);
+            setInitialUserInfo(res);
             alert('회원 정보 수정 성공!');
+            setIsEditing(false);
         } catch (err) {
             setError('회원 정보 수정 실패.');
         }
@@ -79,6 +84,7 @@ function UserInfo(){
 
     // 각 체크박스가 변경될 때 실행되는 공통 핸들러
     const handleCheckboxChange = (name: string, checked: boolean) => {
+        if (!isEditing) return;
         // 기존 상태를 복사한 뒤, 해당 name의 값을 새로운 checked로 업데이트
         setUserInfo((prev) => ({
             ...prev,
@@ -87,13 +93,31 @@ function UserInfo(){
     };
 
     // 각 체크박스가 변경될 때 실행되는 공통 핸들러
-    const handleFiledChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!isEditing) return;
         // 기존 상태를 복사한 뒤, 해당 name의 값을 새로운 checked로 업데이트
         const { name, value } = e.target;
         setUserInfo((prev) => ({
             ...prev,
             [name]: value,
         }));
+    };
+
+    const handleCancel = () => {
+        if (initialUserInfo) {
+            setUserInfo({ ...initialUserInfo });
+        }
+        setError(null);
+        setIsEditing(false);
+    };
+
+    const handleNavigateMyPage = () => {
+        navigate('/myPage');
+    };
+
+    const handleStartEdit = () => {
+        setIsEditing(true);
+        setError(null);
     };
 
     return(
@@ -106,12 +130,16 @@ function UserInfo(){
             email={userInfo.email}
             phone={userInfo.phone}
             error={error}
-            onEmailChange={(e) => handleFiledChange(e)}
-            onNickNameChange={(e) => handleFiledChange(e)}
-            onPhoneChange={(e) => handleFiledChange(e)}
+            isEditing={isEditing}
+            onEmailChange={(e) => handleFieldChange(e)}
+            onNickNameChange={(e) => handleFieldChange(e)}
+            onPhoneChange={(e) => handleFieldChange(e)}
             onSubmit={handleUserInfoModification}                
             onDelete={handleDeleteMyAccount}
-            setChecked={handleCheckboxChange}             
+            setChecked={handleCheckboxChange}
+            onCancel={handleCancel}
+            onStartEdit={handleStartEdit}
+            onNavigateMyPage={handleNavigateMyPage}
         />
     );
 }
