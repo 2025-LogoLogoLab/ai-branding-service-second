@@ -25,6 +25,8 @@
 .expanded {
     /* 전체보기에서는 이미지 최대폭만 확장 (카드 높이는 상위에서 통일 관리) */
     --ls-img-max: 260px;
+    width: clamp(420px, 60vw, 980px);
+    min-width: clamp(420px, 60vw, 980px);
 }
 
 /*
@@ -65,20 +67,10 @@
 .gridAll {
     display: grid;
     gap: 12px;
-    grid-template-columns: 1fr; /* 기본(모바일): 한 줄에 1개 */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
-@media (min-width: 768px) {
-    .gridAll {
-        grid-template-columns: repeat(2, 1fr); /* 태블릿: 2열 (2x4) */
-    }
-}
-
-@media (min-width: 1024px) {
-    .gridAll {
-        grid-template-columns: repeat(4, 1fr); /* 데스크톱: 4열 (4x2) */
-    }
-}
+/* auto-fill 설정으로 열이 자연스럽게 채워지므로 별도 브레이크포인트 정의 불필요 */
 
 /*
     .allBtn: 일반 모드 하단의 "전체보기" 버튼

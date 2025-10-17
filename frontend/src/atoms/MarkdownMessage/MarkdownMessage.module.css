@@ -1,7 +1,5 @@
 /* src/atoms/MarkdownMessage/MarkdownMessage.module.css */
 
-/* src/atoms/MarkdownMessage/MarkdownMessage.module.css */
-
 /* 공통 박스 스타일 */
 .systemMessage,
 .userMessage {
@@ -31,6 +29,12 @@
     justify-self: end;      /* for grid parents */
     margin-bottom: 8px;
     border-radius: 16px 16px 0 16px; /* 우측 하단만 각지게 */
+}
+
+.compact {
+    padding: 0;
+    max-width: 100%;
+    margin: 0;
 }
 
 

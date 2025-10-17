@@ -1,0 +1,43 @@
+.wrap {
+  display: grid;
+  gap: 10px;
+  height: auto;
+  align-items: start;
+}
+.title {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--color-menu-selected-bg);
+  color: var(--color-font-basic-content);
+  font-weight: 600;
+ }
+.box {
+  border-radius: 12px;
+  background: var(--color-bg-base);
+  /* padding: 10px; */
+  width: 100%;
+  box-sizing: border-box;
+}
+.toolbarOuter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.gridTwo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: minmax(0, 1fr);
+  gap: var(--palette-gap, 16px);
+  width: 100%;
+  place-items: stretch;
+}
+
+.cardWrapper {
+  --palette-card-min: 0px;
+  --palette-card-max: 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}

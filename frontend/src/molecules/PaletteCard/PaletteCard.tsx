@@ -7,15 +7,17 @@ import styles from './PaletteCard.module.css';
 type PaletteCardProps = {
   label: string;     // 'main' | 'sub' | 'point' | 'background' 등 표시용
   palette: palette;
+  className?: string;
+  style?: React.CSSProperties;
 };
 
-const PaletteCard: React.FC<PaletteCardProps> = React.memo(({ label, palette }) => {
+const PaletteCard: React.FC<PaletteCardProps> = React.memo(({ label, palette, className, style }) => {
   const valid = isValidHex(palette.hex);
   const hex = normalizeHex(palette.hex);
   const textColor = getContrastText(hex);
 
   return (
-    <div className={styles.card} aria-label={`${label} color`}>
+    <div className={[styles.card, className].filter(Boolean).join(' ')} aria-label={`${label} color`} style={style}>
       <div
         className={`${styles.swatch} ${!valid ? styles.invalid : ''}`}
         style={{ backgroundColor: valid ? hex : '#FFFFFF', color: textColor }}

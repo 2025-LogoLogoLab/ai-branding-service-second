@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import styles from "./SectionLayout.module.css";
 
 /**
@@ -19,13 +20,21 @@ export default function SectionLayout({
     children,
     maxWidth = 1200
 }: SectionLayoutProps) {
+    const location = useLocation();
+    const hasSelectedLogo = Boolean((location.state as any)?.selectedLogoBase64);
     return (
         <div
             className={styles.wrap}
             style={{ ["--mw" as any]: `${maxWidth}px` }}
         >
             <div className={styles.container}>
-                <aside className={styles.sidebar} aria-label="Section sidebar">
+                <aside
+                    className={styles.sidebar}
+                    aria-label="Section sidebar"
+                    style={
+                        hasSelectedLogo ? { width: "fit-content" } : undefined
+                    }
+                >
                     {sidebar}
                 </aside>
 

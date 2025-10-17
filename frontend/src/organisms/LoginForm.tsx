@@ -4,7 +4,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { SocialProvider } from '../custom_api/auth';
 import { TextInput } from '../atoms/TextInput/TextInput';
-import { TextButton } from '../atoms/TextButton/TextButton';
+import styles from './LoginForm.module.css';
 
 type social = SocialProvider | null;
 
@@ -17,7 +17,6 @@ type LoginFormProps = {    // Props 타입 지정
     onSubmit: () => void;
     onNaverLogin: (provider: social) => void;
     onKakaoLogin: (provider: social) => void;
-    onAdminLogin: () => void;
 };
 
 function LoginForm({
@@ -29,40 +28,75 @@ function LoginForm({
     onSubmit,
     onNaverLogin,
     onKakaoLogin,
-    onAdminLogin,
 }: LoginFormProps) {
     const navigate = useNavigate();
     return (
-        <div style={styles.container}>
-            <h1>로그인</h1>
+        <div className={styles.page}>
+            <div className={styles.card}>
+                <div className={styles.titleGroup}>
+                    <h1 className={styles.title}>다시 오신 것을 환영합니다</h1>
+                    <p className={styles.subtitle}>로그인해서 더 많은 기능을 사용해보세요</p>
+                </div>
 
-            {/* 에러 메시지 출력하는 부분 error가 null이 아니어야 수행 됨 */}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+                {error && <p className={styles.error}>{error}</p>}
 
-            {/* email과 비밀번호를 입력받는 input 창 */}
-            <TextInput type="email" value={email} onChange={onEmailChange} placeholder="이메일" />
-            <TextInput type="password" value={password} onChange={onPasswordChange} placeholder="비밀번호" />
+                <div className={styles.form}>
+                    <TextInput
+                        type="email"
+                        value={email}
+                        onChange={onEmailChange}
+                        placeholder="이메일 주소"
+                        className={styles.input}
+                    />
+                    <TextInput
+                        type="password"
+                        value={password}
+                        onChange={onPasswordChange}
+                        placeholder="비밀번호"
+                        className={styles.input}
+                    />
+                    <button type="button" className={styles.primaryButton} onClick={onSubmit}>
+                        로그인 하기
+                    </button>
+                </div>
 
-            {/* 각종 로그인 버튼. JWT 토큰 사용 후 관리자 로그인 버튼은 삭제할 가능성 존재 */}
-            <TextButton label='회원가입' onClick={() => navigate('/signUp')} variant='orange' />
-            <TextButton label='로그인' onClick={onSubmit} variant='outlined' />
-            <TextButton label='네이버로 계속하기' onClick={() => onNaverLogin('naver')} variant='outlined' />
-            <TextButton label='카카오로 계속하기' onClick={() => onKakaoLogin('kakao')} variant='outlined' />
-            <TextButton label='관리자 로그인' onClick={onAdminLogin} variant='outlined' />
+                <div className={styles.divider}>
+                    <span className={styles.dividerLine} aria-hidden="true" />
+                    <span className={styles.dividerText}>or continue with</span>
+                    <span className={styles.dividerLine} aria-hidden="true" />
+                </div>
+
+                <div className={styles.socialList}>
+                    <button
+                        type="button"
+                        className={styles.socialButton}
+                        onClick={() => onKakaoLogin('kakao')}
+                    >
+                        <span className={`${styles.socialIcon} ${styles.kakao}`} aria-hidden="true">K</span>
+                        Kakao
+                    </button>
+                    <button
+                        type="button"
+                        className={styles.socialButton}
+                        onClick={() => onNaverLogin('naver')}
+                    >
+                        <span className={`${styles.socialIcon} ${styles.naver}`} aria-hidden="true">N</span>
+                        Naver
+                    </button>
+                </div>
+
+                <div className={styles.signupFooter}>
+                    <button
+                        type="button"
+                        className={styles.primaryButton}
+                        onClick={() => navigate('/signUp')}
+                    >
+                        회원가입
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }
-
-// 스타일을 JS 객체로 정하기.
-const styles = {
-    container: {
-        display: 'flex',
-        flexDirection: 'column' as const,
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '10px',
-        height: '100vh',
-    },
-};
 
 export default LoginForm;

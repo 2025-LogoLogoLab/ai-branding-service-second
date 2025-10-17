@@ -1,0 +1,13 @@
+/* Deprecated preview layouts for reference */
+.rowFourEqual {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(8px, 2vw, 20px);
+}
+
+.card {
+  --palette-card-min: 0px;
+  --palette-card-max: 100%;
+  width: 100%;
+}
+

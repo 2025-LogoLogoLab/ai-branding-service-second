@@ -14,6 +14,13 @@ export type TextInputProps = {
   name?: string;
   id?: string;
   disabled?: boolean;
+  required?: boolean;
+  minLength?: number;
+  pattern?: string;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onInvalid?: (e: React.FormEvent<HTMLInputElement>) => void;
+  onInput?: (e: React.FormEvent<HTMLInputElement>) => void;
+  ariaInvalid?: boolean;
   className?: string;     // 🔹 추가: 외부에서 스타일 덮어쓸 수 있도록
 };
 
@@ -25,6 +32,13 @@ export function TextInput({
   name,
   id,
   disabled = false,
+  required,
+  minLength,
+  pattern,
+  onBlur,
+  onInvalid,
+  onInput,
+  ariaInvalid,
   className,
 }: TextInputProps) {
   return (
@@ -37,6 +51,13 @@ export function TextInput({
       name={name}
       id={id}
       disabled={disabled}
+      required={required}
+      minLength={minLength}
+      pattern={pattern}
+      onBlur={onBlur}
+      onInvalid={onInvalid}
+      onInput={onInput}
+      aria-invalid={ariaInvalid}
     />
   );
 }

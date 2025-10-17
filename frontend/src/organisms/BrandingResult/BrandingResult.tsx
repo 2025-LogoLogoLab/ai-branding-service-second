@@ -38,7 +38,7 @@ export default function BrandingResult({
 
       <div className={styles.panel}>
         <div className={styles.messageGroup}>
-          <MarkdownMessage content={markdown} />
+          <MarkdownMessage content={markdown} className={styles.bubble} />
           <div className={styles.panelToolbar}>
             <ProductToolbar
               id={id}

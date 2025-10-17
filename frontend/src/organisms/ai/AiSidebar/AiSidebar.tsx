@@ -15,30 +15,33 @@ import styles from "./AiSidebar.module.css";
 import iconLogo from "../../../assets/icons/icon_logo_generation.png";
 import iconStrategy from "../../../assets/icons/icon_strategy.png";
 import iconColor from "../../../assets/icons/icon_color_guide.png";
+import SelectedLogoSidebar from "../SelectedLogoSidebar/SelectedLogoSidebar";
+import SelectedBrandingSidebar from "../SelectedBrandingSidebar/SelectedBrandingSidebar";
+import SelectedColorGuideSidebar from "../SelectedColorGuideSidebar/SelectedColorGuideSidebar";
+import { useSelectionStore } from "../../../context/selectionStore";
 
 export default function AiSidebar() {
+    const { state } = useSelectionStore();
+    const selectedLogoBase64 = state.logoBase64;
+    const selectedBrandingMarkdown = state.brandingMarkdown;
+    const selectedColorGuide = state.colorGuide;
+
     // 현재 페이지가 '/logo' 인지 여부 (→ 컴팩트 모드 전환 트리거)
     const logoPageActive = Boolean(useMatch("/logo"));
-
-    // 컴팩트 모드가 아니면(=로고 페이지가 아니면) 로고 항목만 10% Promote
     const promoteLogo = !logoPageActive;
 
-    return (
+    const sidebarClass = `${styles.sidebar} ${selectedLogoBase64 ? styles.compact : (logoPageActive ? styles.compact : "")}`;
+    const iconsNav = (
         <nav
-            className={`${styles.sidebar} ${logoPageActive ? styles.compact : ""}`}
+            className={sidebarClass}
             aria-label="AI studio navigation"
         >
             <ul className={styles.list} role="list">
-                {/* AI 로고 생성 */}
                 <li>
                     <NavLink
                         to="/logo"
                         className={({ isActive }) =>
-                            [
-                                styles.item,
-                                isActive ? styles.active : "",
-                                promoteLogo ? styles.promote : "" // 사용자 유인을 위해 로고 생성 메뉴만 확대
-                            ].join(" ").trim()
+                            [styles.item, isActive ? styles.active : "", promoteLogo ? styles.promote : ""].join(" ").trim()
                         }
                         aria-label="AI 로고 생성"
                     >
@@ -46,28 +49,20 @@ export default function AiSidebar() {
                         <span className={styles.label}>AI 로고 생성</span>
                     </NavLink>
                 </li>
-
-                {/* 브랜딩 전략 생성 */}
                 <li>
                     <NavLink
                         to="/branding"
-                        className={({ isActive }) =>
-                            `${styles.item} ${isActive ? styles.active : ""}`
-                        }
+                        className={({ isActive }) => `${styles.item} ${isActive ? styles.active : ""}`}
                         aria-label="브랜딩 전략 생성"
                     >
                         <img className={styles.icon} src={iconStrategy} alt="" aria-hidden="true" />
                         <span className={styles.label}>브랜딩 전략 생성</span>
                     </NavLink>
                 </li>
-
-                {/* 컬러가이드 생성 */}
                 <li>
                     <NavLink
                         to="/colorGuide"
-                        className={({ isActive }) =>
-                            `${styles.item} ${isActive ? styles.active : ""}`
-                        }
+                        className={({ isActive }) => `${styles.item} ${isActive ? styles.active : ""}`}
                         aria-label="컬러가이드 생성"
                     >
                         <img className={styles.icon} src={iconColor} alt="" aria-hidden="true" />
@@ -77,4 +72,28 @@ export default function AiSidebar() {
             </ul>
         </nav>
     );
+
+    if (selectedLogoBase64 || selectedBrandingMarkdown || selectedColorGuide) {
+        // 선택된 로고가 있으면 왼쪽 작은 툴바 + 큰 프리뷰 조합으로 노출
+        return (
+            <div className={styles.withSelected}>
+                {iconsNav}
+                <div style={{ display: 'grid', gap: 16, 
+                    // position: "sticky", 
+                    // top: 64 
+                    }}>
+                    {selectedLogoBase64 && <SelectedLogoSidebar base64={selectedLogoBase64} />}
+                    {selectedBrandingMarkdown && (
+                        <SelectedBrandingSidebar markdown={selectedBrandingMarkdown} />
+                    )}
+                    {selectedColorGuide && (
+                        <SelectedColorGuideSidebar guide={selectedColorGuide} />
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // 선택된 로고가 없으면 기존 사이드바(상태에 따라 컴팩트 적용)
+    return iconsNav;
 }

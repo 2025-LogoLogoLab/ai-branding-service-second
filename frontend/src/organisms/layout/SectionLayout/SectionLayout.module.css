@@ -1,8 +1,8 @@
 /* --mw: 섹션 컨테이너 최대 폭(커스텀 속성으로 주입) */
 .wrap {
-    /* --mw: 1200px; */
-    /* 좌측 정렬: 전체 폭을 사용하되 좌우 패딩만 유지 */
-    width: 100%;
+    /* 페이지 폭: 100vw를 기본으로 하되 최대 1440px로 캡 */
+    /* 
+    width: min(100vw, 1440px); */
     margin-inline: 0;
     padding: 8px 0px;
     box-sizing: border-box;
@@ -12,13 +12,15 @@
 .container {
     width: 100%;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    column-gap: 10px;
+    /* grid-template-columns: auto minmax(1fr, 1080px); */
+    grid-template-columns: min-content auto;
+    column-gap: 8px;
     align-items: start;
 }
 
 /* 사이드바는 스크롤 시 헤더 아래서 고정되도록 sticky (헤더 높이에 맞춰 top 조절) */
 .sidebar {
+    /* width: 560px; */
     position: sticky;
     /* 전역 헤더 높이에 맞춰 조정 */
     top: 64px; 
@@ -28,7 +30,10 @@
 /* 우측 콘텐츠: 그리드 자식 오버플로 방지 */
 .content {
     min-width: 0;
-    display: block;
+    /* display: block; */
+    /* 콘텐츠 폭: 뷰포트 전체를 기본으로, 최대 1440px */
+    width: min(100%, 1500px);
+    /* width: auto; */
     /* align-items: start; */
     /* justify-content: start; */
     justify-self: flex-start;

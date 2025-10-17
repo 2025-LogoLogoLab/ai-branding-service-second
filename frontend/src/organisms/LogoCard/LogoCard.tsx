@@ -30,7 +30,7 @@ export function LogoCard({
             <ImageBase64
                 imageData={logoBase64}
                 alt="로고 이미지"
-                variant="logo"
+                variant="logoImage"
             />
             <div className={styles.toolbarWrapper}>
                 <ProductToolbar
