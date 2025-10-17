@@ -167,7 +167,9 @@ function Branding() {
   return (
     <div style={{ padding: '12px 16px', display: 'grid', gap: 16 }}>
       {/* 페이지 타이틀 */}
-      <h2 style={{ margin: 0 }}>로고를 기반으로 브랜딩 전략 생성</h2>
+      <h2 style={{ margin: 0 }}>
+        {base64 ? '로고를 기반으로 브랜딩 전략 생성' : '브랜딩 전략 생성'}
+      </h2>
       {/* 상단 프롬프트 말풍선 (있을 때만) */}
       {lastPrompt && (
         <MarkdownMessage content={lastPrompt} isUser />

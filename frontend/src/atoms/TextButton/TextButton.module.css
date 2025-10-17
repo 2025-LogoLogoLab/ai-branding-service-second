@@ -55,6 +55,33 @@
     background-color: var(--color-button-hover-bg);
 }
 
+.headerLink,
+.headerPrimary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 999px;
+    width: 130px;
+}
+
+.headerLink {
+    background: none;
+    color: var(--color-font-basic-content);
+}
+.headerLink:hover {
+    color: var(--color-font-site-title);
+}
+
+.headerPrimary {
+    background-color: var(--color-button-primary-bg);
+    color: var(--color-font-button-white);
+}
+.headerPrimary:hover {
+    background-color: var(--color-button-hover-bg);
+}
+
 /* 카드용(필요 시) */
 .card {
     background-color: #fff;

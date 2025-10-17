@@ -1,7 +1,9 @@
 // src/organisms/layout/GlobalHeader/GlobalHeader.tsx
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import styles from "./GlobalHeader.module.css";
+import { useAuth } from "../../../context/AuthContext";
+import { TextButton } from "../../../atoms/TextButton/TextButton";
 
 /**
  * GlobalHeader
@@ -14,6 +16,8 @@ export default function GlobalHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
   const [pricingOpen, setPricingOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const featuresRef = useRef<HTMLDivElement | null>(null);
   const pricingRef = useRef<HTMLDivElement | null>(null);
@@ -37,6 +41,21 @@ export default function GlobalHeader() {
     setFeaturesOpen(false);
     setPricingOpen(false);
     setMobileOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      closeAll();
+      await logout();
+      navigate("/");
+    } catch (err) {
+      console.error("로그아웃 실패", err);
+    }
+  };
+
+  const handleNavigate = (path: string) => {
+    closeAll();
+    navigate(path);
   };
 
   return (
@@ -117,8 +136,33 @@ export default function GlobalHeader() {
 
       {/* 우측: 액션/인증 영역 */}
       <div className={styles.authArea}>
-        <Link to="/login" className={styles.linkButton} onClick={closeAll}>Log in</Link>
-        <Link to="/signUp" className={styles.primaryButton} onClick={closeAll}>Try it Free</Link>
+        {user ? (
+          <>
+            <TextButton
+              label="My Page"
+              variant="headerLink"
+              onClick={() => handleNavigate("/myPage")}
+            />
+            <TextButton
+              label="Log out"
+              variant="headerPrimary"
+              onClick={handleLogout}
+            />
+          </>
+        ) : (
+          <>
+            <TextButton
+              label="Log in"
+              variant="headerLink"
+              onClick={() => handleNavigate("/login")}
+            />
+            <TextButton
+              label="Try it Free"
+              variant="headerPrimary"
+              onClick={() => handleNavigate("/logo")}
+            />
+          </>
+        )}
       </div>
     </div>
   );

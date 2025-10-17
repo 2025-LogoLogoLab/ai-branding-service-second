@@ -4,7 +4,7 @@ import styles from "./TextButton.module.css";
 export type ButtonProps = {
     label: string;                         // 버튼 내용
     onClick: () => void;                   // 클릭 핸들러
-    variant?: "white" | "orange" | "outlined" | "card" | "blue";
+    variant?: "white" | "orange" | "outlined" | "card" | "blue" | "headerLink" | "headerPrimary";
     disabled?: boolean;                    // 비활성화 여부
     type?: "button" | "submit" | "reset";  // 버튼 타입
 };

@@ -75,27 +75,6 @@
   align-items: center;
 }
 
-.linkButton {
-  color: var(--color-font-basic-content);
-  text-decoration: none;
-  font-size: 14px;
-  padding: 8px 12px;
-  border-radius: 10px;
-}
-
-.primaryButton {
-  background: var(--color-button-primary-bg);
-  color: var(--color-font-button-white);
-  text-decoration: none;
-  font-size: 14px;
-  padding: 8px 14px;
-  border-radius: 10px;
-}
-
-.primaryButton:hover {
-  background: #2646a5; /* 살짝 진하게 */
-}
-
 /* Dropdown styling */
 .dropdown { position: relative; }
 .dropdownPanel {

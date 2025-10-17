@@ -155,7 +155,7 @@ export default function Logo() {
         <div className={s.page}>
 
             {/* 본문: [타입] [스타일] [폼/결과] */}
-            <div className={s.container}>
+            <div className={`${s.container} ${showAllStyle ? s.styleExpanded : ""}`}>
                 {/* 좌: 타입 */}
                 <section
                     className={s.col}
