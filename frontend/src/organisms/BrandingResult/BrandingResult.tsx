@@ -10,8 +10,10 @@ export type BrandingResultProps = {
   onDelete?: (id: number) => void;
   onSave?: (id: number) => void;
   onDownload?: (id: number) => void;
+  onCopy?: (id: number) => void;
   onTag?: (id: number) => void;
   onInsertToProject?: (id: number) => void;
+  isCopying?: boolean;
 };
 
 export default function BrandingResult({
@@ -21,8 +23,10 @@ export default function BrandingResult({
   onDelete,
   onSave,
   onDownload,
+  onCopy,
   onTag,
   onInsertToProject,
+  isCopying,
 }: BrandingResultProps) {
   return (
     <div className={styles.wrap}>
@@ -45,8 +49,10 @@ export default function BrandingResult({
               onDelete={onDelete}
               onSave={onSave}
               onDownload={onDownload}
+              onCopy={onCopy}
               onTag={onTag}
               onInsertToProject={onInsertToProject}
+              isCopying={isCopying}
             />
           </div>
         </div>

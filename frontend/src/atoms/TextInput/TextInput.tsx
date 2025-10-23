@@ -16,6 +16,9 @@ export type TextInputProps = {
   disabled?: boolean;
   required?: boolean;
   minLength?: number;
+  min?: number;
+  max?: number;
+  step?: number;
   pattern?: string;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onInvalid?: (e: React.FormEvent<HTMLInputElement>) => void;
@@ -34,6 +37,9 @@ export function TextInput({
   disabled = false,
   required,
   minLength,
+  min,
+  max,
+  step,
   pattern,
   onBlur,
   onInvalid,
@@ -53,6 +59,9 @@ export function TextInput({
       disabled={disabled}
       required={required}
       minLength={minLength}
+      min={min}
+      max={max}
+      step={step}
       pattern={pattern}
       onBlur={onBlur}
       onInvalid={onInvalid}

@@ -10,8 +10,10 @@ export type ColorGuideResultProps = {
   onDelete?: (id: number) => void;
   onSave?: (id: number) => void;
   onDownload?: (id: number) => void;
+  onCopy?: (id: number) => void;
   onTag?: (id: number) => void;
   onInsertToProject?: (id: number) => void;
+  isCopying?: boolean;
 };
 
 export default function ColorGuideResult({
@@ -20,8 +22,10 @@ export default function ColorGuideResult({
   onDelete,
   onSave,
   onDownload,
+  onCopy,
   onTag,
   onInsertToProject,
+  isCopying,
 }: ColorGuideResultProps) {
   return (
     <div className={styles.wrap}>
@@ -38,8 +42,10 @@ export default function ColorGuideResult({
                 onDelete={onDelete}
                 onSave={onSave}
                 onDownload={onDownload}
+                onCopy={onCopy}
                 onTag={onTag}
                 onInsertToProject={onInsertToProject}
+                isCopying={isCopying}
               />
             </div>
           </div>

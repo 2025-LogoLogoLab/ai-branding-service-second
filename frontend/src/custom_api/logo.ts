@@ -19,6 +19,8 @@ export type LogoRequest = { // 로고 요청 타입
     type: LogoType | undefined;
     negative_prompt?: string;
     num_images?: number;
+    width?: number;
+    height?: number;
 }
 
 // export type LogoGenResponse = {    // 로고 생성 응답 타입 ver 1
@@ -63,6 +65,8 @@ export async function generateLogo( {
     type,
     negative_prompt = "no watermark",
     num_images= 2,
+    width,
+    height,
 } : LogoRequest ) 
     : Promise<LogoGenResponse> {
     // 로고 생성 api 클라이언트
@@ -85,7 +89,9 @@ export async function generateLogo( {
             style,
             type,
             negative_prompt,
-            num_images, 
+            num_images,
+            width,
+            height, 
         } )
     });
 

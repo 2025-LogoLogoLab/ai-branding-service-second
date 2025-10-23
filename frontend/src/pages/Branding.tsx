@@ -39,6 +39,7 @@ function Branding() {
   // 마지막 사용자 프롬프트(말풍선 표시용)
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
 
   // 초기 진입 시에는 아무 결과도 표시하지 않습니다.
   useEffect(() => {
@@ -147,6 +148,26 @@ function Branding() {
     }
   };
 
+  const handleBrandingCopy = async () => {
+    if (!brandingResult) {
+      alert('복사할 브랜딩 전략이 없습니다.');
+      return;
+    }
+    if (typeof navigator === 'undefined' || !navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+      alert('클립보드 기능을 사용할 수 없습니다.');
+      return;
+    }
+    try {
+      setIsCopying(true);
+      await navigator.clipboard.writeText(brandingResult);
+    } catch (err) {
+      console.error(err);
+      alert('브랜딩 전략 복사에 실패했습니다. 브라우저 설정을 확인해주세요.');
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
   // 선택된 결과를 바탕으로 컬러 가이드 생성으로 이동
   const goToColorGuideWithContext = () => {
     if (!brandingResult) {
@@ -184,6 +205,8 @@ function Branding() {
           markdown={brandingResult}
           onDelete={handleBrandingDelete}
           onSave={handleBrandingSave}
+          onCopy={() => handleBrandingCopy()}
+          isCopying={isCopying}
         />
       )}
 

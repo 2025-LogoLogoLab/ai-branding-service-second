@@ -26,8 +26,9 @@ const deleteIcon = icons.delete;
 const saveIcon = icons.save;
 const downloadIcon = icons.download;
 const tagIcon = icons.tag;
-// const insertIcon = icons.insert;
 const insertIcon = icons.tag;
+const copyIcon =
+    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="%230f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
 
 // ProductToolbarProps 타입 정의
 export type ProductToolbarProps = {
@@ -39,6 +40,7 @@ export type ProductToolbarProps = {
     onDelete?: (id: number) => void;
     onSave?: (id: number) => void;
     onDownload?: (id: number) => void;
+    onCopy?: (id: number) => void;
     onTag?: (id: number) => void;
     onInsertToProject?: (id: number) => void;
 
@@ -46,6 +48,7 @@ export type ProductToolbarProps = {
     isDeleting?: boolean;
     isSaving?: boolean;
     isDownloading?: boolean;
+    isCopying?: boolean;
     isTagging?: boolean;
     isInserting?: boolean;
 };
@@ -57,11 +60,13 @@ export function ProductToolbar({
     onDelete,
     onSave,
     onDownload,
+    onCopy,
     onTag,
     onInsertToProject,
     isDeleting = false,
     isSaving = false,
     isDownloading = false,
+    isCopying = false,
     isTagging = false,
     isInserting = false
 }: ProductToolbarProps) {
@@ -103,6 +108,18 @@ export function ProductToolbar({
                     onClick={() => onDownload(id)}
                     size={size}
                     disabled={isDownloading}
+                />
+            )}
+
+            {/* 클립보드 복사 버튼 */}
+            {onCopy && (
+                <IconButton
+                    iconSrc={copyIcon}
+                    alt="클립보드로 복사 버튼"
+                    tooltip="이 산출물을 클립보드로 복사합니다"
+                    onClick={() => onCopy(id)}
+                    size={size}
+                    disabled={isCopying}
                 />
             )}
 

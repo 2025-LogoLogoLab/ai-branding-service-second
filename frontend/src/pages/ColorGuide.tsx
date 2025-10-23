@@ -26,6 +26,7 @@ function ColorGuide(){
     const [colorGuideGenResult, setColorGuideGenResult] = useState<colorGuideGenResponse|null>(null);
     const [lastPrompt, setLastPrompt] = useState<string>('');
     const [loading, setLoading] = useState(false);
+    const [isCopying, setIsCopying] = useState(false);
 
     useEffect( () => {
         setStyle('');
@@ -90,6 +91,26 @@ function ColorGuide(){
         
     }
 
+    const handleColorGuideCopy = async () => {
+        if (!colorGuideGenResult) {
+            alert('복사할 컬러 가이드가 없습니다.');
+            return;
+        }
+        if (typeof navigator === 'undefined' || !navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+            alert('클립보드 기능을 사용할 수 없습니다.');
+            return;
+        }
+        try {
+            setIsCopying(true);
+            await navigator.clipboard.writeText(JSON.stringify(colorGuideGenResult, null, 2));
+        } catch (err) {
+            console.error(err);
+            alert('컬러 가이드 복사에 실패했습니다. 브라우저 설정을 확인해주세요.');
+        } finally {
+            setIsCopying(false);
+        }
+    };
+
     const goToBrandingWithContext = () => {
         if (!colorGuideGenResult) {
             alert('먼저 컬러 가이드를 생성해주세요.');
@@ -121,6 +142,8 @@ function ColorGuide(){
                     id={0}
                     onDelete={handleColorGuideDelete}
                     onSave={handleColorGuideSave}
+                    onCopy={() => handleColorGuideCopy()}
+                    isCopying={isCopying}
                 />
             )}
 

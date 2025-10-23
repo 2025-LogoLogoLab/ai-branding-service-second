@@ -3,16 +3,18 @@ import PaletteCard from '../../../molecules/PaletteCard/PaletteCard';
 import type { colorGuideGenResponse } from '../../../custom_api/colorguide';
 import { ProductToolbar } from '../../../molecules/ProductToolbar/ProductToolbar';
 import { useSelectionStore } from '../../../context/selectionStore';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export type SelectedColorGuideSidebarProps = {
   guide: colorGuideGenResponse;
   onDelete?: () => void;
   onSave?: () => void;
+  onCopy?: () => void;
 };
 
-export default function SelectedColorGuideSidebar({ guide, onDelete, onSave }: SelectedColorGuideSidebarProps) {
+export default function SelectedColorGuideSidebar({ guide, onDelete, onSave, onCopy }: SelectedColorGuideSidebarProps) {
   const { clearColorGuide } = useSelectionStore();
+  const [isCopying, setIsCopying] = useState(false);
 
   const resolvedDelete = useCallback(() => {
     if (onDelete) {
@@ -38,6 +40,26 @@ export default function SelectedColorGuideSidebar({ guide, onDelete, onSave }: S
     document.body.removeChild(anchor);
     URL.revokeObjectURL(url);
   }, [onSave, guide]);
+
+  const resolvedCopy = useCallback(async () => {
+    if (onCopy) {
+        onCopy();
+        return;
+    }
+    if (typeof navigator === 'undefined' || !navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+        window.alert?.('클립보드 기능을 사용할 수 없습니다.');
+        return;
+    }
+    try {
+        setIsCopying(true);
+        await navigator.clipboard.writeText(JSON.stringify(guide, null, 2));
+    } catch (error) {
+        console.error(error);
+        window.alert?.('클립보드 복사에 실패했습니다. 브라우저 설정을 확인해주세요.');
+    } finally {
+        setIsCopying(false);
+    }
+  }, [onCopy, guide]);
   const entries: Array<{ key: keyof colorGuideGenResponse; label: string }> = [
     { key: 'main', label: 'Main' },
     { key: 'sub', label: 'Sub' },
@@ -66,6 +88,8 @@ export default function SelectedColorGuideSidebar({ guide, onDelete, onSave }: S
           id={2}
           onDelete={() => resolvedDelete()}
           onSave={() => resolvedSave()}
+          onCopy={() => resolvedCopy()}
+          isCopying={isCopying}
           size={20}
         />
       </div>

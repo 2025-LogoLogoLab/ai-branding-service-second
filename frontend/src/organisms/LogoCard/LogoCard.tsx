@@ -11,8 +11,11 @@ export type LogoCardProps = {
     onDelete?: (id: number) => void;
     onSave?: (id: number) => void;
     onDownload?: (id: number) => void;
+    onCopy?: (id: number) => void;
     onTag?: (id: number) => void;
     onInsertToProject?: (id: number) => void;
+    isDownloading?: boolean;
+    isCopying?: boolean;
 };
 
 export function LogoCard({
@@ -21,8 +24,11 @@ export function LogoCard({
     onDelete,
     onSave,
     onDownload,
+    onCopy,
     onTag,
-    onInsertToProject
+    onInsertToProject,
+    isDownloading = false,
+    isCopying = false
 }: LogoCardProps) {
 
     return (
@@ -39,8 +45,11 @@ export function LogoCard({
                     onDelete={onDelete}
                     onSave={onSave}
                     onDownload={onDownload}
+                    onCopy={onCopy}
                     onTag={onTag}
                     onInsertToProject={onInsertToProject}
+                    isDownloading={isDownloading}
+                    isCopying={isCopying}
                 />
             </div>
         </div>

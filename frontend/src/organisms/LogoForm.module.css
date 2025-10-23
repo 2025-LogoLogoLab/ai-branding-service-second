@@ -1,30 +1,101 @@
 /* src/components/LogoForm.module.css */
 .card {
     display: grid;
-    grid-template-rows: auto auto auto auto;
-    gap: 12px;
-
-    background: var(--color-bg-base); /* 폼 래퍼는 항상 흰색 */
-    /* border: 1px solid var(--color-divider-border); */
-    border-radius: 12px;
-    padding: 16px;
+    gap: 0;
+    padding: 28px;
     box-sizing: border-box;
+    background: var(--color-bg-base);
+    border-radius: 16px;
 
-    /* ✅ 부모가 좁으면 100%로 확장, 넓으면 최대 1080px까지만 */
     width: 100%;
     max-width: 1080px;
 }
 
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--color-divider-border);
+}
+
 .title {
     margin: 0;
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
     color: var(--color-font-header);
 }
 
-.label {
-    font-size: 16px;
+.section {
+    display: grid;
+    gap: 16px;
+    padding-bottom: 24px;
+}
+
+.section + .section {
+    padding-top: 24px;
+    border-top: 1px solid var(--color-divider-border);
+}
+
+.sectionHeader {
+    display: grid;
+    gap: 6px;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 18px;
     font-weight: 700;
+    color: var(--color-font-header);
+}
+
+.sectionDescription {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-font-basic-content);
+    line-height: 1.5;
+}
+
+.required {
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+.fullWidthInput {
+    width: 100% !important;
+    background-color: var(--color-text-input-bg) !important;
+    border: 1px solid var(--color-divider-border) !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    min-height: 48px;
+    box-sizing: border-box;
+}
+
+.fullWidthInput:focus {
+    border-color: var(--color-button-primary-bg) !important;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-button-primary-bg) 30%, transparent) !important;
+    outline: none;
+}
+
+.textArea {
+    min-height: 220px;
+}
+
+.sizeGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.sizeField {
+    display: grid;
+    gap: 8px;
+}
+
+.inputLabel {
+    font-size: 14px;
+    font-weight: 600;
     color: var(--color-font-basic-content);
 }
 
@@ -34,9 +105,30 @@
     color: var(--color-font-critical);
 }
 
+.inlineError {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-font-critical);
+}
+
+.errorField {
+    border-color: var(--color-font-critical) !important;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-font-critical) 20%, transparent) !important;
+}
+
 .actions {
     display: flex;
+    justify-content: flex-end;
     gap: 8px;
-    /* justify-content: flex-start; */
-    justify-content: right;
+    margin-top: 24px;
+}
+
+@media (max-width: 720px) {
+    .card {
+        padding: 20px;
+    }
+
+    .section + .section {
+        padding-top: 20px;
+    }
 }
