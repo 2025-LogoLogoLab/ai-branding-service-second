@@ -1,6 +1,7 @@
 package com.example.logologolab.service.logo;
 
 import com.example.logologolab.domain.Logo;
+import com.example.logologolab.domain.User;
 import com.example.logologolab.repository.logo.LogoRepository;
 import com.example.logologolab.service.flux.FluxGenerateService;
 import com.example.logologolab.service.gpt.GptPromptService;
@@ -59,12 +60,13 @@ public class LogoGenerationService {
     }
 
     /** 업로드 + DB 저장까지 할 때 */
-    public String saveLogoToS3AndDb(String prompt, String base64) {
+    public String saveLogoToS3AndDb(User user, String prompt, String base64) {
         String url = s3UploadService.uploadBase64AndGetUrl(base64);
         Logo saved = logoRepository.save(
                 Logo.builder()
                         .prompt(prompt)
                         .imageUrl(url)  // A안에서 s3Key 쓰고 싶으면 엔티티에 s3Key 추가하여 저장
+                        .createdBy(user)
                         .build()
         );
         log.info("Saved logo id={}, url={}", saved.getId(), url);

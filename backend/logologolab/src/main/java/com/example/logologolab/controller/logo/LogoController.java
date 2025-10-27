@@ -131,9 +131,13 @@ public class LogoController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Map<String, String>> downloadAndSave(@RequestBody Map<String, String> request) {
+        User user = loginUserProvider.getLoginUser();
+
         String prompt = request.get("prompt");
         String base64 = request.get("base64");
-        String imageUrl = logoGenerationService.saveLogoToS3AndDb(prompt, base64);
+
+        String imageUrl = logoGenerationService.saveLogoToS3AndDb(user, prompt, base64);
+
         return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
     }
 
