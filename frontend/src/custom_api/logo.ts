@@ -219,10 +219,10 @@ export async function deleteLogo( id:number )
     console.log("로고 삭제 요청 시작");    
     const result = await fetch( `${logoDeleteEndPoint}/${id}`, {
         method: 'DELETE',
-        headers:{
-            // 'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${token}`,          // JWT 토큰은 쿠키로 관리.            
-        },
+        // headers:{
+        //     // 'Content-Type': 'application/json',
+        //     // 'Authorization': `Bearer ${token}`,          // JWT 토큰은 쿠키로 관리.            
+        // },
         credentials: 'include',
         // body: JSON.stringify(id),
     });

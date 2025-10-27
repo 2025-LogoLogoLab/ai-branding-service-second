@@ -78,12 +78,12 @@ export async function deleteColorGuide( colorGuideNum:number ) {
 
     const result = await fetch(`${colorguideDeleteEndPoint}/${colorGuideNum}`, {
         method: 'DELETE',
-        headers:{
-            'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${token}`,            // JWT 토큰은 쿠키로 관리.
-        },
+        // headers:{
+        //     'Content-Type': 'application/json',
+        //     // 'Authorization': `Bearer ${token}`,            // JWT 토큰은 쿠키로 관리.
+        // },
         credentials: 'include',
-        body: JSON.stringify(colorGuideNum)
+        // body: JSON.stringify(colorGuideNum)
     });
 
     if( !result.ok ){

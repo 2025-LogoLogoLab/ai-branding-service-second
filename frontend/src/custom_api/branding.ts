@@ -116,11 +116,11 @@ export async function deleteBranding( {id} : BrandingDeleteRequest ) {
 
     const result = await fetch(brandingDeleteEndPoint + id, {   // 삭제할 id 를 url에 붙여서 요청.
         method: 'DELETE',
-        headers:{
-            'Content-Type': 'application/json',
-        },
+        // headers:{
+        //     'Content-Type': 'application/json',
+        // },
         credentials: 'include',
-        body: JSON.stringify(id),
+        // body: JSON.stringify(id),
     });
 
     if( !result.ok ){
