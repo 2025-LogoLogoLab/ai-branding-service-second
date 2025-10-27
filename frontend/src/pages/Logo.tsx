@@ -29,6 +29,7 @@ import { TextButton } from "../atoms/TextButton/TextButton";
 
 import { generateLogo, saveLogo } from "../custom_api/logo";
 import { useSelectionStore } from "../context/selectionStore";
+import { ensureDataUrl } from "../utils/image";
 
 const NUM_IMAGES_DEFAULT = 2; // 생성 이미지 개수(정책상 현재 2장 고정)
 
@@ -98,9 +99,6 @@ export default function Logo() {
 
     const LOGO_DOWNLOAD_ERROR = "로고 다운로드에 실패했습니다.";
     const LOGO_COPY_ERROR = "클립보드 복사에 실패했습니다. 브라우저 설정을 확인해주세요.";
-
-    const ensureDataUrl = (data: string, mime = "image/png") =>
-        data.startsWith("data:") ? data : `data:${mime};base64,${data}`;
 
     const clearErrorMessage = (message: string) => {
         setError((prev) => (prev === message ? null : prev));

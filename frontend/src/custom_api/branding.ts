@@ -1,4 +1,5 @@
 // src/custom_api/branding.ts
+import type { PaginatedResponse } from "./types";
 
 const basePath = import.meta.env.VITE_API_BASE_URL;
 
@@ -7,6 +8,7 @@ const brandingStoreEndPoint = basePath + '/brand-strategy/save';    // 브랜딩
 const brandingDeleteEndPoint = basePath + '/brand-strategy/';       // 브랜딩 전략 삭제
 // const brandingUpdateEndPoint = basePath + '/brand-strategy/';       // 브랜딩 전략 수정
 const fetchAllBrandingEndPoint = basePath + '/brand-strategies';    // 브랜딩 전략 리스트 조회
+const brandStrategyListEndpoint = basePath + '/brand-strategies'; // 페이징 목록 조회(신규 UI)
 // const brandingTagEndPoint = '/api/branding';
 // const brandingProjectEndPoint = '/api/branding';
 
@@ -56,6 +58,31 @@ export type AllBrandingFetchParams = {    // 브랜딩 전략 수정시 URL 파�
     filter?: 'mine' | null | undefined;     // mine 추가되어있는 경우 내것만
 }
 
+/**
+ * 산출물 관리에서 재사용할 브랜딩 전략 목록 항목 타입
+ * - Swagger 캡처본을 기반으로 주요 필드 정의
+ */
+export type BrandStrategyListItem = {
+    id: number;
+    briefKo: string;
+    style?: string;
+    mainHex?: string;
+    pointHex?: string;
+    summaryKo?: string;      // 서버에서 짧은 요약을 줄 경우
+    markdown?: string;       // 전체 본문(옵션)
+    createdAt: string;
+};
+
+/**
+ * 브랜딩 전략 목록 조회 파라미터
+ */
+export type BrandStrategyPageParams = {
+    projectId?: number;
+    page?: number;
+    size?: number;
+    filter?: 'mine';
+};
+
 export async function generateBranding( { briefKo: briefKo, style, base64 } : BrandingRequest): Promise<BrandingResponse> {
     // 브랜딩 전략 생성 클라이언트
 
@@ -89,10 +116,11 @@ export async function deleteBranding( {id} : BrandingDeleteRequest ) {
 
     const result = await fetch(brandingDeleteEndPoint + id, {   // 삭제할 id 를 url에 붙여서 요청.
         method: 'DELETE',
-        // headers:{        // body 없음.
-        //     'Content-Type': 'application/json',
-        // },
+        headers:{
+            'Content-Type': 'application/json',
+        },
         credentials: 'include',
+        body: JSON.stringify(id),
     });
 
     if( !result.ok ){
@@ -165,4 +193,39 @@ export async function fetchAllBranding( params : AllBrandingFetchParams): Promis
 
     console.log("브랜딩 전략 전체 가져오기 요청 완료");    
     return result.json();    
+}
+
+/**
+ * 산출물 관리 전용 브랜딩 전략 페이지 조회
+ */
+export async function fetchBrandStrategyPage(
+    params: BrandStrategyPageParams = {},
+    options: { signal?: AbortSignal } = {}
+): Promise<PaginatedResponse<BrandStrategyListItem>> {
+    console.log("브랜딩 전략 목록 페이지 조회 요청 시작");
+
+    const url = new URL(brandStrategyListEndpoint);
+    const qs = new URLSearchParams();
+
+    if (params.projectId != null) qs.set("projectId", String(params.projectId));
+    if (params.page != null) qs.set("page", String(params.page));
+    if (params.size != null) qs.set("size", String(params.size));
+    if (params.filter) qs.set("filter", params.filter);
+
+    url.search = qs.toString();
+
+    const result = await fetch(url.toString(), {
+        method: 'GET',
+        credentials: 'include',
+        signal: options.signal,
+    });
+
+    if (!result.ok) {
+        console.log("브랜딩 전략 목록 페이지 조회 오류");
+        throw new Error('브랜딩 전략 목록 조회 실패 ' + result.status);
+    }
+
+    console.log("브랜딩 전략 목록 페이지 조회 성공");
+    const payload = await result.json();
+    return payload as PaginatedResponse<BrandStrategyListItem>;
 }

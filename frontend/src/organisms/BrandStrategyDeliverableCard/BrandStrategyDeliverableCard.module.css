@@ -1,0 +1,75 @@
+.card {
+    display: grid;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 20px;
+    background: #ffffff;
+    border: 1px solid rgba(73, 83, 110, 0.15);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.header {
+    display: grid;
+    gap: 12px;
+}
+
+.meta {
+    display: grid;
+    gap: 6px;
+}
+
+.label {
+    font-size: 13px;
+    color: var(--color-font-gray);
+}
+
+.prompt {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-font-basic-content);
+}
+
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0;
+}
+
+.badgeLabel {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-font-gray);
+}
+
+.badgeValue {
+    margin: 2px 0 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.body {
+    display: grid;
+    gap: 8px;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-font-header);
+}
+
+.content {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-font-basic-content);
+    white-space: pre-line;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+}

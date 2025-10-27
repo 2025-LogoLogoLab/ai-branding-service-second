@@ -16,6 +16,7 @@ export type LogoCardProps = {
     onInsertToProject?: (id: number) => void;
     isDownloading?: boolean;
     isCopying?: boolean;
+    isDeleting?: boolean;
 };
 
 export function LogoCard({
@@ -28,7 +29,8 @@ export function LogoCard({
     onTag,
     onInsertToProject,
     isDownloading = false,
-    isCopying = false
+    isCopying = false,
+    isDeleting = false
 }: LogoCardProps) {
 
     return (
@@ -50,6 +52,7 @@ export function LogoCard({
                     onInsertToProject={onInsertToProject}
                     isDownloading={isDownloading}
                     isCopying={isCopying}
+                    isDeleting={isDeleting}
                 />
             </div>
         </div>

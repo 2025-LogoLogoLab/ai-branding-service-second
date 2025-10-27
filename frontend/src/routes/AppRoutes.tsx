@@ -13,6 +13,11 @@ import MyProducts from '../pages/MyProducts'
 import MyProjects from '../pages/MyProjects'
 import Branding from '../pages/Branding'
 import ColorGuide from '../pages/ColorGuide'
+import DeliverablesAllPage, {
+  DeliverablesBrandingPage,
+  DeliverablesColorGuidePage,
+  DeliverablesLogoPage,
+} from '../pages/Deliverables'
 import { ProtectedRoute } from './ProtectedRoute'
 import Admin from '../pages/Admin'
 import UnAuth from '../pages/UnAuth'
@@ -68,6 +73,10 @@ const AppRoutes = () => {
           <Route path="myProducts" element={<MyProducts />} />
           <Route path="myProjects" element={<MyProjects />} />
           <Route path="myPage/userInfo" element={<UserInfo />} />
+          <Route path="deliverables" element={<DeliverablesAllPage />} />
+          <Route path="deliverables/logo" element={<DeliverablesLogoPage />} />
+          <Route path="deliverables/branding" element={<DeliverablesBrandingPage />} />
+          <Route path="deliverables/color-guide" element={<DeliverablesColorGuidePage />} />
         </Route>
 
         {/* 관리자만 공개하는 페이지 */}

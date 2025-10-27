@@ -1,0 +1,47 @@
+.page {
+    display: grid;
+    gap: 32px;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(220px, 260px) 1fr;
+    gap: 32px;
+    align-items: start;
+}
+
+.sections {
+    display: grid;
+    gap: 32px;
+}
+
+.logoGrid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.brandGrid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.colorGrid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.status {
+    padding: 20px;
+    border-radius: 16px;
+    background: rgba(31, 60, 142, 0.08);
+    color: var(--color-font-basic-content);
+    text-align: center;
+}
+
+.error {
+    background: rgba(220, 38, 38, 0.12);
+    color: #b91c1c;
+}

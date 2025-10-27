@@ -2,6 +2,7 @@
 
 import type { LogoStyleKey } from "../types/logoStyles";
 import type { LogoType } from "../types/logoTypes";
+import type { PaginatedResponse } from "./types";
 
 // import { useAuth } from "../context/AuthContext";
 
@@ -10,6 +11,12 @@ const logoGenEndPoint = basePath + '/logo/generate'
 const logoSaveEndPoint = basePath + '/logo/save'
 const fetchAllEndPoint = basePath + '/logo'
 const logoDeleteEndPoint = basePath + '/logo'
+
+/**
+ * 새로운 산출물 관리 UI에서는 페이징이 적용된 로고 목록이 필요하므로
+ * /api/logos 엔드포인트를 별도로 정의한다. (기존 /logo 는 구버전 호환용)
+ */
+const logoListEndPoint = basePath + '/logos'
 
 
 export type LogoRequest = { // 로고 요청 타입
@@ -37,11 +44,28 @@ export type LogoGenResponse = {    // 로고 생성 응답 타입 ver 2. base64 
     images: string[]; 
 }
 
-export type LogoResponse = {
-    logoNum: number;
-    prompt: string;
-    imageUrl: string;
-}
+/**
+ * 로고 목록 항목 타입
+ * - 표준 응답 예시(문서 이미지 참고) 기준으로 필드 구성
+ */
+export type LogoListItem = {
+    id: number;           // 로고 고유 ID
+    prompt: string;       // 생성에 사용된 프롬프트
+    imageUrl: string;     // 저장된 로고 이미지 (절대경로 또는 data URL)
+    createdAt: string;    // 생성 일시(ISO8601)
+};
+
+/**
+ * 로고 목록 조회 시 사용할 쿼리 파라미터 집합
+ * - projectId: 특정 프로젝트 산출물만 조회
+ * - filter: 'mine' 전달 시 내 산출물만 필터링
+ */
+export type LogoListParams = {
+    projectId?: number;
+    page?: number;
+    size?: number;
+    filter?: 'mine';
+};
 
 export type LogoStoreRequest = {    // 로고 저장 요청용
     // logoNum?: number;
@@ -128,7 +152,7 @@ export async function saveLogo( { prompt, base64: imageData }: LogoStoreRequest 
     return result.json();
 }
 
-export async function fetchAllLogo(): Promise<LogoResponse[]>{
+export async function fetchAllLogo(): Promise<LogoListItem[]>{
     // 사용자의 모든 로고 가져오기
     console.log("사용자 전체 로고 가져오기");
     const result = await fetch( fetchAllEndPoint, {
@@ -149,20 +173,58 @@ export async function fetchAllLogo(): Promise<LogoResponse[]>{
     return result.json();
 }
 
+/**
+ * 산출물 관리 전용 로고 목록 API
+ * - GET /api/logos
+ * - 페이징/필터링 쿼리 파라미터를 지원
+ * - 반환값은 PaginatedResponse<LogoListItem>
+ */
+export async function fetchLogoPage(
+    params: LogoListParams = {},
+    options: { signal?: AbortSignal } = {}
+): Promise<PaginatedResponse<LogoListItem>> {
+    console.log("로고 목록 페이지 조회 요청 시작");
+
+    const url = new URL(logoListEndPoint);
+    const qs = new URLSearchParams();
+
+    if (params.projectId != null) qs.set("projectId", String(params.projectId));
+    if (params.page != null) qs.set("page", String(params.page));
+    if (params.size != null) qs.set("size", String(params.size));
+    if (params.filter) qs.set("filter", params.filter);
+
+    url.search = qs.toString();
+
+    const result = await fetch(url.toString(), {
+        method: 'GET',
+        credentials: 'include',
+        signal: options.signal,
+    });
+
+    if (!result.ok) {
+        console.log("로고 목록 페이지 조회 요청 오류");
+        throw new Error('로고 목록 조회 실패 ' + result.status);
+    }
+
+    console.log("로고 목록 페이지 조회 요청 성공");
+    const payload = await result.json();
+    return payload as PaginatedResponse<LogoListItem>;
+}
+
 export async function deleteLogo( id:number )
     // :Promise<boolean>
 {
     // 로고 삭제 요청. 리턴 타입 정해지지 않음.
 
     console.log("로고 삭제 요청 시작");    
-    const result = await fetch( logoDeleteEndPoint, {
+    const result = await fetch( `${logoDeleteEndPoint}/${id}`, {
         method: 'DELETE',
         headers:{
-            'Content-Type': 'application/json',
+            // 'Content-Type': 'application/json',
             // 'Authorization': `Bearer ${token}`,          // JWT 토큰은 쿠키로 관리.            
         },
         credentials: 'include',
-        body: JSON.stringify(id),
+        // body: JSON.stringify(id),
     });
 
     if( !result.ok ){

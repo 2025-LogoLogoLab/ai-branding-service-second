@@ -8,6 +8,7 @@ function MyPage() {
       <h1> My Page</h1>
       <p onClick={() => navigate('/myPage/userInfo')}> User Info </p>
       <p onClick={() => navigate('/myProducts')}> My Products </p>
+      <p onClick={() => navigate('/deliverables')}> Deliverables </p>
       <p onClick={() => navigate('/myProject')}> My Project </p>
     </div>
 
