@@ -161,7 +161,7 @@ function DeliverablesPage({ mode }: { mode: DeliverablesMode }) {
         selections.logo,
         logoPage,
         ({ page, size, signal }) => fetchLogoPage({ page, size, 
-            // filter: "mine" 
+            filter: "mine" 
         }, 
             { signal }),
         [logoNonce],
@@ -170,7 +170,7 @@ function DeliverablesPage({ mode }: { mode: DeliverablesMode }) {
         selections.branding,
         brandingPage,
         ({ page, size, signal }) => fetchBrandStrategyPage({ page, size, 
-            // filter: "mine" 
+            filter: "mine" 
         }, 
             { signal }),
         [brandingNonce],
@@ -179,7 +179,7 @@ function DeliverablesPage({ mode }: { mode: DeliverablesMode }) {
         selections.colorGuide,
         colorGuidePage,
         ({ page, size, signal }) => fetchColorGuidePage({ page, size, 
-            // filter: "mine" 
+            filter: "mine" 
         }, 
             { signal }),
         [colorGuideNonce],

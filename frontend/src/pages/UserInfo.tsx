@@ -9,7 +9,6 @@ import { logOut } from '../custom_api/auth';
 
 // 회원 정보 페이지
 function UserInfo(){
-
     const navigate = useNavigate();
 
     const [error, setError] = useState<string | null>(null);
@@ -111,10 +110,6 @@ function UserInfo(){
         setIsEditing(false);
     };
 
-    const handleNavigateMyPage = () => {
-        navigate('/myPage');
-    };
-
     const handleStartEdit = () => {
         setIsEditing(true);
         setError(null);
@@ -139,7 +134,6 @@ function UserInfo(){
             setChecked={handleCheckboxChange}
             onCancel={handleCancel}
             onStartEdit={handleStartEdit}
-            onNavigateMyPage={handleNavigateMyPage}
         />
     );
 }

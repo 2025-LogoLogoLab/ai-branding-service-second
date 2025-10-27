@@ -24,7 +24,6 @@ type UserInfoFormProps = {
     setChecked: (name: string, checked: boolean) => void;
     onCancel?: () => void;
     onStartEdit: () => void;
-    onNavigateMyPage?: () => void;
 };
 
 function normalizeProfileImageSrc(profileImageData: string | null): string | null {
@@ -54,7 +53,6 @@ function UserInfoForm({
     setChecked,
     onCancel,
     onStartEdit,
-    onNavigateMyPage,
 }: UserInfoFormProps) {
     const profileImageSrc = normalizeProfileImageSrc(profileImageData);
     const pageTitle = isEditing ? '회원 정보 수정' : '회원 정보';
@@ -86,33 +84,6 @@ function UserInfoForm({
     ];
 
     return (
-        <div className={styles.page}>
-            <aside className={styles.sidebar} aria-label="Account sections">
-                <div className={styles.sidebarList}>
-                    <button
-                        type="button"
-                        className={`${styles.sidebarItem} ${styles.sidebarItemActive}`}
-                        aria-current="page"
-                    >
-                        <span className={`${styles.sidebarIcon} ${styles.sidebarIconPrimary}`} aria-hidden="true">
-                            U
-                        </span>
-                        <span className={styles.sidebarLabel}>회원 정보 관리</span>
-                    </button>
-
-                    <button
-                        type="button"
-                        className={styles.sidebarItem}
-                        onClick={() => onNavigateMyPage?.()}
-                    >
-                        <span className={styles.sidebarIcon} aria-hidden="true">
-                            i
-                        </span>
-                        <span className={styles.sidebarLabel}>마이페이지</span>
-                    </button>
-                </div>
-            </aside>
-
             <section className={styles.content} aria-label={pageTitle}>
                 <header className={styles.header}>
                     <h1 className={styles.title}>{pageTitle}</h1>
@@ -270,7 +241,6 @@ function UserInfoForm({
                     />
                 </div>
             </section>
-        </div>
     );
 }
 

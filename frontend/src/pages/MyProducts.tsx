@@ -1,20 +1,7 @@
 // src/pages/MyProducts.tsx
-// import BrandingList from "../forTest/BrandingList";
-import ColorGuideList from "../forTest/ColorGuideList";
-import LogoList from "../forTest/LogoList";
+// 기존 마이프로덕트 페이지는 산출물 관리(Deliverables)와 동일한 화면을 사용한다.
+import DeliverablesAllPage from "./Deliverables";
 
-function MyProducts() {
-    return (
-      <div>
-        <h1> My Products</h1>
-        <h2> 로고 산출물 모음 </h2>
-        <LogoList />
-        {/* <h2> 브랜딩 전략 산출물 모음</h2>
-        <BrandingList /> */}
-        <h2> 컬러 가이드 산출물 모음</h2>
-        <ColorGuideList />
-      </div>
-    );
+export default function MyProducts() {
+    return <DeliverablesAllPage />;
 }
-
-export default MyProducts
