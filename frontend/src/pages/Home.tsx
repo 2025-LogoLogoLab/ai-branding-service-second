@@ -20,7 +20,7 @@ function Home() {
   
   return (
     <div>
-      <h1> Home Page 정적 파일 자동 싱크 테스트</h1>
+      <h1> Home Page **추후 홍보 및 사용법 설명이 들어갈 예정**</h1>
       <Link to={'Login'}> Login </Link><br></br>
       <Link to={'Mypage'}> My Page </Link><br></br>
       <Link to={'MyProducts'}> My Products </Link><br></br>
@@ -29,11 +29,11 @@ function Home() {
       <Link to={'branding'}> Branding </Link><br></br>
       <Link to={'colorGuide'}> Color Guide </Link><br></br>
       <Link to={'Admin'}> Admin </Link><br></br>
-      <DemoLogoTypeSidebar></DemoLogoTypeSidebar>
-      <DemoLogoStyleSidebar></DemoLogoStyleSidebar>
-      <AiSidebar></AiSidebar>
+      {/* <DemoLogoTypeSidebar></DemoLogoTypeSidebar> */}
+      {/* <DemoLogoStyleSidebar></DemoLogoStyleSidebar> */}
+      {/* <AiSidebar></AiSidebar> */}
       {/* <ColorGuideExample></ColorGuideExample> */}
-      <LogOutButton></LogOutButton>
+      {/* <LogOutButton></LogOutButton> */}
     </div>
   );
 }
