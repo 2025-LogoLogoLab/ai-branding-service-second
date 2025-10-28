@@ -7,7 +7,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL as string;
 export const api = axios.create({
     baseURL,
     withCredentials: true, // 쿠키 기반 JWT 인증
-  timeout: 15_000,
+  timeout: 5 * 60 * 1000, // allow logo generation to run up to 5 minutes
 });
 
 // 에러 메시지 변환기
