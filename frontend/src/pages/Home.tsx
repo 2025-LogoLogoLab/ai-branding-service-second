@@ -2,11 +2,11 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
-import LogOutButton from "../molecules/LogOutButton/LogOutButton";
+// import LogOutButton from "../molecules/LogOutButton/LogOutButton";
 // import ColorGuideExample from "../forTest/ColorGuideExample";
-import { DemoLogoTypeSidebar } from "../forTest/DemoLogoTypeSidebar";
-import { DemoLogoStyleSidebar } from "../forTest/DemoLogoStyleSidebar";
-import AiSidebar from "../organisms/ai/AiSidebar/AiSidebar";
+// import { DemoLogoTypeSidebar } from "../forTest/DemoLogoTypeSidebar";
+// import { DemoLogoStyleSidebar } from "../forTest/DemoLogoStyleSidebar";
+// import AiSidebar from "../organisms/ai/AiSidebar/AiSidebar";
 
 function Home() {
   const {user} = useAuth();
