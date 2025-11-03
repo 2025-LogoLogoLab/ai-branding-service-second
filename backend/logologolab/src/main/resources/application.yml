@@ -21,6 +21,12 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
 
 server:
+  server:
+    tomcat:
+      connection-timeout: 600000   # 10분 (단위: ms)
+    servlet:
+      session:
+        timeout: 30m  # 세션은 따로 넉넉하게
   ssl:
     enabled: false
 
