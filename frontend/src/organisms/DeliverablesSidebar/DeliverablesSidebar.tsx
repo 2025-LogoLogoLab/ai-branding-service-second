@@ -5,6 +5,7 @@
 //   클릭 시 onToggle 콜백을 호출한다.
 
 import styles from "./DeliverablesSidebar.module.css";
+import iconProducts from "../../assets/icons/icon_products.png";
 import iconLogo from "../../assets/icons/icon_logo_generation.png";
 import iconStrategy from "../../assets/icons/icon_strategy.png";
 import iconColor from "../../assets/icons/icon_color_guide.png";
@@ -36,7 +37,10 @@ export default function DeliverablesSidebar({
 }: DeliverablesSidebarProps) {
     return (
         <aside className={styles.sidebar} aria-label="산출물 카테고리 선택">
-            <h2 className={styles.title}>산출물 관리</h2>
+            <h2 className={styles.title}>
+                <img src={iconProducts} alt="" aria-hidden="true" className={styles.titleIcon} />
+                산출물 관리
+            </h2>
             <ul className={styles.list} role="list">
                 {OPTION_META.map(({ id, label, icon }) => {
                     const checked = selections[id];
