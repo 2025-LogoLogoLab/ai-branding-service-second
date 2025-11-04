@@ -128,10 +128,14 @@ function ColorGuide(){
         });
     };
 
+    const hasLogoContext = Boolean(selection.logoBase64 || imageUrl);
+
     return(
         <div style={{ padding: '12px 16px', display: 'grid', gap: 16 }}>
             {/* 상단 프롬프트 말풍선 */}
-            <h2 style={{ margin: 0 }}>로고를 기반으로 컬러 가이드 작성</h2>
+            <h2 style={{ margin: 0 }}>
+                {hasLogoContext ? '로고를 기반으로 컬러 가이드 작성' : '컬러 가이드 생성'}
+            </h2>
             {lastPrompt && <MarkdownMessage content={lastPrompt} isUser />}
 
             {/* 결과 표시 */}
