@@ -68,13 +68,15 @@ const renderTagsSection = (tags?: Array<{ id?: number; name: string }>) => (
     <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Tags</h3>
         {tags && tags.length > 0 ? (
-            <div className={styles.tagGroup}>
-                {tags.map((tag) => (
-                    <span className={styles.tag} key={tag.id ?? tag.name}>{tag.name}</span>
-                ))}
+            <div className={styles.tagBlock}>
+                <div className={styles.tagGroup}>
+                    {tags.map((tag) => (
+                        <span className={styles.tag} key={tag.id ?? tag.name}>{tag.name}</span>
+                    ))}
+                </div>
             </div>
         ) : (
-            <p className={styles.textBlock}>등록된 태그가 없습니다.</p>
+            <div className={styles.promptBlock}>등록된 태그가 없습니다.</div>
         )}
     </section>
 );

@@ -176,6 +176,9 @@
     color: rgba(15, 23, 42, 0.55);
 }
 
+.tagBlock {
+    composes: contentBlock;
+}
 .tagGroup {
     display: flex;
     flex-wrap: wrap;
@@ -194,7 +197,7 @@
 .imageWrapper {
     border-radius: 20px;
     overflow: hidden;
-    background: #f1f5f9;
+    background: rgba(15, 23, 42, 0.04);
     display: flex;
     justify-content: center;
     padding: 16px;
