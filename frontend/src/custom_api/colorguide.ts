@@ -7,6 +7,7 @@ import type { PaginatedResponse } from "./types";
 const colorguideGenEndPoint = basePath + '/color-guide/generate';
 const colorguideStoreEndPoint = basePath + '/color-guide/save';
 const colorguideDeleteEndPoint = basePath + '/color-guide';
+const colorGuideDetailEndpoint = basePath + '/color-guide';
 const colorGuideListEndpoint = basePath + '/color-guides';
 
 // const navigate = useNavigate();
@@ -135,6 +136,20 @@ export type ColorGuideListItem = {
     createdAt: string;
 };
 
+export type ColorGuideTag = { id: number; name: string };
+
+export type ColorGuideDetail = {
+    id: number;
+    briefKo: string;
+    style?: string;
+    guide: colorGuide;
+    caseType?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    tags?: ColorGuideTag[];
+    [key: string]: unknown;
+};
+
 export type ColorGuidePageParams = {
     projectId?: number;
     page?: number;
@@ -183,4 +198,46 @@ export async function fetchAllColorGuide(): Promise<ColorGuideListItem[]> {
 
     const firstPage = await fetchColorGuidePage({ page: 0, size: 50, filter: 'mine' });
     return firstPage.content;
+}
+
+const normalizePalette = (input: any, fallbackHex?: string, fallbackDescription?: string): palette => ({
+    hex: input?.hex ?? fallbackHex ?? "",
+    description: input?.description ?? fallbackDescription ?? "",
+});
+
+export async function fetchColorGuideDetail(
+    id: number,
+    options: { signal?: AbortSignal } = {}
+): Promise<ColorGuideDetail> {
+    console.log("컬러 가이드 상세 조회 요청 시작");
+    const result = await fetch(`${colorGuideDetailEndpoint}/${id}`, {
+        method: "GET",
+        credentials: "include",
+        signal: options.signal,
+    });
+
+    if (!result.ok) {
+        console.log("컬러 가이드 상세 조회 오류");
+        throw new Error("컬러 가이드 상세 조회 실패 " + result.status);
+    }
+
+    const payload = await result.json();
+    const guideSource = payload.guide ?? payload;
+    const detail: ColorGuideDetail = {
+        id: payload.id,
+        briefKo: payload.briefKo ?? "",
+        style: payload.style ?? undefined,
+        caseType: payload.caseType ?? undefined,
+        guide: {
+            main: normalizePalette(guideSource.main, payload.mainHex, payload.mainDescription),
+            sub: normalizePalette(guideSource.sub, payload.subHex, payload.subDescription),
+            point: normalizePalette(guideSource.point, payload.pointHex, payload.pointDescription),
+            background: normalizePalette(guideSource.background, payload.backgroundHex, payload.backgroundDescription),
+        },
+        createdAt: payload.createdAt,
+        updatedAt: payload.updatedAt,
+        tags: Array.isArray(payload.tags) ? payload.tags : undefined,
+    };
+    console.log("컬러 가이드 상세 조회 성공");
+    return detail;
 }

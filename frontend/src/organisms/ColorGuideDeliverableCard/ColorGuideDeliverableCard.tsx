@@ -2,6 +2,7 @@
 // 산출물 관리 페이지에서 컬러 가이드를 카드 형태로 노출
 // - briefKo를 Prompt로 보여주고, ColorGuideStrip을 이용해 팔레트를 시각화한다.
 
+import type { KeyboardEvent } from "react";
 import styles from "./ColorGuideDeliverableCard.module.css";
 import { ProductToolbar } from "../../molecules/ProductToolbar/ProductToolbar";
 import ColorGuideStrip from "../ColorGuideStrip/ColorGuideStrip";
@@ -19,6 +20,8 @@ export type ColorGuideDeliverableCardProps = {
     isCopying?: boolean;
     isDownloading?: boolean;
     isDeleting?: boolean;
+    variant?: "default" | "blueprint";
+    onSelect?: (id: number) => void;
 };
 
 function buildGuide(item: ColorGuideListItem): colorGuide {
@@ -55,30 +58,69 @@ export default function ColorGuideDeliverableCard({
     isCopying,
     isDownloading,
     isDeleting,
+    variant = "default",
+    onSelect,
 }: ColorGuideDeliverableCardProps) {
     const palette = buildGuide(item);
+    const isBlueprint = variant === "blueprint";
+
+    const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+        if (!onSelect) return;
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onSelect(item.id);
+        }
+    };
 
     return (
-        <article className={styles.card}>
+        <article
+            className={[
+                styles.card,
+                isBlueprint ? styles.cardBlueprint : "",
+            ].join(" ").trim()}
+            role={onSelect ? "button" : undefined}
+            tabIndex={onSelect ? 0 : undefined}
+            onClick={onSelect ? () => onSelect(item.id) : undefined}
+            onKeyDown={handleKeyDown}
+            aria-label={onSelect ? "컬러 가이드 상세 보기" : undefined}
+        >
             <header className={styles.header}>
                 <div>
-                    <span className={styles.label}>Prompt</span>
-                    <p className={styles.prompt}>{item.briefKo || "컬러 가이드 생성 프롬프트가 없습니다."}</p>
+                    <span
+                        className={[
+                            styles.label,
+                            isBlueprint ? styles.labelBlueprint : "",
+                        ].join(" ").trim()}
+                    >
+                        Prompt
+                    </span>
+                    <p
+                        className={[
+                            styles.prompt,
+                            isBlueprint ? styles.promptBlueprint : "",
+                        ].join(" ").trim()}
+                    >
+                        {item.briefKo || "컬러 가이드 생성 프롬프트가 없습니다."}
+                    </p>
                 </div>
-                {item.style && (
-                    <div className={styles.style}>
-                        <span className={styles.badgeLabel}>Style</span>
-                        <span className={styles.badgeValue}>{item.style}</span>
-                    </div>
-                )}
             </header>
 
             <section className={styles.body}>
-                <h4 className={styles.sectionTitle}>Color Guide</h4>
+                <h4
+                    className={[
+                        styles.sectionTitle,
+                        isBlueprint ? styles.sectionTitleBlueprint : "",
+                    ].join(" ").trim()}
+                >
+                    Color Guide
+                </h4>
                 <ColorGuideStrip guide={palette} />
             </section>
 
-            <footer className={styles.footer}>
+            <footer
+                className={styles.footer}
+                onClick={(event) => event.stopPropagation()}
+            >
                 <ProductToolbar
                     id={item.id}
                     onDelete={onDelete}

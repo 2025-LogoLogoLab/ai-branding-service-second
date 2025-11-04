@@ -116,6 +116,64 @@
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-font-critical) 20%, transparent) !important;
 }
 
+.toggleContainer {
+    display: grid;
+    gap: 12px;
+}
+
+.toggleHeader {
+    display: grid;
+    gap: 4px;
+}
+
+.toggleLabel {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-font-header);
+}
+
+.toggleDescription {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-font-basic-content);
+    line-height: 1.4;
+}
+
+.toggleGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.toggleButton {
+    border: 1px solid var(--color-divider-border);
+    background-color: var(--color-text-input-bg);
+    color: var(--color-font-basic-content);
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.toggleButton[aria-checked="true"],
+.toggleButtonActive {
+    border-color: var(--color-button-primary-bg);
+    background-color: color-mix(in oklab, var(--color-button-primary-bg) 12%, var(--color-text-input-bg));
+    color: var(--color-button-primary-bg);
+}
+
+.toggleButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.toggleButton:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--color-button-primary-bg) 40%, transparent);
+    outline-offset: 2px;
+}
+
 .actions {
     display: flex;
     justify-content: flex-end;

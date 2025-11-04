@@ -2,12 +2,15 @@
 .card {
   display: flex;
   flex-direction: column;
-  /* 부모 그리드에 맞춰 확장하되 토큰 범위 안에서 제한 */
-  width: clamp(var(--palette-card-min, 160px), 100%, var(--palette-card-max, 240px));
+  /* 부모 그리드 너비를 기본으로 사용하면서 최대 폭만 제한 */
+  width: 100%;
+  max-width: var(--palette-card-max, 240px);
+  min-width: 0;
   gap: 8px;
   height: 100%;
   box-sizing: border-box;
   flex: 1 1 auto;
+  margin: 0 auto;
 }
 
 .swatch {

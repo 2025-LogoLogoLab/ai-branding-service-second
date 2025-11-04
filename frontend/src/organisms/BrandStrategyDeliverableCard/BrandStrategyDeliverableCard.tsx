@@ -3,6 +3,7 @@
 // - Prompt(briefKo)와 본문(summary/markdown)을 간단히 노출
 // - 하단에는 ProductToolbar를 재사용하여 공통 액션을 제공
 
+import type { KeyboardEvent } from "react";
 import styles from "./BrandStrategyDeliverableCard.module.css";
 import { ProductToolbar } from "../../molecules/ProductToolbar/ProductToolbar";
 import type { BrandStrategyListItem } from "../../custom_api/branding";
@@ -18,6 +19,8 @@ export type BrandStrategyDeliverableCardProps = {
     isCopying?: boolean;
     isDownloading?: boolean;
     isDeleting?: boolean;
+    variant?: "default" | "blueprint";
+    onSelect?: (id: number) => void;
 };
 
 function normalizeStrategyText(item: BrandStrategyListItem): string {
@@ -38,39 +41,76 @@ export default function BrandStrategyDeliverableCard({
     isCopying,
     isDownloading,
     isDeleting,
+    variant = "default",
+    onSelect,
 }: BrandStrategyDeliverableCardProps) {
     const strategyText = normalizeStrategyText(item);
+    const isBlueprint = variant === "blueprint";
+
+    const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+        if (!onSelect) return;
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onSelect(item.id);
+        }
+    };
 
     return (
-        <article className={styles.card}>
+        <article
+            className={[
+                styles.card,
+                isBlueprint ? styles.cardBlueprint : "",
+            ].join(" ").trim()}
+            role={onSelect ? "button" : undefined}
+            tabIndex={onSelect ? 0 : undefined}
+            onClick={onSelect ? () => onSelect(item.id) : undefined}
+            onKeyDown={handleKeyDown}
+            aria-label={onSelect ? "브랜딩 전략 상세 보기" : undefined}
+        >
             <header className={styles.header}>
                 <div className={styles.meta}>
-                    <span className={styles.label}>Prompt</span>
-                    <p className={styles.prompt}>{item.briefKo || "입력된 프롬프트가 없습니다."}</p>
+                    <span
+                        className={[
+                            styles.label,
+                            isBlueprint ? styles.labelBlueprint : "",
+                        ].join(" ").trim()}
+                    >
+                        Prompt
+                    </span>
+                    <p
+                        className={[
+                            styles.prompt,
+                            isBlueprint ? styles.promptBlueprint : "",
+                        ].join(" ").trim()}
+                    >
+                        {item.briefKo || "입력된 프롬프트가 없습니다."}
+                    </p>
                 </div>
-
-                <dl className={styles.badges}>
-                    {item.style && (
-                        <div>
-                            <dt className={styles.badgeLabel}>Style</dt>
-                            <dd className={styles.badgeValue}>{item.style}</dd>
-                        </div>
-                    )}
-                    {item.createdAt && (
-                        <div>
-                            <dt className={styles.badgeLabel}>Created</dt>
-                            <dd className={styles.badgeValue}>{new Date(item.createdAt).toLocaleString()}</dd>
-                        </div>
-                    )}
-                </dl>
             </header>
 
             <section className={styles.body}>
-                <h4 className={styles.sectionTitle}>Branding Strategy</h4>
-                <p className={styles.content}>{strategyText}</p>
+                <h4
+                    className={[
+                        styles.sectionTitle,
+                        isBlueprint ? styles.sectionTitleBlueprint : "",
+                    ].join(" ").trim()}
+                >
+                    Branding Strategy
+                </h4>
+                <p
+                    className={[
+                        styles.content,
+                        isBlueprint ? styles.contentBlueprint : "",
+                    ].join(" ").trim()}
+                >
+                    {strategyText}
+                </p>
             </section>
 
-            <footer className={styles.footer}>
+            <footer
+                className={styles.footer}
+                onClick={(event) => event.stopPropagation()}
+            >
                 <ProductToolbar
                     id={item.id}
                     onDelete={onDelete}

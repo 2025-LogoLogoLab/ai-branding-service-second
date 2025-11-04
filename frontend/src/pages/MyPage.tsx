@@ -63,6 +63,15 @@ export default function MyPage() {
 
       <section className={styles.content} aria-live="polite">
         {content}
+        <div className={styles.previewLink}>
+          <button
+            type="button"
+            className={styles.previewButton}
+            onClick={() => navigate("/deliverables/blueprint-preview")}
+          >
+            새 카드 테마 미리보기
+          </button>
+        </div>
       </section>
     </div>
   );

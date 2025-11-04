@@ -10,6 +10,7 @@ export type DeliverableSectionProps = {
     description?: string;          // 부제나 안내 문구
     children: ReactNode;           // 카드 목록 등 실제 콘텐츠
     footer?: ReactNode;            // 페이지네이션 등 하단에 추가할 요소
+    variant?: "default" | "blueprint";
 };
 
 export default function DeliverableSection({
@@ -17,19 +18,48 @@ export default function DeliverableSection({
     description,
     children,
     footer,
+    variant = "default",
 }: DeliverableSectionProps) {
     const headingId = `${title.replace(/\s+/g, "-").toLowerCase()}-heading`;
+    const isBlueprint = variant === "blueprint";
 
     return (
-        <section className={styles.section} aria-labelledby={headingId}>
+        <section
+            className={[
+                styles.section,
+                isBlueprint ? styles.sectionBlueprint : "",
+            ].join(" ").trim()}
+            aria-labelledby={headingId}
+        >
             <header className={styles.header}>
                 <div className={styles.titleBar}>
-                    <span className={styles.accent} aria-hidden="true" />
-                    <h3 className={styles.title} id={headingId}>
+                    <span
+                        className={[
+                            styles.accent,
+                            isBlueprint ? styles.accentBlueprint : "",
+                        ].join(" ").trim()}
+                        aria-hidden="true"
+                    />
+                    <h3
+                        className={[
+                            styles.title,
+                            isBlueprint ? styles.titleBlueprint : "",
+                        ].join(" ").trim()}
+                        id={headingId}
+                    >
                         {title}
                     </h3>
                 </div>
-                {description && <p className={styles.description}>{description}</p>}
+                {description && (
+                    <p
+                        className={[
+                            styles.description,
+                            isBlueprint ? styles.descriptionBlueprint : "",
+                        ].join(" ").trim()}
+                    >
+                        {description}
+                    </p>
+                )}
             </header>
 
             <div className={styles.content}>{children}</div>

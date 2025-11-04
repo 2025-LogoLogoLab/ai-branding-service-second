@@ -6,6 +6,7 @@ const basePath = import.meta.env.VITE_API_BASE_URL;
 const brandingGenEndPoint = basePath + '/brand-strategy/generate';  // 브랜딩 전략 생성
 const brandingStoreEndPoint = basePath + '/brand-strategy/save';    // 브랜딩 전략 저장
 const brandingDeleteEndPoint = basePath + '/brand-strategy/';       // 브랜딩 전략 삭제
+const brandStrategyDetailEndpoint = basePath + '/brand-strategy';   // 브랜딩 전략 상세 조회
 // const brandingUpdateEndPoint = basePath + '/brand-strategy/';       // 브랜딩 전략 수정
 const fetchAllBrandingEndPoint = basePath + '/brand-strategies';    // 브랜딩 전략 리스트 조회
 const brandStrategyListEndpoint = basePath + '/brand-strategies'; // 페이징 목록 조회(신규 UI)
@@ -71,6 +72,25 @@ export type BrandStrategyListItem = {
     summaryKo?: string;      // 서버에서 짧은 요약을 줄 경우
     markdown?: string;       // 전체 본문(옵션)
     createdAt: string;
+};
+
+export type BrandStrategyTag = {
+    id: number;
+    name: string;
+};
+
+export type BrandStrategyDetail = {
+    id: number;
+    briefKo: string;
+    style?: string;
+    caseType?: string;
+    markdown: string;
+    summaryKo?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    project?: { id: number; name: string } | null;
+    tags?: BrandStrategyTag[];
+    [key: string]: unknown;
 };
 
 /**
@@ -228,4 +248,37 @@ export async function fetchBrandStrategyPage(
     console.log("브랜딩 전략 목록 페이지 조회 성공");
     const payload = await result.json();
     return payload as PaginatedResponse<BrandStrategyListItem>;
+}
+
+export async function fetchBrandStrategyDetail(
+    id: number,
+    options: { signal?: AbortSignal } = {}
+): Promise<BrandStrategyDetail> {
+    console.log("브랜딩 전략 상세 조회 요청 시작");
+    const result = await fetch(`${brandStrategyDetailEndpoint}/${id}`, {
+        method: "GET",
+        credentials: "include",
+        signal: options.signal,
+    });
+
+    if (!result.ok) {
+        console.log("브랜딩 전략 상세 조회 오류");
+        throw new Error("브랜딩 전략 상세 조회 실패 " + result.status);
+    }
+
+    const payload = await result.json();
+    const detail: BrandStrategyDetail = {
+        id: payload.id,
+        briefKo: payload.briefKo ?? "",
+        style: payload.style ?? undefined,
+        caseType: payload.caseType ?? payload.case ?? undefined,
+        markdown: payload.markdown ?? payload.summaryKo ?? "",
+        summaryKo: payload.summaryKo ?? undefined,
+        createdAt: payload.createdAt,
+        updatedAt: payload.updatedAt,
+        project: payload.project ?? undefined,
+        tags: Array.isArray(payload.tags) ? payload.tags : undefined,
+    };
+    console.log("브랜딩 전략 상세 조회 성공");
+    return detail;
 }

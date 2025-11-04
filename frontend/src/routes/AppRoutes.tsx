@@ -11,6 +11,7 @@ import Logo from '../pages/Logo'
 import Branding from '../pages/Branding'
 import ColorGuide from '../pages/ColorGuide'
 import DeliverablesAllPage, {
+  DeliverablesBlueprintPreviewPage,
   DeliverablesBrandingPage,
   DeliverablesColorGuidePage,
   DeliverablesLogoPage,
@@ -72,6 +73,7 @@ const AppRoutes = () => {
           <Route path="deliverables/logo" element={<DeliverablesLogoPage />} />
           <Route path="deliverables/branding" element={<DeliverablesBrandingPage />} />
           <Route path="deliverables/color-guide" element={<DeliverablesColorGuidePage />} />
+          <Route path="deliverables/blueprint-preview" element={<DeliverablesBlueprintPreviewPage />} />
         </Route>
 
         {/* 관리자만 공개하는 페이지 */}

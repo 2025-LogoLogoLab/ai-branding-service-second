@@ -19,6 +19,8 @@ import { TextArea } from "../atoms/TextArea/TextArea";
 import { TextButton } from "../atoms/TextButton/TextButton";
 import { TextInput } from "../atoms/TextInput/TextInput";
 
+export type TextNotationOption = "romanized" | "translated";
+
 export type LogoFormProps = {
     // 폼 데이터(상위 보관): 프롬프트 문자열
     value: string;
@@ -41,12 +43,16 @@ export type LogoFormProps = {
     onBusinessNameChange: (value: string) => void;
     onWidthChange: (value: string) => void;
     onHeightChange: (value: string) => void;
+    onTextNotationChange: (value: TextNotationOption) => void;
 
     // (선택) 문구 오버라이드 — 기본값은 컴포넌트 내부에서 관리
     title?: string;            // 기본: "Logo를 생성해보세요."
     promptLabel?: string;      // 기본: "로고 설명"
     submitLabel?: string;      // 기본: "로고 생성"
     className?: string;        // 외부에서 추가 스타일이 필요할 때
+
+    showTextFields?: boolean;  // 기본: true — 텍스트 입력이 필요한 타입만 true 유지
+    textNotation?: TextNotationOption;
 };
 
 export default function LogoForm({
@@ -64,20 +70,25 @@ export default function LogoForm({
     onBusinessNameChange,
     onWidthChange,
     onHeightChange,
+    onTextNotationChange,
     title = "Logo를 생성해보세요.",
-    promptLabel = "사업체 및 로고 설명",
+    promptLabel = "로고 설명",
     submitLabel = "로고 생성",
-    className
+    className,
+    showTextFields = true,
+    textNotation = "romanized"
 }: LogoFormProps) {
     // 버튼 활성 조건: 공백을 제외한 입력이 있을 때만 허용
+    const hasBusinessName = businessName.trim().length > 0;
+    const hasPrompt = value.trim().length > 0;
     const canSubmit =
-        businessName.trim().length > 0 &&
-        value.trim().length > 0 &&
+        (!showTextFields || hasBusinessName) &&
+        hasPrompt &&
         width.trim().length > 0 &&
         height.trim().length > 0 &&
         !loading &&
         !sizeError &&
-        !businessNameError &&
+        (!showTextFields || !businessNameError) &&
         !promptError;
 
     const handleBusinessNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,6 +101,11 @@ export default function LogoForm({
 
     const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         onHeightChange(e.target.value);
+    };
+
+    const handleNotationSelect = (nextValue: TextNotationOption) => {
+        if (loading || nextValue === textNotation) return;
+        onTextNotationChange(nextValue);
     };
 
     const businessNameHeadingId = "logoBusinessNameHeading";
@@ -125,6 +141,10 @@ export default function LogoForm({
         promptError ? styles.errorField : ""
     ].join(" ").trim();
 
+    const promptDescriptionText = showTextFields
+        ? "만들고 싶은 로고의 분위기와 원하는 요소를 구체적으로 적어주세요. 선택한 텍스트 표기법과 함께 작성하면 모델이 더 정확한 이미지를 생성하는 데 도움이 됩니다."
+        : "만들고 싶은 로고의 분위기와 원하는 요소를 구체적으로 적어주세요. 텍스트 대신 표현하고 싶은 아이콘이나 심볼을 자세히 설명할수록 모델이 더 정확한 이미지를 생성하는 데 도움이 됩니다.";
+
     return (
         <section
             className={`${styles.card} ${className ?? ""}`}
@@ -135,34 +155,77 @@ export default function LogoForm({
                 <h2 className={styles.title}>{title}</h2>
             </header>
 
-            <div className={styles.section}>
-                <div className={styles.sectionHeader}>
-                    <h3 id={businessNameHeadingId} className={styles.sectionTitle}>사업체 이름</h3>
-                    <p id={businessNameHintId} className={styles.sectionDescription}>
-                        사업체 이름을 한글로 작성해 주세요. 생성된 로고 이미지를 사용할 때에는
-                        이름이 영문으로 표기되도록 조정됩니다. <span className={styles.required}>(필수 입력)</span>
-                    </p>
+            {showTextFields && (
+                <div className={styles.section}>
+                    <div className={styles.sectionHeader}>
+                        <h3 id={businessNameHeadingId} className={styles.sectionTitle}>
+                            로고에 들어갈 텍스트
+                        </h3>
+                        <p id={businessNameHintId} className={styles.sectionDescription}>
+                            로고에 그대로 들어가길 원하는 문구를 입력해 주세요. 작성한 텍스트가 디자인에 반영됩니다.
+                            <span className={styles.required}>(필수 입력)</span>
+                        </p>
+                    </div>
+                    <TextInput
+                        id={businessNameId}
+                        value={businessName}
+                        onChange={handleBusinessNameChange}
+                        placeholder="로고에 들어갈 텍스트를 입력해 주세요."
+                        disabled={loading}
+                        className={businessInputClass}
+                        ariaInvalid={Boolean(businessNameError)}
+                        required
+                        aria-labelledby={businessNameHeadingId}
+                        aria-describedby={
+                            businessNameError
+                                ? `${businessNameHintId} ${businessNameErrorId}`
+                                : businessNameHintId
+                        }
+                    />
+                    {businessNameError && (
+                        <p id={businessNameErrorId} className={styles.inlineError}>
+                            {businessNameError}
+                        </p>
+                    )}
+
+                    <div className={styles.toggleContainer} role="radiogroup" aria-labelledby="logoTextNotationLabel">
+                        <div className={styles.toggleHeader}>
+                            <span id="logoTextNotationLabel" className={styles.toggleLabel}>
+                                텍스트 표기법
+                            </span>
+                            <p className={styles.toggleDescription}>
+                                문구를 로마자 표기로 둘지, 번역한 텍스트로 표현할지 선택해 주세요.
+                            </p>
+                        </div>
+                        <div className={styles.toggleGroup}>
+                            <button
+                                type="button"
+                                role="radio"
+                                aria-checked={textNotation === "romanized"}
+                                className={`${styles.toggleButton} ${
+                                    textNotation === "romanized" ? styles.toggleButtonActive : ""
+                                }`}
+                                onClick={() => handleNotationSelect("romanized")}
+                                disabled={loading}
+                            >
+                                로마자 표기
+                            </button>
+                            <button
+                                type="button"
+                                role="radio"
+                                aria-checked={textNotation === "translated"}
+                                className={`${styles.toggleButton} ${
+                                    textNotation === "translated" ? styles.toggleButtonActive : ""
+                                }`}
+                                onClick={() => handleNotationSelect("translated")}
+                                disabled={loading}
+                            >
+                                번역
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <TextInput
-                    id={businessNameId}
-                    value={businessName}
-                    onChange={handleBusinessNameChange}
-                    placeholder="사업체 이름"
-                    disabled={loading}
-                    className={businessInputClass}
-                    ariaInvalid={Boolean(businessNameError)}
-                    required
-                    aria-labelledby={businessNameHeadingId}
-                    aria-describedby={
-                        businessNameError
-                            ? `${businessNameHintId} ${businessNameErrorId}`
-                            : businessNameHintId
-                    }
-                />
-                {businessNameError && (
-                    <p id={businessNameErrorId} className={styles.inlineError}>{businessNameError}</p>
-                )}
-            </div>
+            )}
 
             <div className={styles.section}>
                 <div className={styles.sectionHeader}>
@@ -235,15 +298,14 @@ export default function LogoForm({
                 <div className={styles.sectionHeader}>
                     <h3 id={promptHeadingId} className={styles.sectionTitle}>{promptLabel}</h3>
                     <p id={promptDescriptionId} className={styles.sectionDescription}>
-                        사업체와 만들고 싶은 로고에 대한 자세한 설명을 적어주세요. 설명이 자세할수록
-                        모델이 명확한 이미지를 생성하는 데 도움이 됩니다. <span className={styles.required}>(필수 입력)</span>
+                        {promptDescriptionText} <span className={styles.required}>(필수 입력)</span>
                     </p>
                 </div>
                 <TextArea
                     id="logoPrompt"
                     value={value}
                     onChange={onChange}
-                    placeholder="어떤 로고를 만들고 싶은지 설명을 적어주세요."
+                    placeholder="어떤 로고를 만들고 싶은지 구체적으로 설명해 주세요."
                     onSubmit={onSubmit}
                     disabled={loading}
                     className={promptTextAreaClass}

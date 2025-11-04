@@ -32,6 +32,10 @@
     --color-font-critical: red;
     --color-font-loading: #264AB1;
 
+    /* 브랜딩/컬러 가이드 블루프린트 전용 색상 */
+    --color-card-blueprint-accent: #1E3A8A;
+    --color-card-blueprint-header: #253C7E;
+
     /* 테두리 색상 모음 */
     --color-input-border: #00000000;
     --color-divider-border: #49536E33;
@@ -50,5 +54,8 @@
     --palette-card-min: 160px;
     --palette-card-max: 240px;
     --palette-gap: 16px;
+
+    /* Deliverable 카드 기본 폭 */
+    --deliverable-card-width: 320px;
 
 }

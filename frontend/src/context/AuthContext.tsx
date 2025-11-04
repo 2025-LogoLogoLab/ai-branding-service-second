@@ -82,9 +82,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         
         fetchAuth();    
-        
-        // 로딩 플래그 해제
-        setLoading(false);
     }, []);
     
     useEffect(() => {

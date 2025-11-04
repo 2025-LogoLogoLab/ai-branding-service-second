@@ -24,6 +24,7 @@ import type { LogoType } from "../types/logoTypes";
 import type { LogoStyleKey } from "../types/logoStyles";
 
 import LogoForm from "../organisms/LogoForm";
+import type { TextNotationOption } from "../organisms/LogoForm";
 import { LogoCard } from "../organisms/LogoCard/LogoCard";
 import { TextButton } from "../atoms/TextButton/TextButton";
 
@@ -61,6 +62,7 @@ export default function Logo() {
     const [isLoading, setIsLoading] = useState(false);
     const [downloadingLogoId, setDownloadingLogoId] = useState<number | null>(null);
     const [copyingLogoId, setCopyingLogoId] = useState<number | null>(null);
+    const [textNotation, setTextNotation] = useState<TextNotationOption>("romanized");
 
     // -----------------------------
     // 결과 상태
@@ -135,6 +137,18 @@ export default function Logo() {
         return null;
     };
 
+    const shouldShowTextInputs = type === "TEXT" || type === "COMBO";
+    const notationLabelMap: Record<TextNotationOption, string> = {
+        romanized: "로마자 표기",
+        translated: "번역"
+    };
+
+    useEffect(() => {
+        if (!shouldShowTextInputs) {
+            setBusinessNameError(null);
+        }
+    }, [shouldShowTextInputs]);
+
     const handleBusinessNameChange = (nextValue: string) => {
         setBusinessName(nextValue);
         if (businessNameError && nextValue.trim()) {
@@ -148,6 +162,10 @@ export default function Logo() {
         if (promptError && nextValue.trim()) {
             setPromptError(null);
         }
+    };
+
+    const handleTextNotationChange = (value: TextNotationOption) => {
+        setTextNotation(value);
     };
 
     const handleWidthChange = (nextValue: string) => {
@@ -229,15 +247,17 @@ export default function Logo() {
 
         let hasError = false;
 
-        if (!trimmedBusinessName) {
-            setBusinessNameError("사업체 이름은 필수 입력 항목입니다.");
-            hasError = true;
-        } else {
-            setBusinessNameError(null);
+        if (shouldShowTextInputs) {
+            if (!trimmedBusinessName) {
+                setBusinessNameError("로고에 들어갈 텍스트는 필수 입력 항목입니다.");
+                hasError = true;
+            } else {
+                setBusinessNameError(null);
+            }
         }
 
         if (!trimmedPrompt) {
-            setPromptError("사업체 및 로고 설명은 필수 입력 항목입니다.");
+            setPromptError("로고 설명은 필수 입력 항목입니다.");
             hasError = true;
         } else {
             setPromptError(null);
@@ -258,7 +278,19 @@ export default function Logo() {
         const widthValue = Number.parseInt(imageWidth, 10);
         const heightValue = Number.parseInt(imageHeight, 10);
 
-        const composedPrompt = [trimmedBusinessName, trimmedPrompt]
+        const promptSegments: string[] = [];
+
+        if (shouldShowTextInputs && trimmedBusinessName) {
+            promptSegments.push(`로고 텍스트: ${trimmedBusinessName}`);
+        }
+
+        promptSegments.push(trimmedPrompt);
+
+        if (shouldShowTextInputs && trimmedBusinessName) {
+            promptSegments.push(`텍스트 표기법: ${notationLabelMap[textNotation]}`);
+        }
+
+        const composedPrompt = promptSegments
             .filter(Boolean)
             .join("\n");
 
@@ -372,10 +404,13 @@ export default function Logo() {
                             value={promptText}
                             error={error}
                             loading={isLoading}
+                            showTextFields={shouldShowTextInputs}
+                            textNotation={textNotation}
                             onBusinessNameChange={handleBusinessNameChange}
                             onWidthChange={handleWidthChange}
                             onHeightChange={handleHeightChange}
                             onChange={handlePromptFieldChange}
+                            onTextNotationChange={handleTextNotationChange}
                             onSubmit={handleLogoGenaration}
                             // 필요 시 title/promptLabel/submitLabel prop으로 오버라이드 가능
                         />

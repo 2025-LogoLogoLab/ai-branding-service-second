@@ -29,6 +29,7 @@ function Home() {
       <Link to={'branding'}> Branding </Link><br></br>
       <Link to={'colorGuide'}> Color Guide </Link><br></br>
       <Link to={'Admin'}> Admin </Link><br></br>
+      <Link to={'deliverables/blueprint-preview'}> Blueprint Preview (New Theme)</Link><br></br>
       {/* <DemoLogoTypeSidebar></DemoLogoTypeSidebar> */}
       {/* <DemoLogoStyleSidebar></DemoLogoStyleSidebar> */}
       {/* <AiSidebar></AiSidebar> */}

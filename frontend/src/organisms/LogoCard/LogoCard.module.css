@@ -2,9 +2,10 @@
 
 /* 전체 카드 컨테이너 */
 .logoCard {
-    width: auto;                  /* 카드 가로 크기 (필요 시 조정) */
+    width: min(100%, var(--deliverable-card-width, 320px));
     height: auto;                 /* 카드 세로 크기 */
     border-radius: 12px;           /* 카드 모서리 둥글게 */
+    box-sizing: border-box;
     /* 자식 요소가 넘치지 않도록 */
     /* overflow: hidden;               */
     background-color: var(--color-bg-base);     /* 기본 배경 (필요 시 이미지 로딩 전 대비) */
