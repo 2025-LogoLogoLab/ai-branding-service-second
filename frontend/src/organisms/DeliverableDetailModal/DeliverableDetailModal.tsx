@@ -1,12 +1,12 @@
 import styles from "./DeliverableDetailModal.module.css";
 import { ProductToolbar, type ProductToolbarProps } from "../../molecules/ProductToolbar/ProductToolbar";
-import ColorGuideStrip from "../ColorGuideStrip/ColorGuideStrip";
 import type { LogoDetail } from "../../custom_api/logo";
 import type { BrandStrategyDetail } from "../../custom_api/branding";
 import type { ColorGuideDetail, palette } from "../../custom_api/colorguide";
 import { ensureDataUrl } from "../../utils/image";
 import { Fragment } from "react";
 import { LOGO_STYLES } from "../../types/logoStyles";
+import ReactMarkdown from "react-markdown";
 
 type Variant = "default" | "blueprint";
 
@@ -168,7 +168,7 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
 
                 <section className={styles.section}>
                     <h3 className={styles.sectionTitle}>Prompt</h3>
-                    <p className={styles.textBlock}>{displayPrompt || "프롬프트 정보가 없습니다."}</p>
+                    <div className={styles.promptBlock}>{displayPrompt || "프롬프트 정보가 없습니다."}</div>
                 </section>
 
                 <section className={styles.section}>
@@ -197,14 +197,18 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
 
             <section className={styles.section}>
                 <h3 className={styles.sectionTitle}>Prompt</h3>
-                <p className={styles.textBlock}>{detail.briefKo || "입력된 브리프 정보가 없습니다."}</p>
+                <div className={styles.promptBlock}>{detail.briefKo || "입력된 브리프 정보가 없습니다."}</div>
             </section>
 
             <section className={styles.section}>
                 <h3 className={styles.sectionTitle}>Branding Strategy</h3>
-                <pre className={styles.markdownBlock}>
-                    {detail.markdown || "브랜딩 전략 본문이 비어 있습니다."}
-                </pre>
+                {detail.markdown && detail.markdown.trim() ? (
+                    <div className={styles.markdownBlock}>
+                        <ReactMarkdown>{normalizeMarkdown(detail.markdown)}</ReactMarkdown>
+                    </div>
+                ) : (
+                    <div className={styles.promptBlock}>브랜딩 전략 본문이 비어 있습니다.</div>
+                )}
             </section>
 
             {renderTagsSection(detail.tags)}
@@ -221,12 +225,11 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
 
             <section className={styles.section}>
                 <h3 className={styles.sectionTitle}>Prompt</h3>
-                <p className={styles.textBlock}>{detail.briefKo || "컬러 가이드 프롬프트가 없습니다."}</p>
+                <div className={styles.promptBlock}>{detail.briefKo || "컬러 가이드 프롬프트가 없습니다."}</div>
             </section>
 
             <section className={styles.section}>
                 <h3 className={styles.sectionTitle}>Color Guide</h3>
-                <ColorGuideStrip guide={detail.guide} />
                 <div className={styles.paletteDetails}>
                     {(Object.keys(detail.guide) as Array<keyof ColorGuideDetail["guide"]>).map((key) => {
                         const swatch = detail.guide[key] as palette;
@@ -291,3 +294,10 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
         </div>
     );
 }
+
+const normalizeMarkdown = (src: string): string => {
+    let normalized = src;
+    normalized = normalized.replace(/^(#{1,6})(?=\S)/gm, "$1 ");
+    normalized = normalized.replace(/^(#{1,6} .+)(\r?\n)(?!\r?\n)/gm, "$1$2$2");
+    return normalized;
+};

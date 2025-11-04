@@ -100,15 +100,72 @@
     white-space: pre-wrap;
 }
 
-.markdownBlock {
+.contentBlock {
     font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif;
     font-size: 15px;
     line-height: 1.7;
     color: rgba(20, 27, 46, 0.85);
-    white-space: pre-wrap;
     background: rgba(15, 23, 42, 0.04);
     border-radius: 16px;
     padding: 16px 18px;
+}
+.promptBlock {
+    composes: contentBlock;
+    white-space: pre-wrap;
+}
+.markdownBlock {
+    composes: contentBlock;
+}
+.markdownBlock :global(*) {
+    margin-top: 0;
+}
+.markdownBlock :global(p),
+.markdownBlock :global(ul),
+.markdownBlock :global(ol),
+.markdownBlock :global(blockquote),
+.markdownBlock :global(pre) {
+    margin-bottom: 12px;
+}
+.markdownBlock :global(ul),
+.markdownBlock :global(ol) {
+    padding-left: 20px;
+}
+.markdownBlock :global(h1),
+.markdownBlock :global(h2),
+.markdownBlock :global(h3),
+.markdownBlock :global(h4),
+.markdownBlock :global(h5),
+.markdownBlock :global(h6) {
+    margin: 20px 0 12px;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.9);
+}
+.markdownBlock :global(h1) { font-size: 22px; }
+.markdownBlock :global(h2) { font-size: 20px; }
+.markdownBlock :global(h3) { font-size: 18px; }
+.markdownBlock :global(h4) { font-size: 17px; }
+.markdownBlock :global(h5),
+.markdownBlock :global(h6) { font-size: 16px; }
+.markdownBlock :global(code) {
+    font-family: "Fira Code", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    background: rgba(15, 23, 42, 0.08);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+.markdownBlock :global(pre) {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.08);
+    overflow-x: auto;
+}
+.markdownBlock :global(pre > code) {
+    padding: 0;
+    background: transparent;
+}
+.markdownBlock :global(a) {
+    color: #2563eb;
+    text-decoration: underline;
 }
 
 .metadata {
