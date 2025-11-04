@@ -25,12 +25,13 @@
 }
 
 .label {
-    font-size: 13px;
-    color: var(--color-font-gray);
+    font-size: 16px;
+    font-weight: 700;
+    color: rgba(20, 27, 46, 0.62);
 }
 
 .labelBlueprint {
-    color: var(--color-font-gray);
+    color: rgba(20, 27, 46, 0.62);
 }
 
 .prompt {
