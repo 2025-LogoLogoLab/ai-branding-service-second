@@ -9,7 +9,7 @@ import { LOGO_STYLES } from "../../types/logoStyles";
 import ReactMarkdown from "react-markdown";
 import iconPlus from "../../assets/icons/icon_plus.png";
 import type { TagRecord } from "../../custom_api/tags";
-import { FALLBACK_TAGS, type TagApiSettings, addTag, deleteTag } from "../../custom_api/tags";
+import { type TagApiSettings, addTag, deleteTag } from "../../custom_api/tags";
 import { TagPickerModal } from "../../components/TagPickerModal/TagPickerModal";
 
 type Variant = "default" | "blueprint";

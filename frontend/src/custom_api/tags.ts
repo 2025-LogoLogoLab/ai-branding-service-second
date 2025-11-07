@@ -75,11 +75,12 @@ export async function addTag(config: TagApiConfig, tag: TagRecord): Promise<TagR
         });
         if (!remote) {
             console.info("[tag API] addTag fallback: using provided tag");
+            return tag;
         }
-        return remote ?? tag;
+        return remote;
     } catch (error) {
         console.warn("[tag API] addTag fallback:", error);
-        return { id: Date.now(), name };
+        return tag;
     }
 }
 
