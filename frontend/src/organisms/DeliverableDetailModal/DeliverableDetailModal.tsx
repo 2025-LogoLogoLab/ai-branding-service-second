@@ -76,7 +76,7 @@ const renderTagsSection = (tags?: Array<{ id?: number; name: string }>) => (
                 </div>
             </div>
         ) : (
-            <div className={styles.promptBlock}>등록된 태그가 없습니다.</div>
+            <div className={styles.promptBlock}>등록된 태그가 없습니다. 태그는 최대 5개까지 부여 가능합니다.</div>
         )}
     </section>
 );
