@@ -70,6 +70,7 @@ export async function fetchTagList(config: TagApiConfig): Promise<TagRecord[]> {
 
 export async function addTag(config: TagApiConfig, tag: TagRecord): Promise<TagRecord> {
     try {
+        console.info("[tag API] addTag payload:", tag);
         const remote = await requestWithConfig<TagRecord>(config, {
             body: JSON.stringify({ tag }),
         });
@@ -86,6 +87,7 @@ export async function addTag(config: TagApiConfig, tag: TagRecord): Promise<TagR
 
 export async function createTag(config: TagApiConfig, newTag: TagRecord): Promise<TagRecord> {
     try {
+        console.info("[tag API] createTag payload:", newTag);
         const remote = await requestWithConfig<TagRecord>(config, {
             body: JSON.stringify({ newTag }),
         });
@@ -101,6 +103,7 @@ export async function createTag(config: TagApiConfig, newTag: TagRecord): Promis
 
 export async function deleteTag(config: TagApiConfig, tag: TagRecord): Promise<boolean> {
     try {
+        console.info("[tag API] deleteTag payload:", tag);
         const remote = await requestWithConfig(config, {
             body: JSON.stringify({ tagToDelete: tag }),
         });
