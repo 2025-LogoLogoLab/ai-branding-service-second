@@ -16,3 +16,5 @@ export type PaginatedResponse<T> = {
     totalPages: number;
     last: boolean;
 };
+
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";

@@ -46,6 +46,9 @@ import type { PaginatedResponse } from "../custom_api/types";
 import { copyImageToClipboard } from "../utils/clipboard";
 import { ensureDataUrl } from "../utils/image";
 import type { ProductToolbarProps } from "../molecules/ProductToolbar/ProductToolbar";
+import type { TagApiSettings } from "../custom_api/tags";
+import type { HttpMethod } from "../custom_api/types";
+import { TagApiSettingsPanel } from "../components/TagApiSettingsPanel/TagApiSettingsPanel";
 
 // 페이지별 기본 페이지 크기(시안에서는 3열 그리드이므로 9개 단위가 자연스러움)
 const PAGE_SIZE = 3;
@@ -230,6 +233,12 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
 
     // 체크 상태 및 페이지 인덱스
     const [selections, setSelections] = useState<DeliverableSelection>(() => createSelection(mode));
+    const [tagApiSettings, setTagApiSettings] = useState<TagApiSettings>({
+        list: { method: "GET", url: "" },
+        add: { method: "POST", url: "" },
+        create: { method: "POST", url: "" },
+        delete: { method: "DELETE", url: "" },
+    });
     const [logoPage, setLogoPage] = useState(0);
     const [brandingPage, setBrandingPage] = useState(0);
     const [colorGuidePage, setColorGuidePage] = useState(0);
@@ -385,6 +394,16 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
         setBrandingNonce((v) => v + 1);
         setColorGuideNonce((v) => v + 1);
         navigate(CATEGORY_PATH[category]);
+    };
+
+    const handleTagConfigChange = (section: keyof TagApiSettings, field: "url" | "method", value: string) => {
+        setTagApiSettings((prev) => ({
+            ...prev,
+            [section]: {
+                ...prev[section],
+                [field]: field === "method" ? (value as HttpMethod) : value,
+            },
+        }));
     };
 
     // 공통 다운로드 유틸
@@ -637,6 +656,7 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
                 isBlueprint ? s.pageBlueprint : "",
             ].join(" ").trim()}
         >
+            <TagApiSettingsPanel settings={tagApiSettings} onChange={handleTagConfigChange} />
             <div className={s.layout}>
                 <DeliverablesSidebar
                     selections={selections}
@@ -767,6 +787,7 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
                     onClose={closeDetail}
                     onRetry={detailState.error ? () => loadDetail("logo", detailState.id) : undefined}
                     toolbarProps={detailToolbarProps}
+                    tagApiSettings={tagApiSettings}
                 />
             )}
 
@@ -780,6 +801,7 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
                     onClose={closeDetail}
                     onRetry={detailState.error ? () => loadDetail("branding", detailState.id) : undefined}
                     toolbarProps={detailToolbarProps}
+                    tagApiSettings={tagApiSettings}
                 />
             )}
 
@@ -793,6 +815,7 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
                     onClose={closeDetail}
                     onRetry={detailState.error ? () => loadDetail("colorGuide", detailState.id) : undefined}
                     toolbarProps={detailToolbarProps}
+                    tagApiSettings={tagApiSettings}
                 />
             )}
         </div>

@@ -4,9 +4,13 @@ import type { LogoDetail } from "../../custom_api/logo";
 import type { BrandStrategyDetail } from "../../custom_api/branding";
 import type { ColorGuideDetail, palette } from "../../custom_api/colorguide";
 import { ensureDataUrl } from "../../utils/image";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { LOGO_STYLES } from "../../types/logoStyles";
 import ReactMarkdown from "react-markdown";
+import iconPlus from "../../assets/icons/icon_plus.png";
+import type { TagRecord } from "../../custom_api/tags";
+import { FALLBACK_TAGS, type TagApiSettings, addTag, deleteTag } from "../../custom_api/tags";
+import { TagPickerModal } from "../../components/TagPickerModal/TagPickerModal";
 
 type Variant = "default" | "blueprint";
 
@@ -17,6 +21,7 @@ type BaseDetailProps = {
     loading?: boolean;
     error?: string | null;
     onRetry?: () => void;
+    tagApiSettings?: TagApiSettings;
 };
 
 type LogoDetailProps = BaseDetailProps & {
@@ -64,16 +69,35 @@ const renderStatus = (message: string, isError = false, onRetry?: () => void) =>
     </div>
 );
 
-const renderTagsSection = (tags?: Array<{ id?: number; name: string }>) => (
+const renderTagsSection = (
+    tags?: Array<{ id?: number; name: string }>,
+    onAddTag?: () => void,
+    onRemoveTag?: (tag: TagRecord) => void,
+) => (
     <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>Tags</h3>
+        <div className={styles.sectionHeader}>
+            <h3 className={styles.sectionTitle}>Tags</h3>
+            {(tags?.length ?? 0) < 5 && (
+                <button type="button" className={styles.tagAddButton} onClick={onAddTag}>
+                    <img src={iconPlus} alt="태그 추가" />
+                </button>
+            )}
+        </div>
         {tags && tags.length > 0 ? (
-            <div className={styles.tagBlock}>
-                <div className={styles.tagGroup}>
-                    {tags.map((tag) => (
-                        <span className={styles.tag} key={tag.id ?? tag.name}>{tag.name}</span>
-                    ))}
-                </div>
+            <div className={styles.tagGroup}>
+                {tags.map((tag) => (
+                    <span className={styles.tag} key={tag.id ?? tag.name}>
+                        #{tag.name}
+                        <button
+                            type="button"
+                            className={styles.tagRemoveButton}
+                            onClick={() => onRemoveTag?.({ id: tag.id ?? -1, name: tag.name })}
+                            aria-label={`${tag.name} 태그 삭제`}
+                        >
+                            ×
+                        </button>
+                    </span>
+                ))}
             </div>
         ) : (
             <div className={styles.promptBlock}>등록된 태그가 없습니다. 태그는 최대 5개까지 부여 가능합니다.</div>
@@ -113,6 +137,51 @@ const translateStyle = (style?: string | null) => {
 export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
     const { variant = "default", onClose, toolbarProps, loading, error, onRetry } = props;
     const isBlueprint = variant === "blueprint";
+    const effectiveTagSettings: TagApiSettings = props.tagApiSettings ?? {
+        list: {},
+        add: {},
+        create: {},
+        delete: {},
+    };
+    const [localTags, setLocalTags] = useState<TagRecord[]>(
+        ((props.data as { tags?: TagRecord[] } | null | undefined)?.tags) ?? [],
+    );
+    const [isTagPickerOpen, setTagPickerOpen] = useState(false);
+
+    useEffect(() => {
+        setLocalTags(((props.data as { tags?: TagRecord[] } | null | undefined)?.tags) ?? []);
+    }, [props.data?.id, props.type]);
+
+    const maxTagsReached = localTags.length >= 5;
+
+    const handleAttachTag = async (tag: TagRecord) => {
+        if (localTags.some((item) => item.id === tag.id)) {
+            alert("이미 추가된 태그입니다.");
+            return;
+        }
+        if (maxTagsReached) {
+            alert("태그는 최대 5개까지 추가할 수 있습니다.");
+            return;
+        }
+        try {
+            await addTag(effectiveTagSettings.add, tag);
+            setLocalTags((prev) => [...prev, tag]);
+        } catch (err) {
+            console.error(err);
+            alert("태그 추가에 실패했습니다.");
+            throw err;
+        }
+    };
+
+    const handleRemoveTag = async (tag: TagRecord) => {
+        try {
+            await deleteTag(effectiveTagSettings.delete, tag);
+            setLocalTags((prev) => prev.filter((item) => item.id !== tag.id));
+        } catch (err) {
+            console.error(err);
+            alert("태그 삭제에 실패했습니다.");
+        }
+    };
 
     const renderContent = () => {
         if (loading) return renderStatus("상세 정보를 불러오는 중입니다…");
@@ -130,7 +199,8 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
         }
     };
 
-    const renderLogoDetail = (detail: LogoDetail) => {
+const renderLogoDetail = (detail: LogoDetail) => {
+
         const resolvedImage = ensureDataUrl(detail.imageUrl);
         const promptSegments = (detail.prompt ?? "")
             .split(/\r?\n/)
@@ -184,7 +254,7 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
                     </div>
                 </section>
 
-                {renderTagsSection(detail.tags)}
+                {renderTagsSection(localTags, () => setTagPickerOpen(true), handleRemoveTag)}
             </Fragment>
         );
     };
@@ -213,7 +283,7 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
                 )}
             </section>
 
-            {renderTagsSection(detail.tags)}
+            {renderTagsSection(localTags, () => setTagPickerOpen(true), handleRemoveTag)}
         </Fragment>
     );
 
@@ -254,7 +324,7 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
                 </div>
             </section>
 
-            {renderTagsSection(detail.tags)}
+            {renderTagsSection(localTags, () => setTagPickerOpen(true), handleRemoveTag)}
         </Fragment>
     );
 
@@ -293,9 +363,19 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
                     )}
                 </footer>
             </div>
+            {isTagPickerOpen && (
+                <TagPickerModal
+                    open={isTagPickerOpen}
+                    onClose={() => setTagPickerOpen(false)}
+                    settings={effectiveTagSettings}
+                    onAttach={handleAttachTag}
+                    existingTags={localTags}
+                />
+            )}
         </div>
     );
 }
+
 
 const normalizeMarkdown = (src: string): string => {
     let normalized = src;
