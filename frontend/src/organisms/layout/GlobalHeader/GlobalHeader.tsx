@@ -15,21 +15,16 @@ export default function GlobalHeader() {
   // 드롭다운 및 모바일 메뉴 상태
   const [mobileOpen, setMobileOpen] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
-  const [pricingOpen, setPricingOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const featuresRef = useRef<HTMLDivElement | null>(null);
-  const pricingRef = useRef<HTMLDivElement | null>(null);
 
   // 바깥 클릭 시 닫기
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (featuresRef.current && !featuresRef.current.contains(e.target as Node)) {
         setFeaturesOpen(false);
-      }
-      if (pricingRef.current && !pricingRef.current.contains(e.target as Node)) {
-        setPricingOpen(false);
       }
     }
     document.addEventListener("click", onDocClick);
@@ -39,7 +34,6 @@ export default function GlobalHeader() {
   // 라우팅 시 자동 닫히도록 history 변경 감지(간단: 클릭 시 닫기)
   const closeAll = () => {
     setFeaturesOpen(false);
-    setPricingOpen(false);
     setMobileOpen(false);
   };
 
@@ -82,14 +76,10 @@ export default function GlobalHeader() {
       {/* 중앙: 기본 내비게이션 */}
       <nav className={styles.navWrap} aria-label="Primary">
         <div className={styles.nav} data-open={mobileOpen || undefined}>
-          <Link to="/" className={styles.navItem} onClick={closeAll}>Home</Link>
-
-          {/* Features 드롭다운 */}
+          {/* Features 드롭다운 - 클릭 토글 방식으로 사용자가 여유 있게 이동 가능 */}
           <div
             className={styles.dropdown}
             ref={featuresRef}
-            onMouseEnter={() => setFeaturesOpen(true)}
-            onMouseLeave={() => setFeaturesOpen(false)}
           >
             <button
               className={styles.navItem}
@@ -108,29 +98,6 @@ export default function GlobalHeader() {
             )}
           </div>
 
-          {/* Pricing 드롭다운 */}
-          <div
-            className={styles.dropdown}
-            ref={pricingRef}
-            onMouseEnter={() => setPricingOpen(true)}
-            onMouseLeave={() => setPricingOpen(false)}
-          >
-            <button
-              className={styles.navItem}
-              aria-haspopup="menu"
-              aria-expanded={pricingOpen}
-              onClick={() => setPricingOpen(v => !v)}
-            >
-              Pricing ▾
-            </button>
-            {pricingOpen && (
-              <div className={styles.dropdownPanel} role="menu">
-                <a href="#" role="menuitem" className={styles.dropdownItem} onClick={closeAll}>Free</a>
-                <a href="#" role="menuitem" className={styles.dropdownItem} onClick={closeAll}>Pro</a>
-                <a href="#" role="menuitem" className={styles.dropdownItem} onClick={closeAll}>Enterprise</a>
-              </div>
-            )}
-          </div>
         </div>
       </nav>
 
