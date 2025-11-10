@@ -46,6 +46,7 @@ import type { PaginatedResponse } from "../custom_api/types";
 import { copyImageToClipboard } from "../utils/clipboard";
 import { ensureDataUrl } from "../utils/image";
 import type { ProductToolbarProps } from "../molecules/ProductToolbar/ProductToolbar";
+// 태그 API 패널용
 import type { TagApiSettings } from "../custom_api/tags";
 import type { HttpMethod } from "../custom_api/types";
 import { TagApiSettingsPanel } from "../components/TagApiSettingsPanel/TagApiSettingsPanel";
@@ -233,6 +234,8 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
 
     // 체크 상태 및 페이지 인덱스
     const [selections, setSelections] = useState<DeliverableSelection>(() => createSelection(mode));
+
+    // 태그 API 패널용
     const [tagApiSettings, setTagApiSettings] = useState<TagApiSettings>({
         list: { method: "GET", url: "" },
         add: { method: "POST", url: "" },
@@ -396,6 +399,7 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
         navigate(CATEGORY_PATH[category]);
     };
 
+    // 태그 패널 상태 관리
     const handleTagConfigChange = (section: keyof TagApiSettings, field: "url" | "method", value: string) => {
         setTagApiSettings((prev) => ({
             ...prev,
@@ -787,6 +791,7 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
                     onClose={closeDetail}
                     onRetry={detailState.error ? () => loadDetail("logo", detailState.id) : undefined}
                     toolbarProps={detailToolbarProps}
+                    // 태그 API 패널용
                     tagApiSettings={tagApiSettings}
                 />
             )}
@@ -801,6 +806,7 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
                     onClose={closeDetail}
                     onRetry={detailState.error ? () => loadDetail("branding", detailState.id) : undefined}
                     toolbarProps={detailToolbarProps}
+                    // 태그 API 패널용
                     tagApiSettings={tagApiSettings}
                 />
             )}
@@ -815,6 +821,7 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
                     onClose={closeDetail}
                     onRetry={detailState.error ? () => loadDetail("colorGuide", detailState.id) : undefined}
                     toolbarProps={detailToolbarProps}
+                    // 태그 API 패널용
                     tagApiSettings={tagApiSettings}
                 />
             )}
