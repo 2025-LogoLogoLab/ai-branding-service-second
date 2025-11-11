@@ -19,6 +19,13 @@ import {
     updateProject,
     type ProjectRecord,
 } from "../custom_api/project";
+import { ProjectApiSettingsPanel } from "../components/ProjectApiSettingsPanel/ProjectApiSettingsPanel";
+import {
+    DEFAULT_PROJECT_API_SETTINGS,
+    DEMO_PROJECTS,
+    type ProjectApiSettings,
+    isProjectApiConfigured,
+} from "../custom_api/projectSettings";
 import { fetchLogoPage, type LogoListItem } from "../custom_api/logo";
 import { fetchBrandStrategyPage, type BrandStrategyListItem } from "../custom_api/branding";
 import { fetchColorGuidePage, type ColorGuideListItem } from "../custom_api/colorguide";
@@ -27,6 +34,7 @@ import BrandStrategyDeliverableCard from "../organisms/BrandStrategyDeliverableC
 import ColorGuideDeliverableCard from "../organisms/ColorGuideDeliverableCard/ColorGuideDeliverableCard";
 import Pagination from "../molecules/Pagination/Pagination";
 import { ensureDataUrl } from "../utils/image";
+import type { HttpMethod } from "../custom_api/types";
 
 type ProjectAssetType = "logo" | "branding" | "colorGuide";
 
@@ -61,40 +69,74 @@ const formatDateTime = (value?: string) => {
     });
 };
 
+const createMockProjectRecord = (name: string): ProjectRecord => ({
+    id: Date.now(),
+    name,
+    logoIds: [],
+    brandStrategyIds: [],
+    colorGuideIds: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+});
+
 type MyProjectsVariant = "page" | "embedded";
 
 type MyProjectsProps = {
     variant?: MyProjectsVariant;
+    showSettingsPanel?: boolean;
 };
 
 const cx = (...values: Array<string | false | null | undefined>) =>
     values.filter(Boolean).join(" ").trim();
 
-export default function MyProjects({ variant = "page" }: MyProjectsProps) {
+export default function MyProjects({ variant = "page", showSettingsPanel }: MyProjectsProps) {
     const [projects, setProjects] = useState<ProjectRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [detailId, setDetailId] = useState<number | null>(null);
     const [createOpen, setCreateOpen] = useState(false);
+    const [projectApiSettings, setProjectApiSettings] = useState<ProjectApiSettings>(DEFAULT_PROJECT_API_SETTINGS);
+
+    const useMockApi = useMemo(() => !isProjectApiConfigured(projectApiSettings), [projectApiSettings]);
+    const handleProjectApiConfigChange = (section: keyof ProjectApiSettings, field: "url" | "method", value: string) => {
+        setProjectApiSettings((prev) => ({
+            ...prev,
+            [section]: {
+                ...prev[section],
+                [field]: field === "method" ? (value as HttpMethod) : value,
+            },
+        }));
+    };
 
     useEffect(() => {
         const controller = new AbortController();
         setLoading(true);
         setError(null);
+
+        if (useMockApi) {
+            console.info("[project API] mock mode active: using demo project list", DEMO_PROJECTS);
+            setProjects(DEMO_PROJECTS);
+            setLoading(false);
+            return () => controller.abort();
+        }
+
+        console.info("[project API] fetch project list start");
         fetchProjectList({ signal: controller.signal })
             .then((list) => {
                 if (controller.signal.aborted) return;
+                console.info("[project API] fetch project list success", list);
                 setProjects(list);
                 setLoading(false);
             })
             .catch((err) => {
                 if (controller.signal.aborted) return;
+                console.warn("[project API] fetch project list error", err);
                 setError(err instanceof Error ? err.message : "프로젝트 목록을 불러오지 못했습니다.");
                 setLoading(false);
             });
 
         return () => controller.abort();
-    }, []);
+    }, [useMockApi]);
 
     const selectedProject = useMemo(
         () => projects.find((item) => item.id === detailId),
@@ -115,6 +157,7 @@ export default function MyProjects({ variant = "page" }: MyProjectsProps) {
     };
 
     const isPageVariant = variant === "page";
+    const shouldShowSettings = showSettingsPanel ?? isPageVariant;
     const pageClass = cx(styles.page, !isPageVariant && styles.pageEmbedded);
     const containerClass = cx(styles.container, variant === "embedded" && styles.containerEmbedded);
     const panelClass = cx(styles.panel, variant === "embedded" && styles.panelEmbedded);
@@ -218,6 +261,20 @@ export default function MyProjects({ variant = "page" }: MyProjectsProps) {
                         </table>
                     </div>
                 </section>
+
+                {shouldShowSettings && (
+                    <>
+                        <ProjectApiSettingsPanel
+                            settings={projectApiSettings}
+                            onChange={handleProjectApiConfigChange}
+                        />
+                        {useMockApi && (
+                            <p className={styles.apiNotice}>
+                                API 설정이 완료되지 않아 예시 프로젝트 데이터가 표시됩니다.
+                            </p>
+                        )}
+                    </>
+                )}
             </div>
 
             {detailId != null && (
@@ -227,6 +284,7 @@ export default function MyProjects({ variant = "page" }: MyProjectsProps) {
                     onClose={() => setDetailId(null)}
                     onUpdated={handleProjectUpdated}
                     onDeleted={handleProjectDeleted}
+                    useMockApi={useMockApi}
                 />
             )}
 
@@ -235,6 +293,7 @@ export default function MyProjects({ variant = "page" }: MyProjectsProps) {
                     existingNames={projects.map((item) => item.name)}
                     onClose={() => setCreateOpen(false)}
                     onCreated={handleProjectCreated}
+                    useMockApi={useMockApi}
                 />
             )}
         </div>
@@ -246,6 +305,7 @@ type ProjectDetailModalProps = {
     onClose: () => void;
     onUpdated: (project: ProjectRecord) => void;
     onDeleted: (projectId: number) => void;
+    useMockApi: boolean;
 };
 
 function ProjectDetailModal({
@@ -254,6 +314,7 @@ function ProjectDetailModal({
     onClose,
     onUpdated,
     onDeleted,
+    useMockApi,
 }: ProjectDetailModalProps) {
     const [project, setProject] = useState<ProjectRecord | null>(initialProject ?? null);
     const [loading, setLoading] = useState(!initialProject);
@@ -278,12 +339,28 @@ function ProjectDetailModal({
     }, [initialProject, project]);
 
     useEffect(() => {
+        if (useMockApi) {
+            if (initialProject) {
+                console.info("[project API] mock detail data", initialProject);
+                setProject(initialProject);
+                setNameValue(initialProject.name);
+                setError(null);
+            } else {
+                setError("프로젝트 정보를 불러올 수 없습니다.");
+            }
+            setLoading(false);
+            setAssetRefreshToken((token) => token + 1);
+            return;
+        }
+
         const controller = new AbortController();
         setLoading(true);
         setError(null);
+        console.info("[project API] fetch project detail start", projectId);
         fetchProjectDetail(projectId, { signal: controller.signal })
             .then((record) => {
                 if (controller.signal.aborted) return;
+                console.info("[project API] fetch project detail success", record);
                 setProject(record);
                 setNameValue(record.name);
                 setLoading(false);
@@ -291,15 +368,21 @@ function ProjectDetailModal({
             })
             .catch((err) => {
                 if (controller.signal.aborted) return;
+                console.warn("[project API] fetch project detail error", err);
                 setError(err instanceof Error ? err.message : "프로젝트 정보를 불러오지 못했습니다.");
                 setLoading(false);
             });
 
         return () => controller.abort();
-    }, [projectId]);
+    }, [projectId, initialProject, useMockApi]);
 
     useEffect(() => {
         if (!project) return;
+        if (useMockApi) {
+            console.info("[project API] mock logo assets: returning empty array");
+            setLogoAssets({ loading: false, error: null, items: [] });
+            return;
+        }
         const controller = new AbortController();
         setLogoAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchLogoPage({ projectId: project.id, page: 0, size: 12 }, { signal: controller.signal })
@@ -317,10 +400,15 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken]);
+    }, [project, assetRefreshToken, useMockApi]);
 
     useEffect(() => {
         if (!project) return;
+        if (useMockApi) {
+            console.info("[project API] mock branding assets: returning empty array");
+            setBrandingAssets({ loading: false, error: null, items: [] });
+            return;
+        }
         const controller = new AbortController();
         setBrandingAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchBrandStrategyPage({ projectId: project.id, page: 0, size: 12 }, { signal: controller.signal })
@@ -338,10 +426,15 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken]);
+    }, [project, assetRefreshToken, useMockApi]);
 
     useEffect(() => {
         if (!project) return;
+        if (useMockApi) {
+            console.info("[project API] mock color guide assets: returning empty array");
+            setColorAssets({ loading: false, error: null, items: [] });
+            return;
+        }
         const controller = new AbortController();
         setColorAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchColorGuidePage({ projectId: project.id, page: 0, size: 12 }, { signal: controller.signal })
@@ -359,7 +452,7 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken]);
+    }, [project, assetRefreshToken, useMockApi]);
 
     const refreshAssets = () => {
         setAssetRefreshToken((token) => token + 1);
@@ -381,6 +474,19 @@ function ProjectDetailModal({
         setSavingName(true);
         setFormError(null);
         try {
+            if (useMockApi) {
+                const updated: ProjectRecord = {
+                    ...project,
+                    name: nextName,
+                    updatedAt: new Date().toISOString(),
+                };
+                console.info("[project API] mock rename", updated);
+                setProject(updated);
+                setNameValue(updated.name);
+                onUpdated(updated);
+                setSavingName(false);
+                return;
+            }
             const updated = await updateProject(project.id, buildUpdatePayload({ name: nextName }));
             setProject(updated);
             setNameValue(updated.name);
@@ -415,6 +521,18 @@ function ProjectDetailModal({
         setAssetError(null);
 
         try {
+            if (useMockApi) {
+                const updated: ProjectRecord = {
+                    ...project,
+                    [key]: nextIds,
+                    updatedAt: new Date().toISOString(),
+                };
+                console.info("[project API] mock asset update", type, nextIds);
+                setProject(updated);
+                onUpdated(updated);
+                setAssetUpdating(false);
+                return;
+            }
             const updated = await updateProject(project.id, buildUpdatePayload({ [key]: nextIds }));
             setProject(updated);
             onUpdated(updated);
@@ -432,7 +550,11 @@ function ProjectDetailModal({
         if (!confirmed) return;
         setDeletePending(true);
         try {
-            await deleteProject(project.id);
+            if (!useMockApi) {
+                await deleteProject(project.id);
+            } else {
+                console.info("[project API] mock delete project", project.id);
+            }
             onDeleted(project.id);
             onClose();
         } catch (err) {
@@ -679,9 +801,10 @@ type ProjectCreateModalProps = {
     existingNames: string[];
     onClose: () => void;
     onCreated: (project: ProjectRecord) => void;
+    useMockApi: boolean;
 };
 
-function ProjectCreateModal({ existingNames, onClose, onCreated }: ProjectCreateModalProps) {
+function ProjectCreateModal({ existingNames, onClose, onCreated, useMockApi }: ProjectCreateModalProps) {
     const [name, setName] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [pending, setPending] = useState(false);
@@ -705,7 +828,10 @@ function ProjectCreateModal({ existingNames, onClose, onCreated }: ProjectCreate
         setPending(true);
         setError(null);
         try {
-            const project = await createProject({ name: trimmed, logoIds: [], brandStrategyIds: [], colorGuideIds: [] });
+            const project = useMockApi
+                ? createMockProjectRecord(trimmed)
+                : await createProject({ name: trimmed, logoIds: [], brandStrategyIds: [], colorGuideIds: [] });
+            console.info("[project API] project create", project);
             onCreated(project);
             onClose();
         } catch (err) {

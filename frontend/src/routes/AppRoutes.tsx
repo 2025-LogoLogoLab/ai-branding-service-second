@@ -5,18 +5,11 @@ import Home from '../pages/Home'
 import Login from '../pages/Login'
 import SignUp from '../pages/SignUp'
 import MyPage from '../pages/MyPage'
-import MyProjects from '../pages/MyProjects'
 import NotFound from '../pages/NotFound'
 import AuthCallback from '../pages/AuthCallback'
 import Logo from '../pages/Logo'
 import Branding from '../pages/Branding'
 import ColorGuide from '../pages/ColorGuide'
-import DeliverablesAllPage, {
-  DeliverablesBlueprintPreviewPage,
-  DeliverablesBrandingPage,
-  DeliverablesColorGuidePage,
-  DeliverablesLogoPage,
-} from '../pages/Deliverables'
 import { ProtectedRoute } from './ProtectedRoute'
 import Admin from '../pages/Admin'
 import UnAuth from '../pages/UnAuth'
@@ -69,13 +62,6 @@ const AppRoutes = () => {
         {/* 로그인 된 사용자만 공개하는 페이지 */}
         <Route element={<ProtectedRoute />}>
           <Route path="myPage" element={<MyPage />} />
-          <Route path="myProjects" element={<MyProjects />} />
-          <Route path="myProducts" element={<DeliverablesAllPage />} />
-          <Route path="deliverables" element={<DeliverablesAllPage />} />
-          <Route path="deliverables/logo" element={<DeliverablesLogoPage />} />
-          <Route path="deliverables/branding" element={<DeliverablesBrandingPage />} />
-          <Route path="deliverables/color-guide" element={<DeliverablesColorGuidePage />} />
-          <Route path="deliverables/blueprint-preview" element={<DeliverablesBlueprintPreviewPage />} />
         </Route>
 
         {/* 관리자만 공개하는 페이지 */}

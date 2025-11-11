@@ -486,3 +486,9 @@
     height: 12px;
     border-radius: 999px;
 }
+
+.apiNotice {
+    margin: 8px 0 16px;
+    font-size: 14px;
+    color: #4b5563;
+}

@@ -1,7 +1,8 @@
 // src/pages/MyPage.tsx
 // 마이페이지 컨테이너: 좌측 사이드바와 우측 콘텐츠를 내부 상태로 전환한다.
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import styles from "./MyPage.module.css";
 import UserInfo from "./UserInfo";
 import MyProjects from "./MyProjects";
@@ -20,8 +21,31 @@ const NAV_ITEMS: Array<{ key: MyPageSection; label: string; icon: string; iconCl
 ];
 
 export default function MyPage() {
-  const [active, setActive] = useState<MyPageSection>("info");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const readSection = useCallback((): MyPageSection => {
+    const section = searchParams.get("section");
+    if (section === "products" || section === "projects" || section === "info") return section;
+    return "info";
+  }, [searchParams]);
+  const [active, setActiveState] = useState<MyPageSection>(readSection);
   const [deliverablesSidebarProps, setDeliverablesSidebarProps] = useState<DeliverablesSidebarBridge | null>(null);
+
+  const setActive = useCallback(
+    (next: MyPageSection) => {
+      setActiveState(next);
+      if (next === "info") {
+        setSearchParams({});
+      } else {
+        setSearchParams({ section: next });
+      }
+    },
+    [setSearchParams],
+  );
+
+  useEffect(() => {
+    const section = readSection();
+    setActiveState((prev) => (prev === section ? prev : section));
+  }, [readSection]);
 
   const handleDeliverablesSidebarChange = useCallback((props: DeliverablesSidebarBridge) => {
     setDeliverablesSidebarProps(props);
@@ -41,7 +65,7 @@ export default function MyPage() {
     }
 
     if (active === "projects") {
-      return <MyProjects variant="embedded" />;
+      return <MyProjects variant="embedded" showSettingsPanel />;
     }
     return <UserInfo />;
   }, [active, handleDeliverablesSidebarChange]);

@@ -23,13 +23,13 @@ function Home() {
       <h1> Home Page **추후 홍보 및 사용법 설명이 들어갈 예정**</h1>
       <Link to={'Login'}> Login </Link><br></br>
       <Link to={'Mypage'}> My Page </Link><br></br>
-      <Link to={'MyProducts'}> My Products </Link><br></br>
-      <Link to={'MyProjects'}> My Projects </Link><br></br>
+      <Link to={'/myPage?section=products'}> My Products </Link><br></br>
+      <Link to={'/myPage?section=projects'}> My Projects </Link><br></br>
       <Link to={'logo'}> Logo </Link><br></br>
       <Link to={'branding'}> Branding </Link><br></br>
       <Link to={'colorGuide'}> Color Guide </Link><br></br>
       <Link to={'Admin'}> Admin </Link><br></br>
-      <Link to={'deliverables/blueprint-preview'}> Blueprint Preview (New Theme)</Link><br></br>
+      <Link to={'/myPage?section=products'}> 내 산출물 바로가기</Link><br></br>
       {/* <DemoLogoTypeSidebar></DemoLogoTypeSidebar> */}
       {/* <DemoLogoStyleSidebar></DemoLogoStyleSidebar> */}
       {/* <AiSidebar></AiSidebar> */}
