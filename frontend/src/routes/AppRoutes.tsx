@@ -5,6 +5,7 @@ import Home from '../pages/Home'
 import Login from '../pages/Login'
 import SignUp from '../pages/SignUp'
 import MyPage from '../pages/MyPage'
+import MyProjects from '../pages/MyProjects'
 import NotFound from '../pages/NotFound'
 import AuthCallback from '../pages/AuthCallback'
 import Logo from '../pages/Logo'
@@ -68,6 +69,7 @@ const AppRoutes = () => {
         {/* 로그인 된 사용자만 공개하는 페이지 */}
         <Route element={<ProtectedRoute />}>
           <Route path="myPage" element={<MyPage />} />
+          <Route path="myProjects" element={<MyProjects />} />
           <Route path="myProducts" element={<DeliverablesAllPage />} />
           <Route path="deliverables" element={<DeliverablesAllPage />} />
           <Route path="deliverables/logo" element={<DeliverablesLogoPage />} />

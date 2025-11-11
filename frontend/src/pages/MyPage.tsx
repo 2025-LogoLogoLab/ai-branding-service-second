@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./MyPage.module.css";
 import UserInfo from "./UserInfo";
+import MyProjects from "./MyProjects";
 import iconUser from "../assets/icons/icon_user.png";
 import iconProducts from "../assets/icons/icon_products.png";
 import iconProject from "../assets/icons/icon_project.png";
@@ -22,8 +23,8 @@ export default function MyPage() {
   const [active, setActive] = useState<MyPageSection>("info");
 
   const content = useMemo(() => {
-    if (active === "info") {
-      return <UserInfo />;
+    if (active === "projects") {
+      return <MyProjects variant="embedded" />;
     }
     return <UserInfo />;
   }, [active]);
@@ -47,7 +48,7 @@ export default function MyPage() {
                   } else if (key === "products") {
                     navigate("/deliverables");
                   } else if (key === "projects") {
-                    navigate("/myProjects");
+                    setActive("projects");
                   }
                 }}
                 aria-current={isActive ? "page" : undefined}
