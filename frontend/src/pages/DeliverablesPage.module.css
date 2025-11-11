@@ -17,6 +17,10 @@
     align-items: start;
 }
 
+.layoutNoSidebar {
+    grid-template-columns: 1fr;
+}
+
 .sections {
     display: grid;
     gap: 32px;

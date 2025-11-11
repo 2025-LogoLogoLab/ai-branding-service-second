@@ -1,5 +1,5 @@
 // src/organisms/DeliverablesSidebar/DeliverablesSidebar.tsx
-// 산출물 관리 페이지 전용 사이드바
+// 내 산출물 페이지 전용 사이드바
 // - 좌측에서 노출되는 카테고리 토글(체크박스) 목록을 구현한다.
 // - 각 항목은 아이콘 + 라벨 + 체크 상태로 구성되어 있으며
 //   클릭 시 onToggle 콜백을 호출한다.
@@ -18,6 +18,7 @@ export type DeliverablesSidebarProps = {
     selections: DeliverableSelection;                  // 현재 체크 상태
     onToggle: (category: DeliverableCategory) => void; // 체크 토글 콜백
     onExclusiveSelect?: (category: DeliverableCategory) => void; // 해당 항목만 표시하도록 요청할 때 사용
+    showTitle?: boolean;
 };
 
 const OPTION_META: Array<{
@@ -34,13 +35,16 @@ export default function DeliverablesSidebar({
     selections,
     onToggle,
     onExclusiveSelect,
+    showTitle = true,
 }: DeliverablesSidebarProps) {
     return (
         <aside className={styles.sidebar} aria-label="산출물 카테고리 선택">
-            <h2 className={styles.title}>
-                <img src={iconProducts} alt="" aria-hidden="true" className={styles.titleIcon} />
-                산출물 관리
-            </h2>
+            {showTitle && (
+                <h2 className={styles.title}>
+                    <img src={iconProducts} alt="" aria-hidden="true" className={styles.titleIcon} />
+                    내 산출물
+                </h2>
+            )}
             <ul className={styles.list} role="list">
                 {OPTION_META.map(({ id, label, icon }) => {
                     const checked = selections[id];

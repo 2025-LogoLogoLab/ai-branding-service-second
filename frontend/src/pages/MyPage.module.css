@@ -34,7 +34,41 @@
 .sidebarList {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
+}
+
+.sidebarDeliverablesWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+}
+
+.sidebarDeliverablesPanel {
+    background: transparent;
+    border-radius: 18px;
+    padding: 0;
+    box-shadow: none;
+}
+
+.sidebarDeliverablesPanel :global(.sidebar) {
+    background: transparent;
+    padding: 0;
+    min-width: auto;
+    gap: 0;
+}
+
+.sidebarDeliverablesPanel :global(.title) {
+    display: none;
+}
+
+.sidebarDeliverablesPanel :global(.list) {
+    gap: 10px;
+}
+
+.sidebarDeliverablesPanel :global(.option) {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .sidebarItem {
@@ -118,3 +152,22 @@
         min-height: auto;
     }
 }
+
+.sidebarPlaceholder {
+    padding: 24px;
+    border-radius: 16px;
+    background: var(--color-bg-base);
+    color: #6b7280;
+    text-align: center;
+    font-size: 14px;
+}
+
+.deliverablesContent {
+    width: 100%;
+}
+
+.contentProducts {
+    padding: 0;
+    gap: 0;
+}
+

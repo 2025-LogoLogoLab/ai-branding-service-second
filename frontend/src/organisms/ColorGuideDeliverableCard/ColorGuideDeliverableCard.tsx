@@ -1,5 +1,5 @@
 // src/organisms/ColorGuideDeliverableCard/ColorGuideDeliverableCard.tsx
-// 산출물 관리 페이지에서 컬러 가이드를 카드 형태로 노출
+// 내 산출물 페이지에서 컬러 가이드를 카드 형태로 노출
 // - briefKo를 Prompt로 보여주고, ColorGuideStrip을 이용해 팔레트를 시각화한다.
 
 import type { KeyboardEvent } from "react";

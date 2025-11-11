@@ -1,5 +1,5 @@
 // src/organisms/DeliverableSection/DeliverableSection.tsx
-// 산출물 관리 페이지에서 각 카테고리 영역을 감싸는 공용 섹션 컴포넌트
+// 내 산출물 페이지에서 각 카테고리 영역을 감싸는 공용 섹션 컴포넌트
 // - 타이틀 / 부가설명 / 카드 그리드 / 하단 슬롯(페이지네이션 등)을 지원한다.
 
 import styles from "./DeliverableSection.module.css";

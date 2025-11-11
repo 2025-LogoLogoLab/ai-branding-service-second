@@ -1,5 +1,5 @@
 // src/organisms/BrandStrategyDeliverableCard/BrandStrategyDeliverableCard.tsx
-// 산출물 관리 페이지에서 브랜딩 전략 아이템을 카드 형태로 표시하는 컴포넌트.
+// 내 산출물 페이지에서 브랜딩 전략 아이템을 카드 형태로 표시하는 컴포넌트.
 // - Prompt(briefKo)와 본문(summary/markdown)을 간단히 노출
 // - 하단에는 ProductToolbar를 재사용하여 공통 액션을 제공
 

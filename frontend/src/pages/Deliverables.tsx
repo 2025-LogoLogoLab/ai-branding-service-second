@@ -1,5 +1,5 @@
 // src/pages/Deliverables.tsx
-// 마이페이지 > 산출물 관리 진입 시 노출되는 메인 페이지.
+// 마이페이지 > 내 산출물 진입 시 노출되는 메인 페이지.
 // - 좌측 사이드바(DeliverablesSidebar)에서 카테고리 토글을 제어하면
 //   선택된 항목에 맞춰 우측 콘텐츠 영역이 갱신된다.
 // - 제공된 시안에 따라 총 4개의 뷰(전체/로고/브랜딩 전략/컬러 가이드)를
@@ -85,6 +85,21 @@ const initialActionState: ActionState = {
     deletingId: null,
     copyingId: null,
     downloadingId: null,
+};
+
+export type DeliverablesSidebarBridge = {
+    selections: DeliverableSelection;
+    onToggle: (category: DeliverableCategory) => void;
+    onExclusiveSelect?: (category: DeliverableCategory) => void;
+};
+
+type DeliverablesPageProps = {
+    mode: DeliverablesMode;
+    variant?: DeliverablesVariant;
+    renderSidebar?: boolean;
+    onSidebarPropsChange?: (props: DeliverablesSidebarBridge) => void;
+    className?: string;
+    disableExclusiveRouting?: boolean;
 };
 
 // mode 값에 따라 기본 체크 상태를 구성
@@ -228,7 +243,14 @@ const previewToColorGuideDetail = (preview: ColorGuideListItem): ColorGuideDetai
     createdAt: preview.createdAt,
 });
 
-function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMode; variant?: DeliverablesVariant }) {
+function DeliverablesPage({
+    mode,
+    variant = "default",
+    renderSidebar = true,
+    onSidebarPropsChange,
+    className,
+    disableExclusiveRouting = false,
+}: DeliverablesPageProps) {
     const navigate = useNavigate();
     const isBlueprint = variant === "blueprint";
 
@@ -357,20 +379,20 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
         setDetailState({ open: false });
     }, []);
 
-    const resetPageFor = (category: DeliverableCategory) => {
+    const resetPageFor = useCallback((category: DeliverableCategory) => {
         if (category === "logo") setLogoPage(0);
         if (category === "branding") setBrandingPage(0);
         if (category === "colorGuide") setColorGuidePage(0);
-    };
+    }, []);
 
-    const bumpNonce = (category: DeliverableCategory) => {
+    const bumpNonce = useCallback((category: DeliverableCategory) => {
         if (category === "logo") setLogoNonce((v) => v + 1);
         if (category === "branding") setBrandingNonce((v) => v + 1);
         if (category === "colorGuide") setColorGuideNonce((v) => v + 1);
-    };
+    }, []);
 
     // 사이드바 토글 동작
-    const handleToggle = (category: DeliverableCategory) => {
+    const handleToggle = useCallback((category: DeliverableCategory) => {
         setSelections((prev) => {
             const next: DeliverableSelection = { ...prev, [category]: !prev[category] };
             const coerced = ensureAtLeastOne(next, prev);
@@ -381,10 +403,10 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
             }
             return coerced;
         });
-    };
+    }, [bumpNonce, resetPageFor]);
 
     // "단독 보기" 버튼 → 해당 전용 라우트 이동
-    const handleExclusiveSelect = (category: DeliverableCategory) => {
+    const handleExclusiveSelect = useCallback((category: DeliverableCategory) => {
         setSelections({
             logo: category === "logo",
             branding: category === "branding",
@@ -396,8 +418,23 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
         setLogoNonce((v) => v + 1);
         setBrandingNonce((v) => v + 1);
         setColorGuideNonce((v) => v + 1);
-        navigate(CATEGORY_PATH[category]);
-    };
+        if (!disableExclusiveRouting) {
+            navigate(CATEGORY_PATH[category]);
+        }
+    }, [disableExclusiveRouting, navigate]);
+
+    const sidebarBridge = useMemo<DeliverablesSidebarBridge>(
+        () => ({
+            selections,
+            onToggle: handleToggle,
+            onExclusiveSelect: handleExclusiveSelect,
+        }),
+        [handleExclusiveSelect, handleToggle, selections],
+    );
+
+    useEffect(() => {
+        onSidebarPropsChange?.(sidebarBridge);
+    }, [onSidebarPropsChange, sidebarBridge]);
 
     // 태그 패널 상태 관리
     const handleTagConfigChange = (section: keyof TagApiSettings, field: "url" | "method", value: string) => {
@@ -653,20 +690,27 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
         ? (detailColorData ?? (detailColorPreview ? previewToColorGuideDetail(detailColorPreview) : undefined))
         : undefined;
 
+    const pageClassName = [
+        s.page,
+        isBlueprint ? s.pageBlueprint : "",
+        className ?? "",
+    ].join(" ").trim();
+
+    const layoutClassName = [
+        s.layout,
+        renderSidebar ? "" : s.layoutNoSidebar,
+    ].join(" ").trim();
+
     return (
-        <div
-            className={[
-                s.page,
-                isBlueprint ? s.pageBlueprint : "",
-            ].join(" ").trim()}
-        >
-            <TagApiSettingsPanel settings={tagApiSettings} onChange={handleTagConfigChange} />
-            <div className={s.layout}>
-                <DeliverablesSidebar
-                    selections={selections}
-                    onToggle={handleToggle}
-                    onExclusiveSelect={handleExclusiveSelect}
-                />
+        <div className={pageClassName}>
+            <div className={layoutClassName}>
+                {renderSidebar && (
+                    <DeliverablesSidebar
+                        selections={selections}
+                        onToggle={handleToggle}
+                        onExclusiveSelect={handleExclusiveSelect}
+                    />
+                )}
 
                 <div className={s.sections}>
                     {selections.logo && (
@@ -781,6 +825,9 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
                 </div>
             </div>
 
+            <TagApiSettingsPanel settings={tagApiSettings} onChange={handleTagConfigChange} />
+
+
             {detailState.open && detailState.type === "logo" && (
                 <DeliverableDetailModal
                     type="logo"
@@ -830,22 +877,24 @@ function DeliverablesPage({ mode, variant = "default" }: { mode: DeliverablesMod
 }
 
 // 라우팅 전용 래퍼 컴포넌트들
-export default function DeliverablesAllPage() {
-    return <DeliverablesPage mode="all" />;
+type StandaloneDeliverablesProps = Omit<DeliverablesPageProps, "mode">;
+
+export default function DeliverablesAllPage(props: StandaloneDeliverablesProps = {}) {
+    return <DeliverablesPage mode="all" {...props} />;
 }
 
-export function DeliverablesBlueprintPreviewPage() {
-    return <DeliverablesPage mode="all" variant="blueprint" />;
+export function DeliverablesBlueprintPreviewPage(props: StandaloneDeliverablesProps = {}) {
+    return <DeliverablesPage mode="all" variant="blueprint" {...props} />;
 }
 
-export function DeliverablesLogoPage() {
-    return <DeliverablesPage mode="logo" />;
+export function DeliverablesLogoPage(props: StandaloneDeliverablesProps = {}) {
+    return <DeliverablesPage mode="logo" {...props} />;
 }
 
-export function DeliverablesBrandingPage() {
-    return <DeliverablesPage mode="branding" />;
+export function DeliverablesBrandingPage(props: StandaloneDeliverablesProps = {}) {
+    return <DeliverablesPage mode="branding" {...props} />;
 }
 
-export function DeliverablesColorGuidePage() {
-    return <DeliverablesPage mode="colorGuide" />;
+export function DeliverablesColorGuidePage(props: StandaloneDeliverablesProps = {}) {
+    return <DeliverablesPage mode="colorGuide" {...props} />;
 }
