@@ -24,28 +24,31 @@ import { DeliverableDetailModal } from "../organisms/DeliverableDetailModal/Deli
 import {
     deleteLogo,
     fetchLogoPage,
-    fetchLogoDetail,
     type LogoListItem,
-    type LogoDetail,
 } from "../custom_api/logo";
 import {
     deleteBranding,
     fetchBrandStrategyPage,
-    fetchBrandStrategyDetail,
     type BrandStrategyListItem,
-    type BrandStrategyDetail,
 } from "../custom_api/branding";
 import {
     deleteColorGuide,
     fetchColorGuidePage,
-    fetchColorGuideDetail,
     type ColorGuideListItem,
-    type ColorGuideDetail,
 } from "../custom_api/colorguide";
 import type { PaginatedResponse } from "../custom_api/types";
 import { copyImageToClipboard } from "../utils/clipboard";
 import { ensureDataUrl } from "../utils/image";
 import type { ProductToolbarProps } from "../molecules/ProductToolbar/ProductToolbar";
+import {
+    asBrandStrategyListItem,
+    asColorGuideListItem,
+    asLogoListItem,
+    previewToBrandDetail,
+    previewToColorGuideDetail,
+    previewToLogoDetail,
+    useDeliverableDetail,
+} from "../utils/deliverableDetail";
 // 태그 API 패널용
 import type { TagApiSettings } from "../custom_api/tags";
 import type { HttpMethod } from "../custom_api/types";
@@ -155,94 +158,6 @@ function usePaginatedLoader<T>(
 
 type DeliverablesVariant = "default" | "blueprint";
 
-type DetailType = "logo" | "branding" | "colorGuide";
-
-type DetailState =
-    | { open: false }
-    | {
-        open: true;
-        type: DetailType;
-        id: number;
-        loading: boolean;
-        error: string | null;
-        preview: LogoListItem | BrandStrategyListItem | ColorGuideListItem;
-        data?: LogoDetail | BrandStrategyDetail | ColorGuideDetail;
-    };
-
-type DetailPreview =
-    | { type: "logo"; item: LogoListItem }
-    | { type: "branding"; item: BrandStrategyListItem }
-    | { type: "colorGuide"; item: ColorGuideListItem };
-
-const asLogoListItem = (detail?: LogoDetail, fallback?: LogoListItem): LogoListItem => ({
-    id: detail?.id ?? fallback?.id ?? 0,
-    prompt: detail?.prompt ?? fallback?.prompt ?? "",
-    imageUrl: detail?.imageUrl ?? fallback?.imageUrl ?? "",
-    createdAt: detail?.createdAt ?? fallback?.createdAt ?? "",
-});
-
-const asBrandStrategyListItem = (
-    detail?: BrandStrategyDetail,
-    fallback?: BrandStrategyListItem,
-): BrandStrategyListItem => ({
-    id: detail?.id ?? fallback?.id ?? 0,
-    briefKo: detail?.briefKo ?? fallback?.briefKo ?? "",
-    style: detail?.style ?? fallback?.style,
-    mainHex: fallback?.mainHex,
-    pointHex: fallback?.pointHex,
-    summaryKo: detail?.summaryKo ?? fallback?.summaryKo,
-    markdown: detail?.markdown ?? fallback?.markdown,
-    createdAt: detail?.createdAt ?? fallback?.createdAt ?? "",
-});
-
-const asColorGuideListItem = (
-    detail?: ColorGuideDetail,
-    fallback?: ColorGuideListItem,
-): ColorGuideListItem => ({
-    id: detail?.id ?? fallback?.id ?? 0,
-    briefKo: detail?.briefKo ?? fallback?.briefKo ?? "",
-    style: detail?.style ?? fallback?.style,
-    mainHex: detail?.guide?.main.hex ?? fallback?.mainHex,
-    subHex: detail?.guide?.sub.hex ?? fallback?.subHex,
-    pointHex: detail?.guide?.point.hex ?? fallback?.pointHex,
-    backgroundHex: detail?.guide?.background.hex ?? fallback?.backgroundHex,
-    mainDescription: detail?.guide?.main.description ?? fallback?.mainDescription,
-    subDescription: detail?.guide?.sub.description ?? fallback?.subDescription,
-    pointDescription: detail?.guide?.point.description ?? fallback?.pointDescription,
-    backgroundDescription: detail?.guide?.background.description ?? fallback?.backgroundDescription,
-    createdAt: detail?.createdAt ?? fallback?.createdAt ?? "",
-});
-
-const previewToLogoDetail = (preview: LogoListItem): LogoDetail => ({
-    id: preview.id,
-    prompt: preview.prompt,
-    imageUrl: preview.imageUrl,
-    createdAt: preview.createdAt,
-});
-
-const previewToBrandDetail = (preview: BrandStrategyListItem): BrandStrategyDetail => ({
-    id: preview.id,
-    briefKo: preview.briefKo,
-    style: preview.style,
-    caseType: undefined,
-    markdown: preview.markdown ?? preview.summaryKo ?? preview.briefKo,
-    summaryKo: preview.summaryKo,
-    createdAt: preview.createdAt,
-});
-
-const previewToColorGuideDetail = (preview: ColorGuideListItem): ColorGuideDetail => ({
-    id: preview.id,
-    briefKo: preview.briefKo,
-    style: preview.style,
-    guide: {
-        main: { hex: preview.mainHex ?? "", description: preview.mainDescription ?? "" },
-        sub: { hex: preview.subHex ?? "", description: preview.subDescription ?? "" },
-        point: { hex: preview.pointHex ?? "", description: preview.pointDescription ?? "" },
-        background: { hex: preview.backgroundHex ?? "", description: preview.backgroundDescription ?? "" },
-    },
-    createdAt: preview.createdAt,
-});
-
 function DeliverablesPage({
     mode,
     variant = "default",
@@ -277,7 +192,19 @@ function DeliverablesPage({
     const [logoActions, setLogoActions] = useState<ActionState>(initialActionState);
     const [brandingActions, setBrandingActions] = useState<ActionState>(initialActionState);
     const [colorGuideActions, setColorGuideActions] = useState<ActionState>(initialActionState);
-    const [detailState, setDetailState] = useState<DetailState>({ open: false });
+    const {
+        detailState,
+        openDetail,
+        closeDetail,
+        closeIfTarget,
+        loadDetail,
+        detailLogoPreview,
+        detailBrandPreview,
+        detailColorPreview,
+        detailLogoData,
+        detailBrandData,
+        detailColorData,
+    } = useDeliverableDetail();
 
     // mode가 변경되면 기본 선택 및 페이지 초기화
     useEffect(() => {
@@ -331,53 +258,6 @@ function DeliverablesPage({
         alert("최소 한 개 이상의 카테고리는 선택되어 있어야 합니다.");
         return current;
     };
-
-    const loadDetail = useCallback(async (type: DetailType, id: number) => {
-        try {
-            let data: LogoDetail | BrandStrategyDetail | ColorGuideDetail;
-            if (type === "logo") {
-                data = await fetchLogoDetail(id);
-            } else if (type === "branding") {
-                data = await fetchBrandStrategyDetail(id);
-            } else {
-                data = await fetchColorGuideDetail(id);
-            }
-            setDetailState((prev) => {
-                if (prev.open && prev.type === type && prev.id === id) {
-                    return { ...prev, loading: false, error: null, data };
-                }
-                return prev;
-            });
-        } catch (err) {
-            const message = err instanceof Error ? err.message : "상세 정보를 불러오지 못했습니다.";
-            setDetailState((prev) => {
-                if (prev.open && prev.type === type && prev.id === id) {
-                    return { ...prev, loading: false, error: message };
-                }
-                return prev;
-            });
-        }
-    }, []);
-
-    const openDetail = useCallback(
-        (payload: DetailPreview) => {
-            setDetailState({
-                open: true,
-                type: payload.type,
-                id: payload.item.id,
-                loading: true,
-                error: null,
-                preview: payload.item,
-                data: undefined,
-            });
-            void loadDetail(payload.type, payload.item.id);
-        },
-        [loadDetail],
-    );
-
-    const closeDetail = useCallback(() => {
-        setDetailState({ open: false });
-    }, []);
 
     const resetPageFor = useCallback((category: DeliverableCategory) => {
         if (category === "logo") setLogoPage(0);
@@ -499,7 +379,7 @@ function DeliverablesPage({
         try {
             await deleteLogo(id);
             bumpNonce("logo");
-            setDetailState((prev) => (prev.open && prev.type === "logo" && prev.id === id ? { open: false } : prev));
+            closeIfTarget("logo", id);
         } catch (err) {
             const message = err instanceof Error ? err.message : "로고 삭제에 실패했습니다.";
             alert(message);
@@ -540,7 +420,7 @@ function DeliverablesPage({
         try {
             await deleteBranding({ id });
             bumpNonce("branding");
-            setDetailState((prev) => (prev.open && prev.type === "branding" && prev.id === id ? { open: false } : prev));
+            closeIfTarget("branding", id);
         } catch (err) {
             const message = err instanceof Error ? err.message : "브랜딩 전략 삭제에 실패했습니다.";
             alert(message);
@@ -577,7 +457,7 @@ function DeliverablesPage({
         try {
             await deleteColorGuide(id);
             bumpNonce("colorGuide");
-            setDetailState((prev) => (prev.open && prev.type === "colorGuide" && prev.id === id ? { open: false } : prev));
+            closeIfTarget("colorGuide", id);
         } catch (err) {
             const message = err instanceof Error ? err.message : "컬러 가이드 삭제에 실패했습니다.";
             alert(message);
@@ -622,26 +502,6 @@ function DeliverablesPage({
             {message}
         </div>
     );
-
-    const detailLogoPreview = detailState.open && detailState.type === "logo"
-        ? (detailState.preview as LogoListItem)
-        : undefined;
-    const detailBrandPreview = detailState.open && detailState.type === "branding"
-        ? (detailState.preview as BrandStrategyListItem)
-        : undefined;
-    const detailColorPreview = detailState.open && detailState.type === "colorGuide"
-        ? (detailState.preview as ColorGuideListItem)
-        : undefined;
-
-    const detailLogoData = detailState.open && detailState.type === "logo"
-        ? (detailState.data as LogoDetail | undefined)
-        : undefined;
-    const detailBrandData = detailState.open && detailState.type === "branding"
-        ? (detailState.data as BrandStrategyDetail | undefined)
-        : undefined;
-    const detailColorData = detailState.open && detailState.type === "colorGuide"
-        ? (detailState.data as ColorGuideDetail | undefined)
-        : undefined;
 
     let detailToolbarProps: ProductToolbarProps | undefined;
 
@@ -836,7 +696,11 @@ function DeliverablesPage({
                     loading={detailState.loading}
                     error={detailState.error ?? undefined}
                     onClose={closeDetail}
-                    onRetry={detailState.error ? () => loadDetail("logo", detailState.id) : undefined}
+                    onRetry={
+                        detailState.error && detailState.id != null
+                            ? () => loadDetail("logo", detailState.id!)
+                            : undefined
+                    }
                     toolbarProps={detailToolbarProps}
                     // 태그 API 패널용
                     tagApiSettings={tagApiSettings}
@@ -851,7 +715,11 @@ function DeliverablesPage({
                     loading={detailState.loading}
                     error={detailState.error ?? undefined}
                     onClose={closeDetail}
-                    onRetry={detailState.error ? () => loadDetail("branding", detailState.id) : undefined}
+                    onRetry={
+                        detailState.error && detailState.id != null
+                            ? () => loadDetail("branding", detailState.id!)
+                            : undefined
+                    }
                     toolbarProps={detailToolbarProps}
                     // 태그 API 패널용
                     tagApiSettings={tagApiSettings}
@@ -866,7 +734,11 @@ function DeliverablesPage({
                     loading={detailState.loading}
                     error={detailState.error ?? undefined}
                     onClose={closeDetail}
-                    onRetry={detailState.error ? () => loadDetail("colorGuide", detailState.id) : undefined}
+                    onRetry={
+                        detailState.error && detailState.id != null
+                            ? () => loadDetail("colorGuide", detailState.id!)
+                            : undefined
+                    }
                     toolbarProps={detailToolbarProps}
                     // 태그 API 패널용
                     tagApiSettings={tagApiSettings}

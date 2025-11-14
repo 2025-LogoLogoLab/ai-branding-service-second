@@ -54,26 +54,9 @@
     flex-wrap: wrap;
 }
 
-.createButton {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 18px;
-    border-radius: 999px;
-    border: none;
-    background: var(--color-button-primary-bg);
-    color: var(--color-font-button-white);
+.createProjectButton {
+    min-width: 140px;
     font-weight: 600;
-    cursor: pointer;
-}
-
-.createButton:hover {
-    background: var(--color-button-hover-bg);
-}
-
-.createIcon {
-    width: 18px;
-    height: 18px;
 }
 
 .panel {
@@ -244,6 +227,49 @@
     align-items: center;
 }
 
+.editModeButton {
+    min-width: 140px;
+    font-weight: 600;
+}
+
+.iconButton {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.iconButton:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.iconButton img {
+    width: 20px;
+    height: 20px;
+}
+
+.iconButtonSpinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(185, 28, 28, 0.35);
+    border-top-color: rgba(185, 28, 28, 0.9);
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .modalTitle {
     margin: 0;
     font-size: 24px;
@@ -258,15 +284,21 @@
 
 .closeButton {
     border: none;
-    background: transparent;
-    font-size: 24px;
-    line-height: 1;
+    background: rgba(15, 23, 42, 0.05);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
     cursor: pointer;
-    color: #9ca3af;
+    color: #0f172a;
+    font-size: 20px;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    transition: background 0.2s ease;
 }
 
 .closeButton:hover {
-    color: #111827;
+    background: rgba(15, 23, 42, 0.12);
 }
 
 .modalBody {
@@ -274,7 +306,7 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 32px;
 }
 
 .fieldGroup {
@@ -283,6 +315,7 @@
 }
 
 .fieldLabel {
+    font-size: 24px;
     font-weight: 600;
     color: #111827;
 }
@@ -298,6 +331,18 @@
     border-radius: 14px;
     border: 1px solid #d1d5db;
     font-size: 15px;
+    background: #fff;
+}
+
+.textInput:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+}
+
+.projectNameInput {
+    border: none;
+    background: #e5edff;
+    color: #0f172a;
 }
 
 .primaryButton,
@@ -337,26 +382,28 @@
 
 .metaSection {
     display: flex;
-    gap: 16px;
     flex-wrap: wrap;
+    gap: 12px;
+    font-size: 13px;
+    color: rgba(15, 23, 42, 0.7);
 }
 
 .metaItem {
-    min-width: 200px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .metaLabel {
-    display: block;
+    /* font-weight: 600; */
+    color: rgba(15, 23, 42, 0.55);
     font-size: 13px;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
 }
 
 .metaValue {
-    color: #111827;
-    font-weight: 600;
-    margin-top: 4px;
+    color: rgba(15, 23, 42, 0.55);
+    /* font-weight: 600; */
+    font-size: 13px;
 }
 
 .assetSection {
@@ -389,7 +436,7 @@
 
 .assetGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 0.33fr));
     gap: 16px;
 }
 
@@ -397,6 +444,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    align-items: stretch;
 }
 
 .assetActionButton {
@@ -407,6 +455,7 @@
     border-radius: 999px;
     font-size: 14px;
     cursor: pointer;
+    width: 100%;
 }
 
 .assetActionButton:disabled {
@@ -491,4 +540,21 @@
     margin: 8px 0 16px;
     font-size: 14px;
     color: #4b5563;
+}
+.assetAddButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+}
+
+.actionButtonIcon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+}
+.actionButtonContent {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }

@@ -190,6 +190,71 @@
     color: rgba(15, 23, 42, 0.55);
 }
 
+.metadataRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.brandingEditActions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.brandingEditButton {
+    border: 1px solid rgba(30, 58, 138, 0.3);
+    background: #ffffff;
+    padding: 8px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    color: rgba(30, 58, 138, 0.85);
+    font-weight: 600;
+}
+
+.brandingEditPrimary {
+    border: none;
+    background: rgba(30, 58, 138, 0.9);
+    color: #ffffff;
+    padding: 8px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.brandingPromptInput {
+    width: 100%;
+    min-height: 80px;
+    border-radius: 16px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 15px;
+    resize: vertical;
+    background: #fff;
+}
+
+.brandingTextarea {
+    width: 100%;
+    min-height: 220px;
+    border-radius: 16px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 15px;
+    resize: vertical;
+    line-height: 1.6;
+    background: #fff;
+}
+
+.brandingEditError {
+    margin-top: 8px;
+    color: #dc2626;
+    font-size: 13px;
+}
+
 .tagBlock {
     composes: contentBlock;
     display: flex;

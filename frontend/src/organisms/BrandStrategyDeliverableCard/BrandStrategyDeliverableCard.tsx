@@ -7,6 +7,7 @@ import type { KeyboardEvent } from "react";
 import styles from "./BrandStrategyDeliverableCard.module.css";
 import { ProductToolbar } from "../../molecules/ProductToolbar/ProductToolbar";
 import type { BrandStrategyListItem } from "../../custom_api/branding";
+import ReactMarkdown from "react-markdown";
 
 export type BrandStrategyDeliverableCardProps = {
     item: BrandStrategyListItem;
@@ -25,9 +26,9 @@ export type BrandStrategyDeliverableCardProps = {
 
 function normalizeStrategyText(item: BrandStrategyListItem): string {
     // markdown 필드가 있다면 그대로 활용하고, 없으면 summary → brief 순으로 대체
-    if (item.markdown) return item.markdown;
-    if (item.summaryKo) return item.summaryKo;
-    return item.briefKo;
+    const source = item.markdown ?? item.summaryKo ?? item.briefKo ?? "";
+    // heading(\#)과 텍스트 사이 공백이 없으면 마크다운 파서가 인식하지 못하므로 강제로 공백을 삽입
+    return source.replace(/(^|\n)(#+)(?!\s)/g, (_, prefix: string, hashes: string) => `${prefix}${hashes} `);
 }
 
 export default function BrandStrategyDeliverableCard({
@@ -45,6 +46,10 @@ export default function BrandStrategyDeliverableCard({
     onSelect,
 }: BrandStrategyDeliverableCardProps) {
     const strategyText = normalizeStrategyText(item);
+    const previewText =
+        strategyText.length > 800
+            ? `${strategyText.slice(0, 800)}\n\n…`
+            : strategyText;
     const isBlueprint = variant === "blueprint";
 
     const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -97,14 +102,17 @@ export default function BrandStrategyDeliverableCard({
                 >
                     Branding Strategy
                 </h4>
-                <p
+                <div
                     className={[
                         styles.content,
                         isBlueprint ? styles.contentBlueprint : "",
                     ].join(" ").trim()}
                 >
-                    {strategyText}
-                </p>
+                    <ReactMarkdown>{previewText}</ReactMarkdown>
+                    {strategyText.length > previewText.length && (
+                        <p className={styles.truncateHint}>…</p>
+                    )}
+                </div>
             </section>
 
             <footer

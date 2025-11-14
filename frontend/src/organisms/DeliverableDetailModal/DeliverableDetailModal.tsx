@@ -1,7 +1,7 @@
 import styles from "./DeliverableDetailModal.module.css";
 import { ProductToolbar, type ProductToolbarProps } from "../../molecules/ProductToolbar/ProductToolbar";
 import type { LogoDetail } from "../../custom_api/logo";
-import type { BrandStrategyDetail } from "../../custom_api/branding";
+import { updateBrandStrategy, type BrandStrategyDetail } from "../../custom_api/branding";
 import type { ColorGuideDetail, palette } from "../../custom_api/colorguide";
 import { ensureDataUrl } from "../../utils/image";
 import { Fragment, useEffect, useState } from "react";
@@ -147,10 +147,31 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
         ((props.data as { tags?: TagRecord[] } | null | undefined)?.tags) ?? [],
     );
     const [isTagPickerOpen, setTagPickerOpen] = useState(false);
+    const [brandingDetail, setBrandingDetail] = useState<BrandStrategyDetail | null>(
+        props.type === "branding" ? ((props.data as BrandStrategyDetail | null | undefined) ?? null) : null,
+    );
+    const [brandingBodyDraft, setBrandingBodyDraft] = useState("");
+    const [brandingEditing, setBrandingEditing] = useState(false);
+    const [brandingSaving, setBrandingSaving] = useState(false);
+    const [brandingEditError, setBrandingEditError] = useState<string | null>(null);
 
     useEffect(() => {
         setLocalTags(((props.data as { tags?: TagRecord[] } | null | undefined)?.tags) ?? []);
     }, [props.data?.id, props.type]);
+
+    useEffect(() => {
+        if (props.type === "branding") {
+            const nextDetail = (props.data as BrandStrategyDetail | null | undefined) ?? null;
+            setBrandingDetail(nextDetail);
+            setBrandingBodyDraft(nextDetail?.markdown ?? "");
+            setBrandingEditing(false);
+            setBrandingEditError(null);
+        } else {
+            setBrandingDetail(null);
+            setBrandingEditing(false);
+            setBrandingEditError(null);
+        }
+    }, [props.type, props.data]);
 
     const maxTagsReached = localTags.length >= 5;
 
@@ -191,7 +212,9 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
             case "logo":
                 return props.data ? renderLogoDetail(props.data) : renderStatus("표시할 로고 정보가 없습니다.", true, onRetry);
             case "branding":
-                return props.data ? renderBrandingDetail(props.data) : renderStatus("표시할 브랜딩 전략이 없습니다.", true, onRetry);
+                return (brandingDetail ?? props.data)
+                    ? renderBrandingDetail((brandingDetail ?? props.data) as BrandStrategyDetail)
+                    : renderStatus("표시할 브랜딩 전략이 없습니다.", true, onRetry);
             case "colorGuide":
                 return props.data ? renderColorGuideDetail(props.data) : renderStatus("표시할 컬러 가이드가 없습니다.", true, onRetry);
             default:
@@ -259,33 +282,114 @@ const renderLogoDetail = (detail: LogoDetail) => {
         );
     };
 
-    const renderBrandingDetail = (detail: BrandStrategyDetail) => (
-        <Fragment>
-            <div className={styles.metadata}>
-                {detail.createdAt && <span>생성일 {formatDate(detail.createdAt)}</span>}
-                {detail.updatedAt && <span>수정일 {formatDate(detail.updatedAt)}</span>}
-                {translateStyle(detail.style) && <span>스타일 {translateStyle(detail.style)}</span>}
-            </div>
+    const handleBrandingEditStart = () => {
+        setBrandingEditing(true);
+        setBrandingBodyDraft((brandingDetail ?? (props.data as BrandStrategyDetail | null | undefined))?.markdown ?? "");
+        setBrandingEditError(null);
+    };
 
-            <section className={styles.section}>
-                <h3 className={styles.sectionTitle}>Prompt</h3>
-                <div className={styles.promptBlock}>{detail.briefKo || "입력된 브리프 정보가 없습니다."}</div>
-            </section>
+    const handleBrandingEditCancel = () => {
+        const current = brandingDetail ?? (props.data as BrandStrategyDetail | null | undefined);
+        setBrandingBodyDraft(current?.markdown ?? "");
+        setBrandingEditing(false);
+        setBrandingEditError(null);
+    };
 
-            <section className={styles.section}>
-                <h3 className={styles.sectionTitle}>Branding Strategy</h3>
-                {detail.markdown && detail.markdown.trim() ? (
-                    <div className={styles.markdownBlock}>
-                        <ReactMarkdown>{normalizeMarkdown(detail.markdown)}</ReactMarkdown>
+    const handleBrandingSave = async () => {
+        const current = brandingDetail ?? (props.data as BrandStrategyDetail | null | undefined);
+        if (!current) return;
+        const nextBody = brandingBodyDraft.trim();
+        if (!nextBody) {
+            setBrandingEditError("브랜딩 전략 본문을 입력해주세요.");
+            return;
+        }
+        setBrandingSaving(true);
+        setBrandingEditError(null);
+        try {
+            const updated = await updateBrandStrategy(current.id, {
+                markdown: nextBody,
+            });
+            setBrandingDetail(updated);
+            setBrandingBodyDraft(updated.markdown ?? "");
+            setBrandingEditing(false);
+            setLocalTags(Array.isArray(updated.tags) ? updated.tags : []);
+        } catch (err) {
+            setBrandingEditError(err instanceof Error ? err.message : "브랜딩 전략 수정에 실패했습니다.");
+        } finally {
+            setBrandingSaving(false);
+        }
+    };
+
+    const renderBrandingDetail = (detail: BrandStrategyDetail) => {
+        const activeDetail = brandingDetail ?? detail;
+        return (
+            <Fragment>
+                <div className={styles.metadataRow}>
+                    <div className={styles.metadata}>
+                        {activeDetail.createdAt && <span>생성일 {formatDate(activeDetail.createdAt)}</span>}
+                        {activeDetail.updatedAt && <span>수정일 {formatDate(activeDetail.updatedAt)}</span>}
+                        {translateStyle(activeDetail.style) && <span>스타일 {translateStyle(activeDetail.style)}</span>}
                     </div>
-                ) : (
-                    <div className={styles.promptBlock}>브랜딩 전략 본문이 비어 있습니다.</div>
-                )}
-            </section>
+                    <div className={styles.brandingEditActions}>
+                        {brandingEditing ? (
+                            <>
+                                <button
+                                    type="button"
+                                    className={styles.brandingEditPrimary}
+                                    onClick={handleBrandingSave}
+                                    disabled={brandingSaving}
+                                >
+                                    {brandingSaving ? "저장 중…" : "저장"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className={styles.brandingEditButton}
+                                    onClick={handleBrandingEditCancel}
+                                    disabled={brandingSaving}
+                                >
+                                    취소
+                                </button>
+                            </>
+                        ) : (
+                            <button type="button" className={styles.brandingEditButton} onClick={handleBrandingEditStart}>
+                                수정
+                            </button>
+                        )}
+                    </div>
+                </div>
 
-            {renderTagsSection(localTags, () => setTagPickerOpen(true), handleRemoveTag)}
-        </Fragment>
-    );
+                <section className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Prompt</h3>
+                    <div className={styles.promptBlock}>
+                        {activeDetail.briefKo || "입력된 브리프 정보가 없습니다."}
+                    </div>
+                </section>
+
+                <section className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Branding Strategy</h3>
+                    {brandingEditing ? (
+                        <textarea
+                            className={styles.brandingTextarea}
+                            value={brandingBodyDraft}
+                            onChange={(event) => setBrandingBodyDraft(event.target.value)}
+                            placeholder="브랜딩 전략 본문을 입력하세요."
+                        />
+                    ) : activeDetail.markdown && activeDetail.markdown.trim() ? (
+                        <div className={styles.markdownBlock}>
+                            <ReactMarkdown>{normalizeMarkdown(activeDetail.markdown)}</ReactMarkdown>
+                        </div>
+                    ) : (
+                        <div className={styles.promptBlock}>브랜딩 전략 본문이 비어 있습니다.</div>
+                    )}
+                    {brandingEditing && brandingEditError && (
+                        <p className={styles.brandingEditError}>{brandingEditError}</p>
+                    )}
+                </section>
+
+                {renderTagsSection(localTags, () => setTagPickerOpen(true), handleRemoveTag)}
+            </Fragment>
+        );
+    };
 
     const renderColorGuideDetail = (detail: ColorGuideDetail) => (
         <Fragment>

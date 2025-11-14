@@ -93,6 +93,10 @@ export type BrandStrategyDetail = {
     [key: string]: unknown;
 };
 
+export type BrandStrategyUpdateRequest = {
+    markdown: string;
+};
+
 /**
  * 브랜딩 전략 목록 조회 파라미터
  */
@@ -280,5 +284,43 @@ export async function fetchBrandStrategyDetail(
         tags: Array.isArray(payload.tags) ? payload.tags : undefined,
     };
     console.log("브랜딩 전략 상세 조회 성공");
+    return detail;
+}
+
+export async function updateBrandStrategy(
+    id: number,
+    body: BrandStrategyUpdateRequest,
+): Promise<BrandStrategyDetail> {
+    console.log("브랜딩 전략 수정 요청 시작");
+    const result = await fetch(`${brandStrategyDetailEndpoint}/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            markdown: body.markdown,
+        }),
+    });
+
+    if (!result.ok) {
+        console.log("브랜딩 전략 수정 요청 오류");
+        throw new Error("브랜딩 전략 수정에 실패했습니다. " + result.status);
+    }
+
+    const payload = await result.json();
+    const detail: BrandStrategyDetail = {
+        id: payload.id,
+        briefKo: payload.briefKo ?? "",
+        style: payload.style ?? undefined,
+        caseType: payload.caseType ?? payload.case ?? undefined,
+        markdown: payload.markdown ?? payload.summaryKo ?? "",
+        summaryKo: payload.summaryKo ?? undefined,
+        createdAt: payload.createdAt,
+        updatedAt: payload.updatedAt,
+        project: payload.project ?? undefined,
+        tags: Array.isArray(payload.tags) ? payload.tags : undefined,
+    };
+    console.log("브랜딩 전략 수정 요청 성공");
     return detail;
 }

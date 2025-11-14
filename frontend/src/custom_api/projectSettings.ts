@@ -26,9 +26,9 @@ export const DEMO_PROJECTS: ProjectRecord[] = [
     {
         id: 9101,
         name: "봄 캠페인 패키지",
-        logoIds: [1, 2, 3],
-        brandStrategyIds: [11],
-        colorGuideIds: [31],
+        logoIds: [8, 11],
+        brandStrategyIds: [12],
+        colorGuideIds: [11],
         createdAt: "2024-03-02T10:00:00.000Z",
         updatedAt: "2024-04-05T09:15:00.000Z",
     },
