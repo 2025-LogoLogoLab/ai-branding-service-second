@@ -30,7 +30,7 @@ public class ColorGuideService {
     }
 
     @Transactional
-    public ColorGuideResponse save(ColorGuidePersistRequest req, String createdBy) {
+    public ColorGuideResponse save(ColorGuidePersistRequest req, String createdByEmail, ProviderType createdByProvider) {
         if (req.guide() == null) throw new IllegalArgumentException("guide is required");
 
         var style = Style.safeOf(req.style());
@@ -38,7 +38,7 @@ public class ColorGuideService {
                 ? CaseType.WITH_LOGO : CaseType.WITHOUT_LOGO;
 
         var g = req.guide();
-        User creator = userRepository.findByEmail(createdBy)
+        User creator = userRepository.findByEmailAndProvider(createdByEmail, createdByProvider)
                 .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
 
         ColorGuide e = ColorGuide.builder()
@@ -73,12 +73,12 @@ public class ColorGuideService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ColorGuideListItem> listMine(String email, Pageable pageable) {
+    public Page<ColorGuideListItem> listMine(String email, ProviderType provider, Pageable pageable) {
         if (email == null || email.isBlank()) {
             // 인증 필수라면 예외를 던지거나, 빈 페이지 반환 등 정책 결정
             return Page.empty(pageable);
         }
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailAndProvider(email, provider)
                 .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
         return repo.findByCreatedBy(user, pageable)
                 .map(e -> new ColorGuideListItem(
