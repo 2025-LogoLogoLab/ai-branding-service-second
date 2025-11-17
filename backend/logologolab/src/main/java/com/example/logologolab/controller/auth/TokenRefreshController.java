@@ -93,15 +93,15 @@ public class TokenRefreshController {
 
         // 2. 이메일 추출 및 저장된 토큰 비교
         String email = jwtTokenProvider.getEmail(refreshToken);
-        String savedToken = refreshTokenService.getRefreshToken(email);
+        ProviderType provider = ProviderType.valueOf(jwtTokenProvider.getProvider(refreshToken).toUpperCase());
+        String savedToken = refreshTokenService.getRefreshToken(email, provider);
 
         if (savedToken == null || !savedToken.equals(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token 불일치 또는 만료");
         }
 
         // 3. DB에서 provider 가져와서 새 access token 생성
-        User user = userService.findByEmail(email);
-        ProviderType provider = user.getProvider();
+        User user = userService.findByEmailAndProvider(email, provider);
         RoleType role = user.getRole();
         String newAccessToken = jwtTokenProvider.createAccessToken(email, provider, role);
 

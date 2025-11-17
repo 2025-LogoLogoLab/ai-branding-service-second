@@ -1,5 +1,6 @@
 package com.example.logologolab.controller.auth;
 
+import com.example.logologolab.domain.ProviderType;
 import com.example.logologolab.security.JwtTokenProvider;
 import com.example.logologolab.service.auth.LogoutService;
 import com.example.logologolab.service.auth.RefreshTokenService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Provider;
 import java.util.Date;
 
 
@@ -90,7 +92,8 @@ public class LogoutController {
         // 2. refresh token 삭제
         if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
             String email = jwtTokenProvider.getEmail(refreshToken);
-            refreshTokenService.deleteRefreshToken(email);
+            ProviderType provider = ProviderType.valueOf(jwtTokenProvider.getProvider(refreshToken).toUpperCase());
+            refreshTokenService.deleteRefreshToken(email, provider);
         }
 
         // 모든 변형 스코프 삭제를 헤더에 일괄 추가

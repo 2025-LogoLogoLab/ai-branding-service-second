@@ -33,10 +33,11 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Refresh Token 생성 (provider/role 없음)
-    public String createRefreshToken(String email) {
+    // Refresh Token 생성 (role 없음)
+    public String createRefreshToken(String email, ProviderType provider) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("provider", provider.name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)

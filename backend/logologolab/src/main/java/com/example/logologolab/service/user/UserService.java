@@ -57,11 +57,6 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
     }
 
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
-    }
-
     @Transactional
     public User updateUser(String email, ProviderType provider, UserUpdateRequest req) {
         User user = userRepository.findByEmailAndProvider(email, provider)

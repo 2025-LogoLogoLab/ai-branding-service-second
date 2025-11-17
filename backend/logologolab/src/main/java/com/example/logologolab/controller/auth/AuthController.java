@@ -115,10 +115,10 @@ public class AuthController {
 
         // 3. access & refresh token 생성
         String accessToken = jwtTokenProvider.createAccessToken(user.getEmail(), user.getProvider(), user.getRole());
-        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getProvider());
 
         // 4. refresh token Redis 저장
-        refreshTokenService.saveRefreshToken(user.getEmail(), refreshToken, refreshTokenExpiration);
+        refreshTokenService.saveRefreshToken(user.getEmail(), user.getProvider(),refreshToken, refreshTokenExpiration);
 
         // 응답 헤더에 과거 스코프 쿠키들 삭제 먼저 추가
         HttpHeaders headers = new HttpHeaders();
@@ -169,10 +169,10 @@ public class AuthController {
 
         // 2. access & refresh token 생성
         String accessToken = jwtTokenProvider.createAccessToken(user.getEmail(), user.getProvider(), user.getRole());
-        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getProvider());
 
         // 3. refresh token Redis 저장
-        refreshTokenService.saveRefreshToken(user.getEmail(), refreshToken, refreshTokenExpiration);
+        refreshTokenService.saveRefreshToken(user.getEmail(), user.getProvider(), refreshToken, refreshTokenExpiration);
 
         // 응답 헤더에 과거 스코프 쿠키들 삭제 먼저 추가
         HttpHeaders headers = new HttpHeaders();

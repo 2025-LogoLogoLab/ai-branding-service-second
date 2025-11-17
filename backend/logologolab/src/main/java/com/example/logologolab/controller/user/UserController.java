@@ -133,7 +133,7 @@ public class UserController {
 
         // 2. refresh token 삭제
         if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
-            refreshTokenService.deleteRefreshToken(email);
+            refreshTokenService.deleteRefreshToken(email, provider);
         }
 
         // 3. access-token 및 refresh-token 쿠키 삭제
