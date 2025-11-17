@@ -7,7 +7,6 @@ import com.example.logologolab.dto.color.*;
 import com.example.logologolab.dto.common.PageResponse;
 import com.example.logologolab.security.CustomUserPrincipal;
 import com.example.logologolab.service.color.ColorGuideService;
-import com.example.logologolab.domain.User;
 import com.example.logologolab.security.LoginUserProvider;
 
 import io.swagger.v3.oas.annotations.Operation;

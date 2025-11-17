@@ -24,7 +24,7 @@ public class BrandStrategyService {
     private final LoginUserProvider loginUserProvider;
 
     @Transactional
-    public BrandStrategyResponse save(BrandStrategyPersistRequest req, String createdBy) {
+    public BrandStrategyResponse save(BrandStrategyPersistRequest req, String createdByEmail, ProviderType createdByProvider) {
         if (req.markdown() == null || req.markdown().isBlank())
             throw new IllegalArgumentException("markdown is required");
 
@@ -32,7 +32,7 @@ public class BrandStrategyService {
         var caseType = (req.imageUrl() != null && !req.imageUrl().isBlank())
                 ? CaseType.WITH_LOGO : CaseType.WITHOUT_LOGO;
 
-        User creator = userRepository.findByEmail(createdBy)
+        User creator = userRepository.findByEmailAndProvider(createdByEmail, createdByProvider)
                 .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
 
         BrandStrategy e = BrandStrategy.builder()
@@ -64,9 +64,9 @@ public class BrandStrategyService {
     }
 
     @Transactional(readOnly = true)
-    public Page<BrandStrategyListItem> listMine(String email, Pageable pageable) {
+    public Page<BrandStrategyListItem> listMine(String email, ProviderType provider, Pageable pageable) {
         if (email == null || email.isBlank()) return Page.empty(pageable);
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailAndProvider(email, provider)
                 .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
         return repo.findByCreatedBy(user, pageable)
                 .map(e -> new BrandStrategyListItem(e.getId(), e.getBriefKo(), e.getStyle(), e.getCreatedAt()));

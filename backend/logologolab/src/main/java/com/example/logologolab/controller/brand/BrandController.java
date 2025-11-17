@@ -6,7 +6,6 @@ import com.example.logologolab.dto.brand.*;
 import com.example.logologolab.dto.common.PageResponse;
 import com.example.logologolab.security.CustomUserPrincipal;
 import com.example.logologolab.service.brand.BrandStrategyService;
-import com.example.logologolab.domain.User;
 import com.example.logologolab.security.LoginUserProvider;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +15,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.Operation;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.*;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.Map;
@@ -179,8 +176,11 @@ public class BrandController {
             @RequestBody BrandStrategyPersistRequest req,
             @AuthenticationPrincipal CustomUserPrincipal principal
     ) {
-        final String createdBy = (principal != null) ? principal.getEmail() : null;
-        var saved = service.save(req, createdBy);
+        if (principal == null) {
+            // Security Filter에서 처리되겠지만, 방어적으로 401 반환
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        var saved = service.save(req, principal.getEmail(), principal.getProvider());
         return ResponseEntity.created(URI.create("/api/brand-strategie/" + saved.id())).body(saved);
     }
 
@@ -232,7 +232,8 @@ public class BrandController {
             @Parameter(description = "특정 프로젝트 ID (선택 사항)") @RequestParam(required = false) Long projectId,
             @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 당 항목 수") @RequestParam(defaultValue = "12") int size,
-            @Parameter(description = "'mine' 입력 시 내 전략만 조회") @RequestParam(required = false) String filter // ★ 파라미터 추가
+            @Parameter(description = "'mine' 입력 시 내 전략만 조회") @RequestParam(required = false) String filter,
+            @AuthenticationPrincipal CustomUserPrincipal principal
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<BrandStrategyListItem> p;
@@ -242,8 +243,12 @@ public class BrandController {
             p = service.listByProject(projectId, pageable);
         } else if ("mine".equalsIgnoreCase(filter)) {
             // 2. 'mine' 필터가 있으면 내 목록 조회 (로그인 필수)
-            User user = loginUserProvider.getLoginUser(); // 비로그인 시 401 오류 발생
-            p = service.listMine(user.getEmail(), pageable);
+            if (principal == null) {
+                // 'mine'을 요청했으나 비로그인 상태
+                p = Page.empty(pageable);
+            } else {
+                p = service.listMine(principal.getEmail(), principal.getProvider(), pageable);
+            }
         } else {
             // 3. 그 외 모든 경우 전체 목록 조회
             p = service.listPublic(pageable);
