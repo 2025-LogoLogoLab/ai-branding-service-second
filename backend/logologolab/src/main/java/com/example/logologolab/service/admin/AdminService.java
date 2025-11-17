@@ -33,8 +33,8 @@ public class AdminService {
     /** [어드민] 신규 사용자 생성 */
     public AdminUserResponse createUser(AdminUserCreateRequest request) {
         // 1. 중복 체크 (모든 Provider 대상)
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다: " + request.getEmail());
+        if (userRepository.findByEmailAndProvider(request.getEmail(), ProviderType.LOCAL).isPresent()) {
+            throw new IllegalArgumentException("이미 'LOCAL' 계정으로 사용 중인 이메일입니다: " + request.getEmail());
         }
 
         // 2. 비밀번호 암호화
