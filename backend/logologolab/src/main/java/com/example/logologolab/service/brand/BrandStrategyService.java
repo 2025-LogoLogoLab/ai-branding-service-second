@@ -80,13 +80,13 @@ public class BrandStrategyService {
         User user = userRepository.findByEmailAndProvider(email, provider)
                 .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
         return repo.findByCreatedBy(user, pageable)
-                .map(e -> new BrandStrategyListItem(e.getId(), e.getBriefKo(), e.getStyle(), e.getCreatedAt()));
+                .map(e -> new BrandStrategyListItem(e.getId(), e.getBriefKo(), e.getStyle(), e.getMarkdown(), e.getCreatedAt()));
     }
 
     @Transactional(readOnly = true)
     public Page<BrandStrategyListItem> listPublic(Pageable pageable) {
         return repo.findAll(pageable)
-                .map(e -> new BrandStrategyListItem(e.getId(), e.getBriefKo(), e.getStyle(), e.getCreatedAt()));
+                .map(e -> new BrandStrategyListItem(e.getId(), e.getBriefKo(), e.getStyle(), e.getMarkdown(), e.getCreatedAt()));
     }
 
     @Transactional
