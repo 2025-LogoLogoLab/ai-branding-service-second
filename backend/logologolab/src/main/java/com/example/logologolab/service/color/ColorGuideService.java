@@ -66,10 +66,26 @@ public class ColorGuideService {
         return ColorGuideResponse.from(e);
     }
 
+    // [Helper] 엔티티를 ColorGuideListItem으로 변환하는 메서드 (중복 제거용)
+    private ColorGuideListItem mapToListItem(ColorGuide e) {
+        return new ColorGuideListItem(
+                e.getId(),
+                e.getBriefKo(),
+                e.getStyle(),
+                new ColorGuideDTO(
+                        new ColorGuideDTO.Role(e.getMainHex(), e.getMainDesc()),
+                        new ColorGuideDTO.Role(e.getSubHex(), e.getSubDesc()),
+                        new ColorGuideDTO.Role(e.getPointHex(), e.getPointDesc()),
+                        new ColorGuideDTO.Role(e.getBackgroundHex(), e.getBackgroundDesc())
+                ),
+                e.getCreatedAt()
+        );
+    }
+
     @Transactional(readOnly = true)
     public Page<ColorGuideListItem> listByProject(Long projectId, Pageable pageable) {
         return repo.findByProjectId(projectId, pageable)
-                .map(e -> new ColorGuideListItem(e.getId(), e.getBriefKo(), e.getStyle(), e.getMainHex(), e.getPointHex(), e.getCreatedAt()));
+                .map(this::mapToListItem);
     }
 
     @Transactional(readOnly = true)
@@ -81,17 +97,13 @@ public class ColorGuideService {
         User user = userRepository.findByEmailAndProvider(email, provider)
                 .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
         return repo.findByCreatedBy(user, pageable)
-                .map(e -> new ColorGuideListItem(
-                        e.getId(), e.getBriefKo(), e.getStyle(), e.getMainHex(), e.getPointHex(), e.getCreatedAt()
-                ));
+                .map(this::mapToListItem);
     }
 
     @Transactional(readOnly = true)
     public Page<ColorGuideListItem> listPublic(Pageable pageable) {
         return repo.findAll(pageable)
-                .map(e -> new ColorGuideListItem(
-                        e.getId(), e.getBriefKo(), e.getStyle(), e.getMainHex(), e.getPointHex(), e.getCreatedAt()
-                ));
+                .map(this::mapToListItem);
     }
 
     @Transactional
