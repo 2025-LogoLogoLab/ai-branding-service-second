@@ -57,10 +57,21 @@ public class BrandStrategyService {
         return BrandStrategyResponse.from(e);
     }
 
+    // [Helper] 엔티티 -> 리스트 아이템 변환 (중복 제거)
+    private BrandStrategyListItem mapToListItem(BrandStrategy e) {
+        return new BrandStrategyListItem(
+                e.getId(),
+                e.getBriefKo(),
+                e.getStyle(),
+                e.getMarkdown(),
+                e.getCreatedAt()
+        );
+    }
+
     @Transactional(readOnly = true)
     public Page<BrandStrategyListItem> listByProject(Long projectId, Pageable pageable) {
         return repo.findByProjectId(projectId, pageable)
-                .map(e -> new BrandStrategyListItem(e.getId(), e.getBriefKo(), e.getStyle(), e.getCreatedAt()));
+                .map(this::mapToListItem);
     }
 
     @Transactional(readOnly = true)

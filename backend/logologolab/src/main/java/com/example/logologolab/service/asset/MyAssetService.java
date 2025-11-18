@@ -66,7 +66,7 @@ public class MyAssetService {
                 .toList();
 
         List<BrandStrategyListItem> brandStrategyListItems = brandStrategies.stream()
-                .map(bs -> new BrandStrategyListItem(bs.getId(), bs.getBriefKo(), bs.getStyle(), bs.getCreatedAt()))
+                .map(bs -> new BrandStrategyListItem(bs.getId(), bs.getBriefKo(), bs.getStyle(), bs.getMarkdown(), bs.getCreatedAt()))
                 .toList();
 
         // 3. 최종 응답 DTO에 담아 반환
