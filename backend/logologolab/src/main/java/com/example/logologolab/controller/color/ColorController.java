@@ -212,16 +212,33 @@ public class ColorController {
                             schema = @Schema(implementation = PageResponse.class),
                             examples = @ExampleObject(
                                     value = """
-                                    {
-                                      "content": [
-                                        { "id": 42, "briefKo": "프리미엄 캔들...", "style": "luxury", "mainHex": "#1C3FAA", "pointHex": "#FFB400", "createdAt": "2025-08-24T09:12:34.123456" }
-                                      ],
-                                      "page": 0,
-                                      "size": 12,
-                                      "totalElements": 1,
-                                      "totalPages": 1,
-                                      "last": true
-                                    }"""
+                                            {
+                                              "content": [
+                                                { "id": 42, "briefKo": "프리미엄 캔들...", "style": "luxury", "guide": {
+                                                                                                                                                                            "main": {
+                                                                                                                                                                                "hex": "#F5A623",
+                                                                                                                                                                                "description": "상큼하고 따뜻한 느낌, 브랜드의 신선함과 활력을 전달하는 대표색 (버튼/주요 강조)"
+                                                                                                                                                                            },
+                                                                                                                                                                            "sub": {
+                                                                                                                                                                                "hex": "#FFFFFF",
+                                                                                                                                                                                "description": "깨끗하고 순수한 느낌, 배경이나 텍스트에 적합 (섹션 배경/보조 텍스트)"
+                                                                                                                                                                            },
+                                                                                                                                                                            "point": {
+                                                                                                                                                                                "hex": "#4CAF50",
+                                                                                                                                                                                "description": "신선함과 건강함을 상징하는 포인트 컬러 (강조 아이콘/액센트)"
+                                                                                                                                                                            },
+                                                                                                                                                                            "background": {
+                                                                                                                                                                                "hex": "#FAFAFA",
+                                                                                                                                                                                "description": "심플하고 깔끔한 배경색, 전체적인 미니멀리즘과 조화 (배경)"
+                                                                                                                                                                            }
+                                                                                                                                                                        }, "createdAt": "2025-08-24T09:12:34.123456" }
+                                              ],
+                                              "page": 0,
+                                              "size": 12,
+                                              "totalElements": 1,
+                                              "totalPages": 1,
+                                              "last": true
+                                            }"""
                             )))
     })
     @GetMapping(value = "/api/color-guides", produces = MediaType.APPLICATION_JSON_VALUE)

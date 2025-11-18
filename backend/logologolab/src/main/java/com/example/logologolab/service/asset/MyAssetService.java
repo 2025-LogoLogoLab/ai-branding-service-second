@@ -4,6 +4,7 @@ import com.example.logologolab.domain.*;
 import com.example.logologolab.dto.asset.AssetListItem;
 import com.example.logologolab.dto.asset.MyProductsResponse;
 import com.example.logologolab.dto.brand.BrandStrategyListItem;
+import com.example.logologolab.dto.color.ColorGuideDTO;
 import com.example.logologolab.dto.color.ColorGuideListItem;
 import com.example.logologolab.dto.logo.LogoListItem;
 import com.example.logologolab.dto.project.ProjectListItem;
@@ -50,7 +51,18 @@ public class MyAssetService {
                 .toList();
 
         List<ColorGuideListItem> colorGuideListItems = colorGuides.stream()
-                .map(cg -> new ColorGuideListItem(cg.getId(), cg.getBriefKo(), cg.getStyle(), cg.getMainHex(), cg.getPointHex(), cg.getCreatedAt()))
+                .map(cg -> new ColorGuideListItem(
+                        cg.getId(),
+                        cg.getBriefKo(),
+                        cg.getStyle(),
+                        new ColorGuideDTO(
+                                new ColorGuideDTO.Role(cg.getMainHex(), cg.getMainDesc()),
+                                new ColorGuideDTO.Role(cg.getSubHex(), cg.getSubDesc()),
+                                new ColorGuideDTO.Role(cg.getPointHex(), cg.getPointDesc()),
+                                new ColorGuideDTO.Role(cg.getBackgroundHex(), cg.getBackgroundDesc())
+                        ),
+                        cg.getCreatedAt()
+                ))
                 .toList();
 
         List<BrandStrategyListItem> brandStrategyListItems = brandStrategies.stream()
