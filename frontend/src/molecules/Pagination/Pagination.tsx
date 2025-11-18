@@ -13,23 +13,24 @@ export type PaginationProps = {
 };
 
 export function Pagination({ page, totalPages, onChange, className }: PaginationProps) {
-    if (totalPages <= 1) {
-        // 페이지가 1개 이하라면 페이지네이션을 표시할 필요가 없음
-        return null;
-    }
+    // totalPages 가 0이거나 음수가 들어와도 1페이지짜리 네비게이션으로 강제 표시
+    const pageCount = Math.max(1, totalPages);
+    const clampedPage = Math.min(Math.max(page, 0), pageCount - 1);
 
-    const pages = Array.from({ length: totalPages }, (_, idx) => idx);
+    // 0-base 페이지 인덱스를 그대로 버튼 라벨에 활용하기 위해 [0..pageCount-1] 배열 생성
+    const pages = Array.from({ length: pageCount }, (_, idx) => idx);
 
     return (
         <nav
             className={[styles.pagination, className].filter(Boolean).join(" ")}
             aria-label="결과 페이지 탐색"
         >
+            {/* 왼쪽 화살표: 첫 페이지에서는 비활성화 */}
             <button
                 type="button"
                 className={styles.arrow}
-                onClick={() => onChange(Math.max(0, page - 1))}
-                disabled={page === 0}
+                onClick={() => onChange(Math.max(0, clampedPage - 1))}
+                disabled={clampedPage === 0}
                 aria-label="이전 페이지"
             >
                 ‹
@@ -38,11 +39,12 @@ export function Pagination({ page, totalPages, onChange, className }: Pagination
             <ul className={styles.list} role="list">
                 {pages.map((idx) => (
                     <li key={idx} role="listitem">
+                        {/* 페이지 번호 버튼: 현재 페이지는 스타일 강조 + aria-current */}
                         <button
                             type="button"
-                            className={`${styles.pageButton} ${idx === page ? styles.active : ""}`}
+                            className={`${styles.pageButton} ${idx === clampedPage ? styles.active : ""}`}
                             onClick={() => onChange(idx)}
-                            aria-current={idx === page ? "page" : undefined}
+                            aria-current={idx === clampedPage ? "page" : undefined}
                         >
                             {idx + 1}
                         </button>
@@ -50,11 +52,12 @@ export function Pagination({ page, totalPages, onChange, className }: Pagination
                 ))}
             </ul>
 
+            {/* 오른쪽 화살표: 마지막 페이지에서는 비활성화 */}
             <button
                 type="button"
                 className={styles.arrow}
-                onClick={() => onChange(Math.min(totalPages - 1, page + 1))}
-                disabled={page >= totalPages - 1}
+                onClick={() => onChange(Math.min(pageCount - 1, clampedPage + 1))}
+                disabled={clampedPage >= pageCount - 1}
                 aria-label="다음 페이지"
             >
                 ›

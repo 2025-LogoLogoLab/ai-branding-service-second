@@ -6,6 +6,7 @@ import type { PaginatedResponse } from "./types";
 const basePath = import.meta.env.VITE_API_BASE_URL;
 
 const projectEndpoint = `${basePath}/project`;
+const projectListEndpoint = `${basePath}/my-projects`;
 const projectGenerateEndpoint = `${projectEndpoint}/generate`;
 
 export type ProjectRecord = {
@@ -14,6 +15,9 @@ export type ProjectRecord = {
     logoIds: number[];
     brandStrategyIds: number[];
     colorGuideIds: number[];
+    logoCount?: number;
+    brandCount?: number;
+    colorGuideCount?: number;
     createdAt?: string;
     updatedAt?: string;
 };
@@ -32,8 +36,13 @@ export type ProjectUpdateRequest = {
     colorGuideIds?: number[];
 };
 
+export type ProjectListParams = {
+    page?: number;
+    size?: number;
+};
+
 type ProjectListPayload =
-    | { content?: ProjectRecord[] | unknown; projects?: ProjectRecord[] | unknown }
+    | { content?: unknown; projects?: unknown; page?: number; size?: number; totalElements?: number; totalPages?: number; last?: boolean }
     | ProjectRecord[]
     | PaginatedResponse<ProjectRecord>;
 
@@ -44,33 +53,86 @@ const ensureIdArray = (value: unknown): number[] => {
     return [];
 };
 
+const ensureCount = (value: unknown, fallback?: number): number | undefined => {
+    const num = typeof value === "number" ? value : Number(value);
+    if (Number.isFinite(num)) return num;
+    return fallback;
+};
+
 const normalizeProject = (payload: any): ProjectRecord => ({
     id: Number(payload?.id) || 0,
     name: typeof payload?.name === "string" ? payload.name : "",
     logoIds: ensureIdArray(payload?.logoIds),
     brandStrategyIds: ensureIdArray(payload?.brandStrategyIds),
     colorGuideIds: ensureIdArray(payload?.colorGuideIds),
+    logoCount: ensureCount(payload?.logoCounts ?? payload?.logoCount, Array.isArray(payload?.logoIds) ? payload.logoIds.length : undefined),
+    brandCount: ensureCount(payload?.brandCounts ?? payload?.brandCount, Array.isArray(payload?.brandStrategyIds) ? payload.brandStrategyIds.length : undefined),
+    colorGuideCount: ensureCount(
+        payload?.colorGuideCounts ?? payload?.colorCount ?? payload?.colorGuideCount,
+        Array.isArray(payload?.colorGuideIds) ? payload.colorGuideIds.length : undefined,
+    ),
     createdAt: payload?.createdAt ?? payload?.createAt ?? undefined,
     updatedAt: payload?.updatedAt ?? payload?.updateAt ?? undefined,
 });
 
-const mapProjectList = (raw: ProjectListPayload): ProjectRecord[] => {
+const toPaginatedProjects = (raw: ProjectListPayload): PaginatedResponse<ProjectRecord> => {
+    const baseContent = Array.isArray(raw)
+        ? raw
+        : Array.isArray((raw as any)?.content)
+            ? (raw as any).content
+            : Array.isArray((raw as any)?.projects)
+                ? (raw as any).projects
+                : [];
+    const content = baseContent.map(normalizeProject);
+
     if (Array.isArray(raw)) {
-        return raw.map(normalizeProject);
+        return {
+            content,
+            page: 0,
+            size: content.length,
+            totalElements: content.length,
+            totalPages: 1,
+            last: true,
+        };
     }
-    if ("content" in raw && Array.isArray(raw.content)) {
-        return raw.content.map(normalizeProject);
-    }
-    if ("projects" in raw && Array.isArray(raw.projects)) {
-        return raw.projects.map(normalizeProject);
-    }
-    return [];
+
+    const payload = raw as Partial<PaginatedResponse<ProjectRecord>>;
+    const totalElements = typeof payload.totalElements === "number" ? payload.totalElements : content.length;
+    const sizeValue = typeof payload.size === "number" ? payload.size : content.length;
+    const size = sizeValue > 0 ? sizeValue : Math.max(content.length, 1);
+    const totalPagesRaw =
+        typeof payload.totalPages === "number" && payload.totalPages > 0
+            ? payload.totalPages
+            : Math.max(1, Math.ceil(totalElements / size));
+    const totalPages = Math.max(1, totalPagesRaw);
+    const pageValue = typeof payload.page === "number" ? payload.page : 0;
+    const page = Math.min(Math.max(pageValue, 0), totalPages - 1);
+    const last =
+        typeof payload.last === "boolean"
+            ? payload.last
+            : page >= totalPages - 1 || content.length + page * Math.max(size, 1) >= totalElements;
+
+    return {
+        content,
+        page,
+        size,
+        totalElements,
+        totalPages,
+        last,
+    };
 };
 
-export async function fetchProjectList(options: { signal?: AbortSignal } = {}): Promise<ProjectRecord[]> {
+export async function fetchProjectList(
+    params: ProjectListParams = {},
+    options: { signal?: AbortSignal } = {},
+): Promise<PaginatedResponse<ProjectRecord>> {
     console.log("프로젝트 목록 조회 요청 시작");
 
-    const result = await fetch(projectEndpoint, {
+    const url = new URL(projectListEndpoint);
+    if (params.page != null) url.searchParams.set("page", String(params.page));
+    if (params.size != null) url.searchParams.set("size", String(params.size));
+
+    const result = await fetch(url.toString(), {
         method: "GET",
         credentials: "include",
         signal: options.signal,
@@ -82,7 +144,7 @@ export async function fetchProjectList(options: { signal?: AbortSignal } = {}): 
     }
 
     const payload = (await result.json()) as ProjectListPayload;
-    const projects = mapProjectList(payload);
+    const projects = toPaginatedProjects(payload);
     console.log("프로젝트 목록 조회 요청 성공");
     return projects;
 }

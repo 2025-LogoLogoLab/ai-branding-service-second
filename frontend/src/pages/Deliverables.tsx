@@ -601,7 +601,7 @@ function DeliverablesPage({
                                 </div>
                             )}
 
-                            {logoState.data && logoState.data.totalPages > 1 && (
+                            {logoState.data && (
                                 <Pagination
                                     page={logoState.data.page}
                                     totalPages={logoState.data.totalPages}
@@ -636,7 +636,7 @@ function DeliverablesPage({
                                 </div>
                             )}
 
-                            {brandingState.data && brandingState.data.totalPages > 1 && (
+                            {brandingState.data && (
                                 <Pagination
                                     page={brandingState.data.page}
                                     totalPages={brandingState.data.totalPages}
@@ -671,7 +671,7 @@ function DeliverablesPage({
                                 </div>
                             )}
 
-                            {colorGuideState.data && colorGuideState.data.totalPages > 1 && (
+                            {colorGuideState.data && (
                                 <Pagination
                                     page={colorGuideState.data.page}
                                     totalPages={colorGuideState.data.totalPages}

@@ -123,6 +123,12 @@
     font-size: 15px;
 }
 
+.tablePagination {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+}
+
 .projectNameHead {
     width: 26%;
 }
@@ -223,13 +229,27 @@
 
 .modalHeaderActions {
     display: flex;
-    gap: 8px;
+    flex-direction: row;
     align-items: center;
+    gap: 12px;
 }
 
 .editModeButton {
     min-width: 140px;
     font-weight: 600;
+}
+
+.editControls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.editHint {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
 }
 
 .iconButton {
@@ -323,6 +343,7 @@
 .nameRow {
     display: flex;
     gap: 12px;
+    align-items: center;
 }
 
 .textInput {
@@ -468,6 +489,12 @@
     padding: 32px 0;
     text-align: center;
     color: #94a3b8;
+}
+
+.assetFooter {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
 }
 
 .modalFooter {

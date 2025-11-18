@@ -54,7 +54,7 @@ import ColorGuideDeliverableCard from "../organisms/ColorGuideDeliverableCard/Co
 import Pagination from "../molecules/Pagination/Pagination";
 import { ensureDataUrl } from "../utils/image";
 import { copyImageToClipboard } from "../utils/clipboard";
-import type { HttpMethod } from "../custom_api/types";
+import type { HttpMethod, PaginatedResponse } from "../custom_api/types";
 import { DeliverableDetailModal } from "../organisms/DeliverableDetailModal/DeliverableDetailModal";
 import type { ProductToolbarProps } from "../molecules/ProductToolbar/ProductToolbar";
 import { TextButton } from "../atoms/TextButton/TextButton";
@@ -70,16 +70,16 @@ import {
 
 type ProjectAssetType = "logo" | "branding" | "colorGuide";
 
-type AssetState<T> = {
+type AssetPageState<T> = {
     loading: boolean;
     error: string | null;
-    items: T[];
+    data: PaginatedResponse<T> | null;
 };
 
-const createAssetState = <T,>(): AssetState<T> => ({
+const createAssetPageState = <T,>(): AssetPageState<T> => ({
     loading: false,
     error: null,
-    items: [],
+    data: null,
 });
 
 type ActionState = {
@@ -98,6 +98,41 @@ const ASSET_LABEL: Record<ProjectAssetType, string> = {
     logo: "로고",
     branding: "브랜딩 전략",
     colorGuide: "컬러 가이드",
+};
+
+const PROJECT_LIST_PAGE_SIZE = 10; // 프로젝트 목록 표의 페이지 크기
+const PROJECT_ASSET_PAGE_SIZE = 3; // 프로젝트 상세 모달에서 한 번에 보여줄 산출물 수
+
+type ProjectPageInfo = {
+    page: number;
+    totalPages: number;
+    totalElements: number;
+};
+
+const createEmptyAssetPage = <T,>(): PaginatedResponse<T> => ({
+    content: [],
+    page: 0,
+    size: PROJECT_ASSET_PAGE_SIZE,
+    totalElements: 0,
+    totalPages: 1,
+    last: true,
+});
+
+const buildMockPaginatedAsset = <T,>(items: T[], requestedPage: number): PaginatedResponse<T> => {
+    const totalElements = items.length;
+    const size = PROJECT_ASSET_PAGE_SIZE;
+    const totalPages = Math.max(1, Math.ceil(totalElements / size));
+    const page = Math.min(Math.max(requestedPage, 0), totalPages - 1);
+    const sliceStart = page * size;
+    const content = items.slice(sliceStart, sliceStart + size);
+    return {
+        content,
+        page,
+        size,
+        totalElements,
+        totalPages,
+        last: page >= totalPages - 1,
+    };
 };
 
 const formatDateTime = (value?: string) => {
@@ -119,6 +154,9 @@ const createMockProjectRecord = (name: string): ProjectRecord => ({
     logoIds: [],
     brandStrategyIds: [],
     colorGuideIds: [],
+    logoCount: 0,
+    brandCount: 0,
+    colorGuideCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
 });
@@ -178,8 +216,18 @@ type MyProjectsProps = {
 const cx = (...values: Array<string | false | null | undefined>) =>
     values.filter(Boolean).join(" ").trim();
 
+// === Component: MyProjects ===
+// 내 프로젝트 전체 화면을 구성하며 목록, 설정 패널, 상세/생성 모달까지 모두 오케스트레이션한다.
 export default function MyProjects({ variant = "page", showSettingsPanel }: MyProjectsProps) {
     const [projects, setProjects] = useState<ProjectRecord[]>([]); // 목록 테이블 데이터
+    const [projectPage, setProjectPage] = useState(0); // 현재 목록 페이지 인덱스
+    const [projectPageInfo, setProjectPageInfo] = useState<ProjectPageInfo>({
+        page: 0,
+        totalPages: 1,
+        totalElements: 0,
+    }); // 서버가 알려주는 페이지네이션 메타
+    const [projectListNonce, setProjectListNonce] = useState(0); // 강제 재로드 트리거
+    const [mockProjects, setMockProjects] = useState<ProjectRecord[]>(DEMO_PROJECTS); // mock 모드 전용 프로젝트 원본
     const [loading, setLoading] = useState(true); // 목록 fetch 진행 여부
     const [error, setError] = useState<string | null>(null); // 목록 fetch 에러 메시지
     const [detailId, setDetailId] = useState<number | null>(null); // 상세 모달에 띄울 프로젝트 ID
@@ -187,6 +235,13 @@ export default function MyProjects({ variant = "page", showSettingsPanel }: MyPr
     const [projectApiSettings, setProjectApiSettings] = useState<ProjectApiSettings>(DEFAULT_PROJECT_API_SETTINGS); // API 설정 패널 상태
 
     const useMockApi = useMemo(() => !isProjectApiConfigured(projectApiSettings), [projectApiSettings]); // API URL/메서드가 비어 있을 때 mock 데이터 사용
+
+    useEffect(() => {
+        if (useMockApi) {
+            setMockProjects(DEMO_PROJECTS);
+        }
+        setProjectPage(0);
+    }, [useMockApi]);
     // API 설정 패널 입력 핸들러
     const handleProjectApiConfigChange = (section: keyof ProjectApiSettings, field: "url" | "method", value: string) => {
         setProjectApiSettings((prev) => ({
@@ -201,22 +256,46 @@ export default function MyProjects({ variant = "page", showSettingsPanel }: MyPr
     // 프로젝트 목록 fetch (혹은 mock 데이터 사용)
     useEffect(() => {
         const controller = new AbortController();
-        setLoading(true);
         setError(null);
 
         if (useMockApi) {
-            console.info("[project API] mock mode active: using demo project list", DEMO_PROJECTS);
-            setProjects(DEMO_PROJECTS);
+            const totalElements = mockProjects.length;
+            const totalPages = Math.max(1, Math.ceil(totalElements / PROJECT_LIST_PAGE_SIZE));
+            const effectivePage = Math.min(Math.max(projectPage, 0), totalPages - 1);
+            if (effectivePage !== projectPage) {
+                setProjectPage(effectivePage);
+            }
+            const sliceStart = effectivePage * PROJECT_LIST_PAGE_SIZE;
+            const pageItems = mockProjects.slice(sliceStart, sliceStart + PROJECT_LIST_PAGE_SIZE);
+            setProjects(pageItems);
+            setProjectPageInfo({
+                page: effectivePage,
+                totalPages,
+                totalElements,
+            });
             setLoading(false);
             return () => controller.abort();
         }
 
-        console.info("[project API] fetch project list start");
-        fetchProjectList({ signal: controller.signal })
-            .then((list) => {
+        setLoading(true);
+        console.info("[project API] fetch project list start", { page: projectPage, size: PROJECT_LIST_PAGE_SIZE });
+        fetchProjectList({ page: projectPage, size: PROJECT_LIST_PAGE_SIZE }, { signal: controller.signal })
+            .then((response) => {
                 if (controller.signal.aborted) return;
-                console.info("[project API] fetch project list success", list);
-                setProjects(list);
+                console.info("[project API] fetch project list success", response);
+                const totalPages = Math.max(response.totalPages, 1);
+                const normalizedPage = Math.min(Math.max(response.page, 0), totalPages - 1);
+                const totalElements =
+                    typeof response.totalElements === "number" ? response.totalElements : response.content.length;
+                setProjects(response.content);
+                setProjectPageInfo({
+                    page: normalizedPage,
+                    totalPages,
+                    totalElements,
+                });
+                if (normalizedPage !== projectPage) {
+                    setProjectPage(normalizedPage);
+                }
                 setLoading(false);
             })
             .catch((err) => {
@@ -227,27 +306,40 @@ export default function MyProjects({ variant = "page", showSettingsPanel }: MyPr
             });
 
         return () => controller.abort();
-    }, [useMockApi]);
+    }, [useMockApi, projectPage, projectListNonce, mockProjects]);
 
-    const selectedProject = useMemo(
-        () => projects.find((item) => item.id === detailId),
-        [projects, detailId],
-    ); // 상세 모달에 넘길 현재 선택 프로젝트
+    const selectedProject = useMemo(() => {
+        const source = useMockApi ? mockProjects : projects;
+        return source.find((item) => item.id === detailId);
+    }, [projects, mockProjects, detailId, useMockApi]); // 상세 모달에 넘길 현재 선택 프로젝트
 
-    // 새 프로젝트 생성 결과를 목록에 prepend
+    // 새 프로젝트 생성 결과 반영 (mock 모드에서는 즉시 데이터 추가)
     const handleProjectCreated = (project: ProjectRecord) => {
-        setProjects((prev) => [project, ...prev]);
+        if (useMockApi) {
+            setMockProjects((prev) => [project, ...prev]);
+        } else {
+            setProjectListNonce((prev) => prev + 1);
+        }
+        setProjectPage(0);
     };
 
     // 상세 모달에서 수정된 프로젝트를 목록에 반영
     const handleProjectUpdated = (project: ProjectRecord) => {
         setProjects((prev) => prev.map((item) => (item.id === project.id ? project : item)));
+        if (useMockApi) {
+            setMockProjects((prev) => prev.map((item) => (item.id === project.id ? project : item)));
+        }
     };
 
     // 프로젝트 삭제 후 목록/모달 동기화
     const handleProjectDeleted = (projectId: number) => {
         setProjects((prev) => prev.filter((item) => item.id !== projectId));
         setDetailId((prev) => (prev === projectId ? null : prev));
+        if (useMockApi) {
+            setMockProjects((prev) => prev.filter((item) => item.id !== projectId));
+        } else {
+            setProjectListNonce((prev) => prev + 1);
+        }
     };
 
     const isPageVariant = variant === "page";
@@ -318,9 +410,9 @@ export default function MyProjects({ variant = "page", showSettingsPanel }: MyPr
                                 {projects.map((project) => (
                                     <tr key={project.id}>
                                         <td className={styles.projectNameCell}>{project.name}</td>
-                                        <td>{project.logoIds?.length ?? 0}</td>
-                                        <td>{project.brandStrategyIds?.length ?? 0}</td>
-                                        <td>{project.colorGuideIds?.length ?? 0}</td>
+                                <td>{project.logoCount ?? project.logoIds?.length ?? 0}</td>
+                                <td>{project.brandCount ?? project.brandStrategyIds?.length ?? 0}</td>
+                                <td>{project.colorGuideCount ?? project.colorGuideIds?.length ?? 0}</td>
                                         <td>{formatDateTime(project.createdAt)}</td>
                                         <td>{formatDateTime(project.updatedAt)}</td>
                                         <td className={styles.rowActions}>
@@ -350,6 +442,15 @@ export default function MyProjects({ variant = "page", showSettingsPanel }: MyPr
                             </tbody>
                         </table>
                     </div>
+                    {!loading && !error && (
+                        <div className={styles.tablePagination}>
+                            <Pagination
+                                page={projectPageInfo.page}
+                                totalPages={projectPageInfo.totalPages}
+                                onChange={(next) => setProjectPage(next)}
+                            />
+                        </div>
+                    )}
                 </section>
 
                 {shouldShowSettings && (
@@ -380,7 +481,7 @@ export default function MyProjects({ variant = "page", showSettingsPanel }: MyPr
 
             {createOpen && (
                 <ProjectCreateModal
-                    existingNames={projects.map((item) => item.name)}
+                    existingNames={(useMockApi ? mockProjects : projects).map((item) => item.name)}
                     onClose={() => setCreateOpen(false)}
                     onCreated={handleProjectCreated}
                     useMockApi={useMockApi}
@@ -389,6 +490,7 @@ export default function MyProjects({ variant = "page", showSettingsPanel }: MyPr
         </div>
     );
 }
+// === End Component: MyProjects ===
 type ProjectDetailModalProps = {
     projectId: number;
     initialProject?: ProjectRecord;
@@ -397,7 +499,8 @@ type ProjectDetailModalProps = {
     onDeleted: (projectId: number) => void;
     useMockApi: boolean;
 };
-
+// === Component: ProjectDetailModal ===
+// 프로젝트 상세 모달 UI: 기본 정보 편집, 산출물 카드, 삭제/추가 모달 트리거를 담당한다.
 function ProjectDetailModal({
     projectId,
     initialProject,
@@ -416,12 +519,16 @@ function ProjectDetailModal({
     const [assetUpdating, setAssetUpdating] = useState(false); // attach/detach 요청 진행 여부
     const [pickerType, setPickerType] = useState<ProjectAssetType | null>(null); // 어떤 산출물 추가 모달을 띄울지
     const [deletePending, setDeletePending] = useState(false); // 삭제 진행 여부
-    const [isEditing, setIsEditing] = useState(false); // 편집 모드 토글(산출물 추가/제거, 이름 변경 등 제어)
+    const [isTitleEditing, setIsTitleEditing] = useState(false);
+    const [isAssetEditing, setIsAssetEditing] = useState(false);
 
     const [assetRefreshToken, setAssetRefreshToken] = useState(0); // 산출물 목록 재조회 트리거
-    const [logoAssets, setLogoAssets] = useState<AssetState<LogoListItem>>(createAssetState); // 포함된 로고 카드 상태
-    const [brandingAssets, setBrandingAssets] = useState<AssetState<BrandStrategyListItem>>(createAssetState); // 포함된 브랜딩 카드 상태
-    const [colorAssets, setColorAssets] = useState<AssetState<ColorGuideListItem>>(createAssetState); // 포함된 컬러 카드 상태
+    const [logoAssets, setLogoAssets] = useState<AssetPageState<LogoListItem>>(createAssetPageState); // 포함된 로고 카드 상태
+    const [brandingAssets, setBrandingAssets] = useState<AssetPageState<BrandStrategyListItem>>(createAssetPageState); // 포함된 브랜딩 카드 상태
+    const [colorAssets, setColorAssets] = useState<AssetPageState<ColorGuideListItem>>(createAssetPageState); // 포함된 컬러 카드 상태
+    const [logoPage, setLogoPage] = useState(0);
+    const [brandingPage, setBrandingPage] = useState(0);
+    const [colorPage, setColorPage] = useState(0);
     const [logoActions, setLogoActions] = useState<ActionState>(initialActionState); // 로고 카드 액션 로딩 상태
     const [brandingActions, setBrandingActions] = useState<ActionState>(initialActionState); // 브랜딩 카드 액션 로딩
     const [colorActions, setColorActions] = useState<ActionState>(initialActionState); // 컬러 카드 액션 로딩
@@ -449,8 +556,12 @@ function ProjectDetailModal({
 
     // 모달 대상이 바뀌면 편집 상태/픽커를 리셋
     useEffect(() => {
-        setIsEditing(false);
+        setIsTitleEditing(false);
+        setIsAssetEditing(false);
         setPickerType(null);
+        setLogoPage(0);
+        setBrandingPage(0);
+        setColorPage(0);
     }, [projectId]);
 
     // 상세 정보 fetch (mock 모드 포함)
@@ -492,23 +603,64 @@ function ProjectDetailModal({
         return () => controller.abort();
     }, [projectId, initialProject, useMockApi]);
 
-    // 포함된 로고 ID 배열을 기반으로 상세 데이터 로드
+    // 포함된 로고 목록을 프로젝트 ID + 페이지 기준으로 로드
     useEffect(() => {
         if (!project) return;
         const controller = new AbortController();
         const targetIds = dedupeIds(project.logoIds);
-        if (targetIds.length === 0) {
-            setLogoAssets({ loading: false, error: null, items: [] });
+
+        if (useMockApi) {
+            if (targetIds.length === 0) {
+                setLogoAssets({ loading: false, error: null, data: createEmptyAssetPage() });
+                setLogoPage(0);
+                return () => controller.abort();
+            }
+            console.info("[project API] mock mode active – fetching logo assets via detail API", targetIds);
+            setLogoAssets((prev) => ({ ...prev, loading: true, error: null }));
+            fetchListItemsByIds(targetIds, fetchLogoDetail, mapLogoDetailToListItem, controller.signal)
+                .then((items) => {
+                    if (controller.signal.aborted) return;
+                    const paginated = buildMockPaginatedAsset(items, logoPage);
+                    setLogoAssets({ loading: false, error: null, data: paginated });
+                    if (paginated.page !== logoPage) {
+                        setLogoPage(paginated.page);
+                    }
+                })
+                .catch((err) => {
+                    if (controller.signal.aborted) return;
+                    setLogoAssets((prev) => ({
+                        ...prev,
+                        loading: false,
+                        error: err instanceof Error ? err.message : "로고 정보를 불러오지 못했습니다.",
+                    }));
+                });
             return () => controller.abort();
         }
-        if (useMockApi) {
-            console.info("[project API] mock mode active – fetching logo assets via detail API", targetIds);
-        }
+
         setLogoAssets((prev) => ({ ...prev, loading: true, error: null }));
-        fetchListItemsByIds(targetIds, fetchLogoDetail, mapLogoDetailToListItem, controller.signal)
-            .then((items) => {
+        fetchLogoPage(
+            { projectId: project.id, page: logoPage, size: PROJECT_ASSET_PAGE_SIZE, filter: "mine" },
+            { signal: controller.signal },
+        )
+            .then((payload) => {
                 if (controller.signal.aborted) return;
-                setLogoAssets({ loading: false, error: null, items });
+                const excluded = new Set(project.logoIds);
+                const filteredContent = payload.content.filter((item) => !excluded.has(item.id));
+                const filteredTotal = Math.max(payload.totalElements - excluded.size, 0);
+                const filteredPages = Math.max(1, Math.ceil(filteredTotal / Math.max(payload.size, 1)));
+                const adjustedPage = Math.min(payload.page, filteredPages - 1);
+                const adjusted: PaginatedResponse<LogoListItem> = {
+                    ...payload,
+                    content: filteredContent,
+                    totalElements: filteredTotal,
+                    totalPages: filteredPages,
+                    page: adjustedPage,
+                    last: adjustedPage >= filteredPages - 1,
+                };
+                if (adjustedPage !== payload.page || adjusted.content.length === 0) {
+                    setLogoPage((prev) => (prev !== adjustedPage ? adjustedPage : prev));
+                }
+                setLogoAssets({ loading: false, error: null, data: adjusted });
             })
             .catch((err) => {
                 if (controller.signal.aborted) return;
@@ -520,25 +672,59 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, useMockApi]);
+    }, [project, assetRefreshToken, useMockApi, logoPage]);
 
-    // 포함된 브랜딩 전략 상세 데이터 로드
+    // 포함된 브랜딩 전략을 프로젝트 ID + 페이지 기준으로 로드
     useEffect(() => {
         if (!project) return;
         const controller = new AbortController();
         const targetIds = dedupeIds(project.brandStrategyIds);
-        if (targetIds.length === 0) {
-            setBrandingAssets({ loading: false, error: null, items: [] });
+
+        if (useMockApi) {
+            if (targetIds.length === 0) {
+                setBrandingAssets({ loading: false, error: null, data: createEmptyAssetPage() });
+                setBrandingPage(0);
+                return () => controller.abort();
+            }
+            console.info("[project API] mock mode active – fetching branding assets via detail API", targetIds);
+            setBrandingAssets((prev) => ({ ...prev, loading: true, error: null }));
+            fetchListItemsByIds(targetIds, fetchBrandStrategyDetail, mapBrandStrategyDetailToListItem, controller.signal)
+                .then((items) => {
+                    if (controller.signal.aborted) return;
+                    const paginated = buildMockPaginatedAsset(items, brandingPage);
+                    setBrandingAssets({ loading: false, error: null, data: paginated });
+                    if (paginated.page !== brandingPage) {
+                        setBrandingPage(paginated.page);
+                    }
+                })
+                .catch((err) => {
+                    if (controller.signal.aborted) return;
+                    setBrandingAssets((prev) => ({
+                        ...prev,
+                        loading: false,
+                        error: err instanceof Error ? err.message : "브랜딩 전략을 불러오지 못했습니다.",
+                    }));
+                });
             return () => controller.abort();
         }
-        if (useMockApi) {
-            console.info("[project API] mock mode active – fetching branding assets via detail API", targetIds);
+
+        if (targetIds.length === 0) {
+            setBrandingAssets({ loading: false, error: null, data: createEmptyAssetPage() });
+            setBrandingPage(0);
+            return () => controller.abort();
         }
+
         setBrandingAssets((prev) => ({ ...prev, loading: true, error: null }));
-        fetchListItemsByIds(targetIds, fetchBrandStrategyDetail, mapBrandStrategyDetailToListItem, controller.signal)
-            .then((items) => {
+        fetchBrandStrategyPage(
+            { projectId: project.id, page: brandingPage, size: PROJECT_ASSET_PAGE_SIZE, filter: "mine" },
+            { signal: controller.signal },
+        )
+            .then((payload) => {
                 if (controller.signal.aborted) return;
-                setBrandingAssets({ loading: false, error: null, items });
+                setBrandingAssets({ loading: false, error: null, data: payload });
+                if (payload.page !== brandingPage) {
+                    setBrandingPage(payload.page);
+                }
             })
             .catch((err) => {
                 if (controller.signal.aborted) return;
@@ -550,25 +736,59 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, useMockApi]);
+    }, [project, assetRefreshToken, useMockApi, brandingPage]);
 
-    // 포함된 컬러 가이드 상세 데이터 로드
+    // 포함된 컬러 가이드를 프로젝트 ID + 페이지 기준으로 로드
     useEffect(() => {
         if (!project) return;
         const controller = new AbortController();
         const targetIds = dedupeIds(project.colorGuideIds);
-        if (targetIds.length === 0) {
-            setColorAssets({ loading: false, error: null, items: [] });
+
+        if (useMockApi) {
+            if (targetIds.length === 0) {
+                setColorAssets({ loading: false, error: null, data: createEmptyAssetPage() });
+                setColorPage(0);
+                return () => controller.abort();
+            }
+            console.info("[project API] mock mode active – fetching color guide assets via detail API", targetIds);
+            setColorAssets((prev) => ({ ...prev, loading: true, error: null }));
+            fetchListItemsByIds(targetIds, fetchColorGuideDetail, mapColorGuideDetailToListItem, controller.signal)
+                .then((items) => {
+                    if (controller.signal.aborted) return;
+                    const paginated = buildMockPaginatedAsset(items, colorPage);
+                    setColorAssets({ loading: false, error: null, data: paginated });
+                    if (paginated.page !== colorPage) {
+                        setColorPage(paginated.page);
+                    }
+                })
+                .catch((err) => {
+                    if (controller.signal.aborted) return;
+                    setColorAssets((prev) => ({
+                        ...prev,
+                        loading: false,
+                        error: err instanceof Error ? err.message : "컬러 가이드를 불러오지 못했습니다.",
+                    }));
+                });
             return () => controller.abort();
         }
-        if (useMockApi) {
-            console.info("[project API] mock mode active – fetching color guide assets via detail API", targetIds);
+
+        if (targetIds.length === 0) {
+            setColorAssets({ loading: false, error: null, data: createEmptyAssetPage() });
+            setColorPage(0);
+            return () => controller.abort();
         }
+
         setColorAssets((prev) => ({ ...prev, loading: true, error: null }));
-        fetchListItemsByIds(targetIds, fetchColorGuideDetail, mapColorGuideDetailToListItem, controller.signal)
-            .then((items) => {
+        fetchColorGuidePage(
+            { projectId: project.id, page: colorPage, size: PROJECT_ASSET_PAGE_SIZE, filter: "mine" },
+            { signal: controller.signal },
+        )
+            .then((payload) => {
                 if (controller.signal.aborted) return;
-                setColorAssets({ loading: false, error: null, items });
+                setColorAssets({ loading: false, error: null, data: payload });
+                if (payload.page !== colorPage) {
+                    setColorPage(payload.page);
+                }
             })
             .catch((err) => {
                 if (controller.signal.aborted) return;
@@ -580,27 +800,35 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, useMockApi]);
+    }, [project, assetRefreshToken, useMockApi, colorPage]);
 
     // 산출물 API를 다시 호출하도록 토큰 증가
     const refreshAssets = () => {
         setAssetRefreshToken((token) => token + 1);
     };
-    // "프로젝트 수정" -> true, "변경 사항 저장" -> false
-    const handleStartEdit = () => {
-        setIsEditing(true);
+    // 제목 수정 모드 토글
+    const handleStartTitleEdit = () => {
+        setIsTitleEditing(true);
     };
-    const handleFinishEdit = async () => {
+    const handleFinishTitleEdit = async () => {
         const saved = await persistNameChange();
         if (!saved) return;
-        setIsEditing(false);
+        setIsTitleEditing(false);
+    };
+
+    // 산출물 수정 모드 토글
+    const handleStartAssetEdit = () => {
+        setIsAssetEditing(true);
+    };
+    const handleFinishAssetEdit = () => {
+        setIsAssetEditing(false);
         setPickerType(null);
         setAssetError(null);
     };
 
     // 편집 중일 때만 산출물 추가 모달 오픈
     const handleOpenPicker = (type: ProjectAssetType) => {
-        if (!project || !isEditing || assetUpdating) return;
+        if (!project || !isAssetEditing || assetUpdating) return;
         setPickerType(type);
     };
 
@@ -858,9 +1086,14 @@ function ProjectDetailModal({
     // 산출물 attach/detach 공통 루틴
     const mutateAssets = async (type: ProjectAssetType, assetId: number, action: "attach" | "detach") => {
         if (!project) return;
-        if (!isEditing) {
+        if (!isAssetEditing) {
             setAssetError("프로젝트 수정 모드에서만 산출물을 변경할 수 있습니다.");
             return;
+        }
+        if (action === "detach") {
+            const label = ASSET_LABEL[type];
+            const confirmed = window.confirm(`${label}을(를) 프로젝트에서 제외하면 즉시 적용됩니다. 계속할까요?`);
+            if (!confirmed) return;
         }
         const key =
             type === "logo"
@@ -911,6 +1144,10 @@ function ProjectDetailModal({
             setAssetUpdating(false);
         }
     };
+
+    const logoItems = logoAssets.data?.content ?? [];
+    const brandingItems = brandingAssets.data?.content ?? [];
+    const colorItems = colorAssets.data?.content ?? [];
 
     // 프로젝트 삭제 처리
     const handleDeleteProject = async () => {
@@ -1013,22 +1250,23 @@ function ProjectDetailModal({
                         <h2 className={styles.modalTitle}>프로젝트 상세 보기</h2>
                     </div>
                     <div className={styles.modalHeaderActions}>
-                        {!isEditing ? (
-                            <TextButton
-                                label="프로젝트 수정"
-                                variant="outlined"
-                                onClick={handleStartEdit}
-                                className={styles.editModeButton}
-                            />
-                        ) : (
-                            <TextButton
-                                label={savingName ? "저장 중…" : "변경 사항 저장"}
-                                variant="outlined"
-                                onClick={() => void handleFinishEdit()}
-                                disabled={savingName}
-                                className={styles.editModeButton}
-                            />
-                        )}
+                        <div className={styles.editControls}>
+                            {!isAssetEditing ? (
+                                <TextButton
+                                    label="프로젝트 수정"
+                                    variant="outlined"
+                                    onClick={handleStartAssetEdit}
+                                    className={styles.editModeButton}
+                                />
+                            ) : (
+                                <TextButton
+                                    label="수정 완료"
+                                    variant="outlined"
+                                    onClick={handleFinishAssetEdit}
+                                    className={styles.editModeButton}
+                                />
+                            )}
+                        </div>
                         <button
                             type="button"
                             className={styles.iconButton}
@@ -1077,9 +1315,26 @@ function ProjectDetailModal({
                                         value={nameValue}
                                         onChange={(event) => setNameValue(event.target.value)}
                                         placeholder="프로젝트 이름을 입력하세요"
-                                        disabled={!isEditing}
+                                        disabled={!isTitleEditing}
                                     />
+                                    {!isTitleEditing ? (
+                                        <TextButton
+                                            label="프로젝트 제목 변경"
+                                            variant="outlined"
+                                            onClick={handleStartTitleEdit}
+                                            className={styles.editModeButton}
+                                        />
+                                    ) : (
+                                        <TextButton
+                                            label={savingName ? "저장 중…" : "프로젝트 제목 저장"}
+                                            variant="outlined"
+                                            onClick={() => void handleFinishTitleEdit()}
+                                            disabled={savingName}
+                                            className={styles.editModeButton}
+                                        />
+                                    )}
                                 </div>
+                                {isTitleEditing && <p className={styles.editHint}>제목 변경은 즉시 적용됩니다.</p>}
                             </section>
                             <ProjectAssetSection
                                 title="포함된 로고"
@@ -1089,11 +1344,20 @@ function ProjectDetailModal({
                                 onAddClick={() => handleOpenPicker("logo")}
                                 actionLabel="로고 추가"
                                 disabled={assetUpdating}
-                                showAction={isEditing}
+                                showAction={isAssetEditing}
+                                footer={
+                                    logoAssets.data && (
+                                        <Pagination
+                                            page={logoPage}
+                                            totalPages={Math.max(logoAssets.data.totalPages, 1)}
+                                            onChange={setLogoPage}
+                                        />
+                                    )
+                                }
                             >
-                                {logoAssets.items.length > 0 && (
+                                {logoItems.length > 0 && (
                                     <div className={styles.assetGrid}>
-                                        {logoAssets.items.map((item) => (
+                                        {logoItems.map((item) => (
                                             <div key={item.id} className={styles.assetWrapper}>
                                                 <LogoCard
                                                     id={item.id}
@@ -1106,7 +1370,7 @@ function ProjectDetailModal({
                                                     isDownloading={logoActions.downloadingId === item.id}
                                                     onSelect={(_id) => openDetail({ type: "logo", item })}
                                                 />
-                                                {isEditing && (
+                                                {isAssetEditing && (
                                                     <button
                                                         type="button"
                                                         className={styles.assetActionButton}
@@ -1130,11 +1394,20 @@ function ProjectDetailModal({
                                 onAddClick={() => handleOpenPicker("branding")}
                                 actionLabel="브랜딩 전략 추가"
                                 disabled={assetUpdating}
-                                showAction={isEditing}
+                                showAction={isAssetEditing}
+                                footer={
+                                    brandingAssets.data && (
+                                        <Pagination
+                                            page={brandingPage}
+                                            totalPages={Math.max(brandingAssets.data.totalPages, 1)}
+                                            onChange={setBrandingPage}
+                                        />
+                                    )
+                                }
                             >
-                                {brandingAssets.items.length > 0 && (
+                                {brandingItems.length > 0 && (
                                     <div className={styles.assetGrid}>
-                                        {brandingAssets.items.map((item) => (
+                                        {brandingItems.map((item) => (
                                             <div key={item.id} className={styles.assetWrapper}>
                                                 <BrandStrategyDeliverableCard
                                                     item={item}
@@ -1146,7 +1419,7 @@ function ProjectDetailModal({
                                                     isDownloading={brandingActions.downloadingId === item.id}
                                                     onSelect={(_id) => openDetail({ type: "branding", item })}
                                                 />
-                                                {isEditing && (
+                                                {isAssetEditing && (
                                                     <button
                                                         type="button"
                                                         className={styles.assetActionButton}
@@ -1170,11 +1443,20 @@ function ProjectDetailModal({
                                 onAddClick={() => handleOpenPicker("colorGuide")}
                                 actionLabel="컬러 가이드 추가"
                                 disabled={assetUpdating}
-                                showAction={isEditing}
+                                showAction={isAssetEditing}
+                                footer={
+                                    colorAssets.data && (
+                                        <Pagination
+                                            page={colorPage}
+                                            totalPages={Math.max(colorAssets.data.totalPages, 1)}
+                                            onChange={setColorPage}
+                                        />
+                                    )
+                                }
                             >
-                                {colorAssets.items.length > 0 && (
+                                {colorItems.length > 0 && (
                                     <div className={styles.assetGrid}>
-                                        {colorAssets.items.map((item) => (
+                                        {colorItems.map((item) => (
                                             <div key={item.id} className={styles.assetWrapper}>
                                                 <ColorGuideDeliverableCard
                                                     item={item}
@@ -1186,7 +1468,7 @@ function ProjectDetailModal({
                                                     isDownloading={colorActions.downloadingId === item.id}
                                                     onSelect={(_id) => openDetail({ type: "colorGuide", item })}
                                                 />
-                                                {isEditing && (
+                                                {isAssetEditing && (
                                                     <button
                                                         type="button"
                                                         className={styles.assetActionButton}
@@ -1269,6 +1551,7 @@ function ProjectDetailModal({
         </div>
     );
 }
+// === End Component: ProjectDetailModal ===
 type ProjectAssetSectionProps = {
     title: string;
     loading: boolean;
@@ -1279,8 +1562,10 @@ type ProjectAssetSectionProps = {
     actionLabel?: string;
     disabled?: boolean;
     showAction?: boolean;
+    footer?: ReactNode;
 };
-
+// === Component: ProjectAssetSection ===
+// 프로젝트 상세 패널에서 로고/브랜딩/컬러 블록을 묶고 상단 액션 버튼을 출력하는 래퍼 영역이다.
 function ProjectAssetSection({
     title,
     loading,
@@ -1291,6 +1576,7 @@ function ProjectAssetSection({
     actionLabel,
     disabled,
     showAction,
+    footer,
 }: ProjectAssetSectionProps) {
     const canShowAction = Boolean(showAction && actionLabel && onAddClick);
     return (
@@ -1317,16 +1603,19 @@ function ProjectAssetSection({
             {!loading && !error && !children && (
                 <p className={styles.assetEmpty}>{emptyMessage}</p>
             )}
+            {!loading && !error && footer && <div className={styles.assetFooter}>{footer}</div>}
         </section>
     );
 }
+// === End Component: ProjectAssetSection ===
 type ProjectCreateModalProps = {
     existingNames: string[];
     onClose: () => void;
     onCreated: (project: ProjectRecord) => void;
     useMockApi: boolean;
 };
-
+// === Component: ProjectCreateModal ===
+// 새 프로젝트 생성 모달 UI: 이름 입력 및 API/mocked 생성 요청을 핸들링한다.
 function ProjectCreateModal({ existingNames, onClose, onCreated, useMockApi }: ProjectCreateModalProps) {
     const [name, setName] = useState(""); // 입력된 프로젝트 이름
     const [error, setError] = useState<string | null>(null); // 검증/요청 에러 메시지
@@ -1415,6 +1704,7 @@ function ProjectCreateModal({ existingNames, onClose, onCreated, useMockApi }: P
         </div>
     );
 }
+// === End Component: ProjectCreateModal ===
 type ProjectAssetPickerModalProps = {
     type: ProjectAssetType;
     excludedIds: number[];
@@ -1422,7 +1712,8 @@ type ProjectAssetPickerModalProps = {
     onAttach: (assetId: number) => Promise<void> | void;
     disabled?: boolean;
 };
-
+// === Component: ProjectAssetPickerModal ===
+// 프로젝트에 산출물을 추가할 때 쓰는 선택 모달 UI와 페이징 리스트를 담당한다.
 function ProjectAssetPickerModal({
     type,
     excludedIds,
@@ -1576,7 +1867,7 @@ function ProjectAssetPickerModal({
                         </div>
                     )}
 
-                    {!loading && !error && totalPages > 1 && (
+                    {!loading && !error && (
                         <Pagination
                             page={page}
                             totalPages={totalPages}
@@ -1588,3 +1879,4 @@ function ProjectAssetPickerModal({
         </div>
     );
 }
+// === End Component: ProjectAssetPickerModal ===
