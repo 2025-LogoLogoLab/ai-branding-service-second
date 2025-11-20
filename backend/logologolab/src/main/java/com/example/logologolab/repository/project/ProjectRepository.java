@@ -27,4 +27,12 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Project> findByUserOrderByCreatedAtDesc(User user);
 
     Page<Project> findByUser(User user, Pageable pageable);
+
+    // 상세 조회용: 자산들을 다 함께 가져옴
+    @Query("SELECT p FROM Project p " +
+            "LEFT JOIN FETCH p.brandStrategies " +
+            "LEFT JOIN FETCH p.colorGuides " +
+            "LEFT JOIN FETCH p.logos " +
+            "WHERE p.id = :id AND p.user = :user")
+    Optional<Project> findWithAssets(@Param("id") Long id, @Param("user") User user);
 }

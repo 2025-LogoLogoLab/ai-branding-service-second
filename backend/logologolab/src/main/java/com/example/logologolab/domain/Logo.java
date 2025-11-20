@@ -28,10 +28,6 @@ public class Logo extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "text")
     private String imageUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "project_id")
-    private Project project;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by_id")
     private User createdBy;

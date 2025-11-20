@@ -43,10 +43,6 @@ public class BrandStrategy extends BaseTimeEntity {
     @Column(columnDefinition = "text", nullable = false)
     private String markdown;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "project_id")
-    private Project project;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by_id")
     private User createdBy;

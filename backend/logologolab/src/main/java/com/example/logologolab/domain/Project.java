@@ -2,8 +2,8 @@ package com.example.logologolab.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter @Setter
@@ -30,20 +30,33 @@ public class Project extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user; // 프로젝트 소유자
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.PERSIST, orphanRemoval = false)
-    @OrderBy("id DESC")
+    // Set을 사용하여 중복 연결 방지
+    @ManyToMany
+    @JoinTable(
+            name = "project_brand_strategy",
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "brand_strategy_id")
+    )
     @Builder.Default
-    private List<Logo> logos = new ArrayList<>();
+    private Set<BrandStrategy> brandStrategies = new HashSet<>();
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.PERSIST, orphanRemoval = false)
-    @OrderBy("id DESC")
+    @ManyToMany
+    @JoinTable(
+            name = "project_color_guide",
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "color_guide_id")
+    )
     @Builder.Default
-    private List<ColorGuide> colorGuides = new ArrayList<>();
+    private Set<ColorGuide> colorGuides = new HashSet<>();
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.PERSIST, orphanRemoval = false)
-    @OrderBy("id DESC")
+    @ManyToMany
+    @JoinTable(
+            name = "project_logo",
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "logo_id")
+    )
     @Builder.Default
-    private List<BrandStrategy> brandStrategies = new ArrayList<>();
+    private Set<Logo> logos = new HashSet<>();
 
     public void addLogo(Logo l) {
         if (l == null) return;

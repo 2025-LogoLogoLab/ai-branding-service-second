@@ -1,7 +1,6 @@
 package com.example.logologolab.service.project;
 
-import com.example.logologolab.domain.Project;
-import com.example.logologolab.domain.User;
+import com.example.logologolab.domain.*;
 import com.example.logologolab.dto.project.ProjectRequest;
 import com.example.logologolab.dto.project.ProjectResponse;
 import com.example.logologolab.repository.brand.BrandStrategyRepository;
@@ -16,6 +15,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -33,116 +33,131 @@ public class ProjectService {
     public ProjectResponse createProject(ProjectRequest req) {
         User user = loginUserProvider.getLoginUser();
 
-        Project saved = projectRepository.save(
-                Project.builder().name(req.getName()).user(user).build()
+        Project project = Project.builder().name(req.getName()).user(user).build();
+        projectRepository.save(project); // ID 생성
+
+        linkAssetsToProject(project.getId(), req, user); // 연결
+
+        em.flush(); // DB 반영
+        em.clear(); // 영속성 컨텍스트 초기화 (중요: 깔끔하게 다시 조회하기 위함)
+
+        Project saved = projectRepository.findWithAssets(project.getId(), user).orElseThrow();
+
+        // 이제 별도로 repo.findByProjectId 할 필요 없이 saved에서 바로 꺼냄
+        return ProjectResponse.of(
+                saved,
+                new ArrayList<>(saved.getBrandStrategies()),
+                new ArrayList<>(saved.getColorGuides()),
+                new ArrayList<>(saved.getLogos())
         );
-
-        linkAssetsToProject(saved.getId(), req, user);
-
-        em.flush();
-
-        Project p = projectRepository.findWithLogos(saved.getId(), user).orElseThrow();
-        var bsList = brandStrategyRepository.findByProjectId(saved.getId());
-        var cgList = colorGuideRepository.findByProjectId(saved.getId());
-        return ProjectResponse.of(p, bsList, cgList, p.getLogos());
     }
 
     @Transactional
     public ProjectResponse updateProject(Long projectId, ProjectRequest req) {
         User user = loginUserProvider.getLoginUser();
 
-        // 존재/소유자 확인
-        projectRepository.findByIdAndUser(projectId, user)
+        // 1. 존재 및 권한 확인
+        Project project = projectRepository.findByIdAndUser(projectId, user)
                 .orElseThrow(() -> new NoSuchElementException("프로젝트를 찾을 수 없거나 접근 권한이 없습니다."));
 
-        // 이름 수정 + 링크 재설정
-        Project ref = projectRepository.getReferenceById(projectId);
-        ref.setName(req.getName());
+        // 2. 이름 수정
+        project.setName(req.getName());
+
+        // 3. 연결 자산 수정 (기존 것 비우고 새로 채움)
         linkAssetsToProject(projectId, req, user);
 
+        // 4. DB 반영 및 초기화 (중요: 1차 캐시 갱신)
         em.flush();
+        em.clear();
 
-        // 재조회 + 연관 자원 병합
-        Project p = projectRepository.findWithLogos(projectId, user).orElseThrow();
-        var bsList = brandStrategyRepository.findByProjectId(projectId);
-        var cgList = colorGuideRepository.findByProjectId(projectId);
-        return ProjectResponse.of(p, bsList, cgList, p.getLogos());
+        // 5. 재조회 (업데이트된 관계 데이터를 가져오기 위해 findWithAssets 사용)
+        Project updated = projectRepository.findWithAssets(projectId, user).orElseThrow();
+
+        // 6. 엔티티 내부의 컬렉션을 사용하여 응답 생성
+        return ProjectResponse.of(
+                updated,
+                new ArrayList<>(updated.getBrandStrategies()),
+                new ArrayList<>(updated.getColorGuides()),
+                new ArrayList<>(updated.getLogos())
+        );
     }
 
     @Transactional
     public void deleteProject(Long projectId) {
         User user = loginUserProvider.getLoginUser();
 
-        // 존재/권한 확인 (예외 던져 UX 선명화)
+        // 1. 존재 및 권한 확인
         Project project = projectRepository.findByIdAndUser(projectId, user)
                 .orElseThrow(() -> new NoSuchElementException("프로젝트를 찾을 수 없거나 접근 권한이 없습니다."));
 
-        // 1) 모든 연관 해제 (project_id -> null)
-        brandStrategyRepository.detachAllByProjectId(projectId);
-        colorGuideRepository.detachAllByProjectId(projectId);
-        logoRepository.detachAllByProjectId(projectId);
-
-        // 2) 부모 삭제
+        // 2. 삭제 수행
+        // N:M 관계(Join Table)는 Project가 삭제되면 중간 테이블 데이터도 자동으로 삭제됩니다.
+        // 자산 원본(Logo, BrandStrategy 등)은 삭제되지 않고 유지됩니다.
         projectRepository.delete(project);
-        // 선택: 즉시 DB 반영/정합성 보장
-        // entityManager.flush();
     }
 
 
     @Transactional(readOnly = true)
     public ProjectResponse getProject(Long projectId) {
         User user = loginUserProvider.getLoginUser();
-        Project p = projectRepository.findWithLogos(projectId, user)
+
+        // 페치 조인이 적용된 메서드로 한 번에 조회
+        Project p = projectRepository.findWithAssets(projectId, user)
                 .orElseThrow(() -> new NoSuchElementException("프로젝트를 찾을 수 없거나 접근 권한이 없습니다."));
 
-        var bsList = brandStrategyRepository.findByProjectId(projectId);
-        var cgList = colorGuideRepository.findByProjectId(projectId);
-        // logos는 p.getLogos()에 이미 들어있음
-
-        return ProjectResponse.of(p, bsList, cgList, p.getLogos());
+        return ProjectResponse.of(
+                p,
+                new ArrayList<>(p.getBrandStrategies()),
+                new ArrayList<>(p.getColorGuides()),
+                new ArrayList<>(p.getLogos())
+        );
     }
 
     @Transactional
     public void linkAssetsToProject(Long projectId, ProjectRequest req, User user) {
-        Project ref = projectRepository.getReferenceById(projectId);
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new NoSuchElementException("Project not found"));
 
-        // 1) 기존 연결 해제 (이 프로젝트에 묶인 것만)
-        colorGuideRepository.findByProjectId(projectId)
-                .forEach(cg -> cg.setProject(null));
-        brandStrategyRepository.findByProjectId(projectId)
-                .forEach(bs -> bs.setProject(null));
-        logoRepository.findByProjectId(projectId)
-                .forEach(lg -> lg.setProject(null));
+        // 1. 기존 연결 초기화 (Set을 비움)
+        // N:M 관계이므로 자산 자체가 삭제되는 것이 아니라 '연결'만 끊김
+        project.getBrandStrategies().clear();
+        project.getColorGuides().clear();
+        project.getLogos().clear();
 
-        // 2) 요청 값 안전 처리
-        List<Long> bsIds = req.getBrandStrategyIds() == null ? List.of() : req.getBrandStrategyIds();
-        List<Long> cgIds = req.getColorGuideIds() == null ? List.of() : req.getColorGuideIds();
-        List<Long> lgIds = req.getLogoIds() == null ? List.of() : req.getLogoIds();
-
-        for (Long id : bsIds) {
-            brandStrategyRepository.findById(id).ifPresent(bs -> {
-                boolean ok = isOwner(bs.getCreatedBy(), user);
-                if (ok) bs.setProject(ref);
-                logLink("BS", id, ok, bs.getCreatedBy(), user);
-            });
-        }
-        for (Long id : cgIds) {
-            colorGuideRepository.findById(id).ifPresent(cg -> {
-                boolean ok = isOwner(cg.getCreatedBy(), user);
-                if (ok) cg.setProject(ref);
-                logLink("CG", id, ok, cg.getCreatedBy(), user);
-            });
-        }
-        for (Long id : lgIds) {
-            logoRepository.findById(id).ifPresent(lg -> {
-                boolean ok = isOwner(lg.getCreatedBy(), user);
-                if (ok) lg.setProject(ref);
-                logLink("LG", id, ok, lg.getCreatedBy(), user);
-            });
+        // 2. 요청된 ID로 자산 조회 및 연결
+        List<Long> bsIds = req.getBrandStrategyIds();
+        if (bsIds != null && !bsIds.isEmpty()) {
+            List<BrandStrategy> strategies = brandStrategyRepository.findAllById(bsIds);
+            for (BrandStrategy bs : strategies) {
+                // 내 자산인지 확인 (보안)
+                if (isOwner(bs.getCreatedBy(), user)) {
+                    project.getBrandStrategies().add(bs);
+                }
+            }
         }
 
-        // 4) 변경 감지 반영을 즉시 보장하고 싶으면 주석 해제
-        // projectRepository.flush();
+        List<Long> cgIds = req.getColorGuideIds();
+        if (cgIds != null && !cgIds.isEmpty()) {
+            List<ColorGuide> guides = colorGuideRepository.findAllById(cgIds);
+            for (ColorGuide cg : guides) {
+                if (isOwner(cg.getCreatedBy(), user)) {
+                    project.getColorGuides().add(cg);
+                }
+            }
+        }
+
+        List<Long> lgIds = req.getLogoIds();
+        if (lgIds != null && !lgIds.isEmpty()) {
+            List<Logo> logos = logoRepository.findAllById(lgIds);
+            for (Logo lg : logos) {
+                if (isOwner(lg.getCreatedBy(), user)) {
+                    project.getLogos().add(lg);
+                }
+            }
+        }
+
+        // JPA 변경 감지(Dirty Checking)에 의해 project_brand_strategy 등
+        // 중간 테이블에 데이터가 자동으로 insert/delete 됩니다.
     }
 
     private boolean isOwner(User createdBy, User user) {
@@ -164,15 +179,16 @@ public class ProjectService {
         User user = loginUserProvider.getLoginUser();
 
         // 1. 내 프로젝트 페이징 조회
+        // N+1 문제 방지를 위해 hibernate.default_batch_fetch_size 설정이 application.yml에 되어 있어야 효율적입니다.
         Page<Project> projectPage = projectRepository.findByUser(user, pageable);
 
         // 2. 엔티티 -> DTO 변환
-        // Project 엔티티에 @OneToMany로 brandStrategies, colorGuides, logos가 매핑되어 있다고 가정합니다.
+        // Set을 List로 변환하여 DTO에 전달
         return projectPage.map(p -> ProjectResponse.of(
                 p,
-                p.getBrandStrategies(), // Lazy Loading 발생 (hibernate.default_batch_fetch_size 설정 권장)
-                p.getColorGuides(),
-                p.getLogos()
+                new ArrayList<>(p.getBrandStrategies()),
+                new ArrayList<>(p.getColorGuides()),
+                new ArrayList<>(p.getLogos())
         ));
     }
 }

@@ -60,10 +60,6 @@ public class ColorGuide extends BaseTimeEntity {
     @Column(columnDefinition = "text")
     private String backgroundDesc;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "project_id")
-    private Project project;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "created_by_id")
     private User createdBy;
