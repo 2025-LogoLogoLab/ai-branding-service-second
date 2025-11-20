@@ -65,7 +65,7 @@ export default function MyPage() {
     }
 
     if (active === "projects") {
-      return <MyProjects variant="embedded" showSettingsPanel />;
+      return <MyProjects variant="embedded" />;
     }
     return <UserInfo />;
   }, [active, handleDeliverablesSidebarChange]);

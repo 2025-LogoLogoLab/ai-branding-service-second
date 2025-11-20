@@ -20,32 +20,19 @@ import {
     updateProject,
     type ProjectRecord,
 } from "../custom_api/project";
-import { ProjectApiSettingsPanel } from "../components/ProjectApiSettingsPanel/ProjectApiSettingsPanel";
-import {
-    DEFAULT_PROJECT_API_SETTINGS,
-    DEMO_PROJECTS,
-    type ProjectApiSettings,
-    isProjectApiConfigured,
-} from "../custom_api/projectSettings";
 import {
     deleteLogo,
-    fetchLogoDetail,
     fetchLogoPage,
-    type LogoDetail,
     type LogoListItem,
 } from "../custom_api/logo";
 import {
     deleteBranding,
-    fetchBrandStrategyDetail,
     fetchBrandStrategyPage,
-    type BrandStrategyDetail,
     type BrandStrategyListItem,
 } from "../custom_api/branding";
 import {
     deleteColorGuide,
-    fetchColorGuideDetail,
     fetchColorGuidePage,
-    type ColorGuideDetail,
     type ColorGuideListItem,
 } from "../custom_api/colorguide";
 import { LogoCard } from "../organisms/LogoCard/LogoCard";
@@ -54,7 +41,7 @@ import ColorGuideDeliverableCard from "../organisms/ColorGuideDeliverableCard/Co
 import Pagination from "../molecules/Pagination/Pagination";
 import { ensureDataUrl } from "../utils/image";
 import { copyImageToClipboard } from "../utils/clipboard";
-import type { HttpMethod, PaginatedResponse } from "../custom_api/types";
+import type { PaginatedResponse } from "../custom_api/types";
 import { DeliverableDetailModal } from "../organisms/DeliverableDetailModal/DeliverableDetailModal";
 import type { ProductToolbarProps } from "../molecules/ProductToolbar/ProductToolbar";
 import { TextButton } from "../atoms/TextButton/TextButton";
@@ -118,23 +105,6 @@ const createEmptyAssetPage = <T,>(): PaginatedResponse<T> => ({
     last: true,
 });
 
-const buildMockPaginatedAsset = <T,>(items: T[], requestedPage: number): PaginatedResponse<T> => {
-    const totalElements = items.length;
-    const size = PROJECT_ASSET_PAGE_SIZE;
-    const totalPages = Math.max(1, Math.ceil(totalElements / size));
-    const page = Math.min(Math.max(requestedPage, 0), totalPages - 1);
-    const sliceStart = page * size;
-    const content = items.slice(sliceStart, sliceStart + size);
-    return {
-        content,
-        page,
-        size,
-        totalElements,
-        totalPages,
-        last: page >= totalPages - 1,
-    };
-};
-
 const formatDateTime = (value?: string) => {
     if (!value) return "-";
     const date = new Date(value);
@@ -148,69 +118,13 @@ const formatDateTime = (value?: string) => {
     });
 };
 
-const createMockProjectRecord = (name: string): ProjectRecord => ({
-    id: Date.now(),
-    name,
-    logoIds: [],
-    brandStrategyIds: [],
-    colorGuideIds: [],
-    logoCount: 0,
-    brandCount: 0,
-    colorGuideCount: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-});
-
 const dedupeIds = (ids?: number[]): number[] =>
     Array.from(new Set((ids ?? []).filter((value): value is number => typeof value === "number" && Number.isFinite(value))));
-
-async function fetchListItemsByIds<TDetail, TList>(
-    ids: number[],
-    loader: (id: number, options: { signal?: AbortSignal }) => Promise<TDetail>,
-    mapper: (detail: TDetail) => TList,
-    signal: AbortSignal,
-): Promise<TList[]> {
-    if (ids.length === 0) return [];
-    const results = await Promise.all(ids.map((id) => loader(id, { signal }).then(mapper)));
-    return results;
-}
-
-const mapLogoDetailToListItem = (detail: LogoDetail): LogoListItem => ({
-    id: detail.id,
-    prompt: detail.prompt ?? "",
-    imageUrl: detail.imageUrl ?? "",
-    createdAt: detail.createdAt ?? "",
-});
-
-const mapBrandStrategyDetailToListItem = (detail: BrandStrategyDetail): BrandStrategyListItem => ({
-    id: detail.id,
-    briefKo: detail.briefKo ?? "",
-    style: detail.style ?? undefined,
-    summaryKo: detail.summaryKo ?? undefined,
-    markdown: detail.markdown ?? "",
-    createdAt: detail.createdAt ?? "",
-});
-
-const mapColorGuideDetailToListItem = (detail: ColorGuideDetail): ColorGuideListItem => ({
-    id: detail.id,
-    briefKo: detail.briefKo ?? "",
-    style: detail.style ?? undefined,
-    mainHex: detail.guide.main.hex,
-    subHex: detail.guide.sub.hex,
-    pointHex: detail.guide.point.hex,
-    backgroundHex: detail.guide.background.hex,
-    mainDescription: detail.guide.main.description,
-    subDescription: detail.guide.sub.description,
-    pointDescription: detail.guide.point.description,
-    backgroundDescription: detail.guide.background.description,
-    createdAt: detail.createdAt ?? "",
-});
 
 type MyProjectsVariant = "page" | "embedded";
 
 type MyProjectsProps = {
     variant?: MyProjectsVariant;
-    showSettingsPanel?: boolean;
 };
 
 const cx = (...values: Array<string | false | null | undefined>) =>
@@ -218,7 +132,7 @@ const cx = (...values: Array<string | false | null | undefined>) =>
 
 // === Component: MyProjects ===
 // 내 프로젝트 전체 화면을 구성하며 목록, 설정 패널, 상세/생성 모달까지 모두 오케스트레이션한다.
-export default function MyProjects({ variant = "page", showSettingsPanel }: MyProjectsProps) {
+export default function MyProjects({ variant = "page" }: MyProjectsProps) {
     const [projects, setProjects] = useState<ProjectRecord[]>([]); // 목록 테이블 데이터
     const [projectPage, setProjectPage] = useState(0); // 현재 목록 페이지 인덱스
     const [projectPageInfo, setProjectPageInfo] = useState<ProjectPageInfo>({
@@ -227,56 +141,15 @@ export default function MyProjects({ variant = "page", showSettingsPanel }: MyPr
         totalElements: 0,
     }); // 서버가 알려주는 페이지네이션 메타
     const [projectListNonce, setProjectListNonce] = useState(0); // 강제 재로드 트리거
-    const [mockProjects, setMockProjects] = useState<ProjectRecord[]>(DEMO_PROJECTS); // mock 모드 전용 프로젝트 원본
     const [loading, setLoading] = useState(true); // 목록 fetch 진행 여부
     const [error, setError] = useState<string | null>(null); // 목록 fetch 에러 메시지
     const [detailId, setDetailId] = useState<number | null>(null); // 상세 모달에 띄울 프로젝트 ID
     const [createOpen, setCreateOpen] = useState(false); // 생성 모달 오픈 여부
-    const [projectApiSettings, setProjectApiSettings] = useState<ProjectApiSettings>(DEFAULT_PROJECT_API_SETTINGS); // API 설정 패널 상태
 
-    const useMockApi = useMemo(() => !isProjectApiConfigured(projectApiSettings), [projectApiSettings]); // API URL/메서드가 비어 있을 때 mock 데이터 사용
-
-    useEffect(() => {
-        if (useMockApi) {
-            setMockProjects(DEMO_PROJECTS);
-        }
-        setProjectPage(0);
-    }, [useMockApi]);
-    // API 설정 패널 입력 핸들러
-    const handleProjectApiConfigChange = (section: keyof ProjectApiSettings, field: "url" | "method", value: string) => {
-        setProjectApiSettings((prev) => ({
-            ...prev,
-            [section]: {
-                ...prev[section],
-                [field]: field === "method" ? (value as HttpMethod) : value,
-            },
-        }));
-    };
-
-    // 프로젝트 목록 fetch (혹은 mock 데이터 사용)
+    // 프로젝트 목록 fetch
     useEffect(() => {
         const controller = new AbortController();
         setError(null);
-
-        if (useMockApi) {
-            const totalElements = mockProjects.length;
-            const totalPages = Math.max(1, Math.ceil(totalElements / PROJECT_LIST_PAGE_SIZE));
-            const effectivePage = Math.min(Math.max(projectPage, 0), totalPages - 1);
-            if (effectivePage !== projectPage) {
-                setProjectPage(effectivePage);
-            }
-            const sliceStart = effectivePage * PROJECT_LIST_PAGE_SIZE;
-            const pageItems = mockProjects.slice(sliceStart, sliceStart + PROJECT_LIST_PAGE_SIZE);
-            setProjects(pageItems);
-            setProjectPageInfo({
-                page: effectivePage,
-                totalPages,
-                totalElements,
-            });
-            setLoading(false);
-            return () => controller.abort();
-        }
-
         setLoading(true);
         console.info("[project API] fetch project list start", { page: projectPage, size: PROJECT_LIST_PAGE_SIZE });
         fetchProjectList({ page: projectPage, size: PROJECT_LIST_PAGE_SIZE }, { signal: controller.signal })
@@ -306,44 +179,32 @@ export default function MyProjects({ variant = "page", showSettingsPanel }: MyPr
             });
 
         return () => controller.abort();
-    }, [useMockApi, projectPage, projectListNonce, mockProjects]);
+    }, [projectPage, projectListNonce]);
 
-    const selectedProject = useMemo(() => {
-        const source = useMockApi ? mockProjects : projects;
-        return source.find((item) => item.id === detailId);
-    }, [projects, mockProjects, detailId, useMockApi]); // 상세 모달에 넘길 현재 선택 프로젝트
+    const selectedProject = useMemo(
+        () => projects.find((item) => item.id === detailId),
+        [projects, detailId],
+    ); // 상세 모달에 넘길 현재 선택 프로젝트
 
     // 새 프로젝트 생성 결과 반영 (mock 모드에서는 즉시 데이터 추가)
-    const handleProjectCreated = (project: ProjectRecord) => {
-        if (useMockApi) {
-            setMockProjects((prev) => [project, ...prev]);
-        } else {
-            setProjectListNonce((prev) => prev + 1);
-        }
+    const handleProjectCreated = () => {
+        setProjectListNonce((prev) => prev + 1);
         setProjectPage(0);
     };
 
     // 상세 모달에서 수정된 프로젝트를 목록에 반영
     const handleProjectUpdated = (project: ProjectRecord) => {
         setProjects((prev) => prev.map((item) => (item.id === project.id ? project : item)));
-        if (useMockApi) {
-            setMockProjects((prev) => prev.map((item) => (item.id === project.id ? project : item)));
-        }
     };
 
     // 프로젝트 삭제 후 목록/모달 동기화
     const handleProjectDeleted = (projectId: number) => {
         setProjects((prev) => prev.filter((item) => item.id !== projectId));
         setDetailId((prev) => (prev === projectId ? null : prev));
-        if (useMockApi) {
-            setMockProjects((prev) => prev.filter((item) => item.id !== projectId));
-        } else {
-            setProjectListNonce((prev) => prev + 1);
-        }
+        setProjectListNonce((prev) => prev + 1);
     };
 
     const isPageVariant = variant === "page";
-    const shouldShowSettings = showSettingsPanel ?? isPageVariant;
     const pageClass = cx(styles.page, !isPageVariant && styles.pageEmbedded);
     const containerClass = cx(styles.container, variant === "embedded" && styles.containerEmbedded);
     const panelClass = cx(styles.panel, variant === "embedded" && styles.panelEmbedded);
@@ -453,19 +314,6 @@ export default function MyProjects({ variant = "page", showSettingsPanel }: MyPr
                     )}
                 </section>
 
-                {shouldShowSettings && (
-                    <>
-                        <ProjectApiSettingsPanel
-                            settings={projectApiSettings}
-                            onChange={handleProjectApiConfigChange}
-                        />
-                        {useMockApi && (
-                            <p className={styles.apiNotice}>
-                                API 설정이 완료되지 않아 예시 프로젝트 데이터가 표시됩니다.
-                            </p>
-                        )}
-                    </>
-                )}
             </div>
 
             {detailId != null && (
@@ -475,16 +323,14 @@ export default function MyProjects({ variant = "page", showSettingsPanel }: MyPr
                     onClose={() => setDetailId(null)}
                     onUpdated={handleProjectUpdated}
                     onDeleted={handleProjectDeleted}
-                    useMockApi={useMockApi}
                 />
             )}
 
             {createOpen && (
                 <ProjectCreateModal
-                    existingNames={(useMockApi ? mockProjects : projects).map((item) => item.name)}
+                    existingNames={projects.map((item) => item.name)}
                     onClose={() => setCreateOpen(false)}
                     onCreated={handleProjectCreated}
-                    useMockApi={useMockApi}
                 />
             )}
         </div>
@@ -497,7 +343,6 @@ type ProjectDetailModalProps = {
     onClose: () => void;
     onUpdated: (project: ProjectRecord) => void;
     onDeleted: (projectId: number) => void;
-    useMockApi: boolean;
 };
 // === Component: ProjectDetailModal ===
 // 프로젝트 상세 모달 UI: 기본 정보 편집, 산출물 카드, 삭제/추가 모달 트리거를 담당한다.
@@ -507,7 +352,6 @@ function ProjectDetailModal({
     onClose,
     onUpdated,
     onDeleted,
-    useMockApi,
 }: ProjectDetailModalProps) {
     const [project, setProject] = useState<ProjectRecord | null>(initialProject ?? null); // 모달에 표시할 프로젝트 데이터
     const [loading, setLoading] = useState(!initialProject); // 상세 로딩 여부
@@ -564,22 +408,8 @@ function ProjectDetailModal({
         setColorPage(0);
     }, [projectId]);
 
-    // 상세 정보 fetch (mock 모드 포함)
+    // 상세 정보 fetch
     useEffect(() => {
-        if (useMockApi) {
-            if (initialProject) {
-                console.info("[project API] mock detail data", initialProject);
-                setProject(initialProject);
-                setNameValue(initialProject.name);
-                setError(null);
-            } else {
-                setError("프로젝트 정보를 불러올 수 없습니다.");
-            }
-            setLoading(false);
-            setAssetRefreshToken((token) => token + 1);
-            return;
-        }
-
         const controller = new AbortController();
         setLoading(true);
         setError(null);
@@ -601,7 +431,7 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [projectId, initialProject, useMockApi]);
+    }, [projectId]);
 
     // 포함된 로고 목록을 프로젝트 ID + 페이지 기준으로 로드
     useEffect(() => {
@@ -609,31 +439,9 @@ function ProjectDetailModal({
         const controller = new AbortController();
         const targetIds = dedupeIds(project.logoIds);
 
-        if (useMockApi) {
-            if (targetIds.length === 0) {
-                setLogoAssets({ loading: false, error: null, data: createEmptyAssetPage() });
-                setLogoPage(0);
-                return () => controller.abort();
-            }
-            console.info("[project API] mock mode active – fetching logo assets via detail API", targetIds);
-            setLogoAssets((prev) => ({ ...prev, loading: true, error: null }));
-            fetchListItemsByIds(targetIds, fetchLogoDetail, mapLogoDetailToListItem, controller.signal)
-                .then((items) => {
-                    if (controller.signal.aborted) return;
-                    const paginated = buildMockPaginatedAsset(items, logoPage);
-                    setLogoAssets({ loading: false, error: null, data: paginated });
-                    if (paginated.page !== logoPage) {
-                        setLogoPage(paginated.page);
-                    }
-                })
-                .catch((err) => {
-                    if (controller.signal.aborted) return;
-                    setLogoAssets((prev) => ({
-                        ...prev,
-                        loading: false,
-                        error: err instanceof Error ? err.message : "로고 정보를 불러오지 못했습니다.",
-                    }));
-                });
+        if (targetIds.length === 0) {
+            setLogoAssets({ loading: false, error: null, data: createEmptyAssetPage() });
+            setLogoPage(0);
             return () => controller.abort();
         }
 
@@ -672,41 +480,13 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, useMockApi, logoPage]);
+    }, [project, assetRefreshToken, logoPage]);
 
     // 포함된 브랜딩 전략을 프로젝트 ID + 페이지 기준으로 로드
     useEffect(() => {
         if (!project) return;
         const controller = new AbortController();
         const targetIds = dedupeIds(project.brandStrategyIds);
-
-        if (useMockApi) {
-            if (targetIds.length === 0) {
-                setBrandingAssets({ loading: false, error: null, data: createEmptyAssetPage() });
-                setBrandingPage(0);
-                return () => controller.abort();
-            }
-            console.info("[project API] mock mode active – fetching branding assets via detail API", targetIds);
-            setBrandingAssets((prev) => ({ ...prev, loading: true, error: null }));
-            fetchListItemsByIds(targetIds, fetchBrandStrategyDetail, mapBrandStrategyDetailToListItem, controller.signal)
-                .then((items) => {
-                    if (controller.signal.aborted) return;
-                    const paginated = buildMockPaginatedAsset(items, brandingPage);
-                    setBrandingAssets({ loading: false, error: null, data: paginated });
-                    if (paginated.page !== brandingPage) {
-                        setBrandingPage(paginated.page);
-                    }
-                })
-                .catch((err) => {
-                    if (controller.signal.aborted) return;
-                    setBrandingAssets((prev) => ({
-                        ...prev,
-                        loading: false,
-                        error: err instanceof Error ? err.message : "브랜딩 전략을 불러오지 못했습니다.",
-                    }));
-                });
-            return () => controller.abort();
-        }
 
         if (targetIds.length === 0) {
             setBrandingAssets({ loading: false, error: null, data: createEmptyAssetPage() });
@@ -736,41 +516,13 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, useMockApi, brandingPage]);
+    }, [project, assetRefreshToken, brandingPage]);
 
     // 포함된 컬러 가이드를 프로젝트 ID + 페이지 기준으로 로드
     useEffect(() => {
         if (!project) return;
         const controller = new AbortController();
         const targetIds = dedupeIds(project.colorGuideIds);
-
-        if (useMockApi) {
-            if (targetIds.length === 0) {
-                setColorAssets({ loading: false, error: null, data: createEmptyAssetPage() });
-                setColorPage(0);
-                return () => controller.abort();
-            }
-            console.info("[project API] mock mode active – fetching color guide assets via detail API", targetIds);
-            setColorAssets((prev) => ({ ...prev, loading: true, error: null }));
-            fetchListItemsByIds(targetIds, fetchColorGuideDetail, mapColorGuideDetailToListItem, controller.signal)
-                .then((items) => {
-                    if (controller.signal.aborted) return;
-                    const paginated = buildMockPaginatedAsset(items, colorPage);
-                    setColorAssets({ loading: false, error: null, data: paginated });
-                    if (paginated.page !== colorPage) {
-                        setColorPage(paginated.page);
-                    }
-                })
-                .catch((err) => {
-                    if (controller.signal.aborted) return;
-                    setColorAssets((prev) => ({
-                        ...prev,
-                        loading: false,
-                        error: err instanceof Error ? err.message : "컬러 가이드를 불러오지 못했습니다.",
-                    }));
-                });
-            return () => controller.abort();
-        }
 
         if (targetIds.length === 0) {
             setColorAssets({ loading: false, error: null, data: createEmptyAssetPage() });
@@ -800,7 +552,7 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, useMockApi, colorPage]);
+    }, [project, assetRefreshToken, colorPage]);
 
     // 산출물 API를 다시 호출하도록 토큰 증가
     const refreshAssets = () => {
@@ -899,11 +651,7 @@ function ProjectDetailModal({
     const handleLogoDelete = async (id: number) => {
         setLogoActions((prev) => ({ ...prev, deletingId: id }));
         try {
-            if (!useMockApi) {
-                await deleteLogo(id);
-            } else {
-                console.info("[project API] mock delete logo", id);
-            }
+            await deleteLogo(id);
             removeAssetReference("logo", id);
             closeIfTarget("logo", id);
             refreshAssets();
@@ -945,11 +693,7 @@ function ProjectDetailModal({
     const handleBrandingDelete = async (id: number) => {
         setBrandingActions((prev) => ({ ...prev, deletingId: id }));
         try {
-            if (!useMockApi) {
-                await deleteBranding({ id });
-            } else {
-                console.info("[project API] mock delete branding", id);
-            }
+            await deleteBranding({ id });
             removeAssetReference("branding", id);
             closeIfTarget("branding", id);
             refreshAssets();
@@ -987,11 +731,7 @@ function ProjectDetailModal({
     const handleColorGuideDelete = async (id: number) => {
         setColorActions((prev) => ({ ...prev, deletingId: id }));
         try {
-            if (!useMockApi) {
-                await deleteColorGuide(id);
-            } else {
-                console.info("[project API] mock delete color guide", id);
-            }
+            await deleteColorGuide(id);
             removeAssetReference("colorGuide", id);
             closeIfTarget("colorGuide", id);
             refreshAssets();
@@ -1058,18 +798,6 @@ function ProjectDetailModal({
         setSavingName(true);
         setFormError(null);
         try {
-            if (useMockApi) {
-                const updated: ProjectRecord = {
-                    ...project,
-                    name: nextName,
-                    updatedAt: new Date().toISOString(),
-                };
-                console.info("[project API] mock rename", updated);
-                setProject(updated);
-                setNameValue(updated.name);
-                onUpdated(updated);
-                return true;
-            }
             const updated = await updateProject(project.id, buildUpdatePayload({ name: nextName }));
             setProject(updated);
             setNameValue(updated.name);
@@ -1116,21 +844,6 @@ function ProjectDetailModal({
         setAssetError(null);
 
         try {
-            if (useMockApi) {
-                const updated: ProjectRecord = {
-                    ...project,
-                    [key]: nextIds,
-                    updatedAt: new Date().toISOString(),
-                };
-                console.info("[project API] mock asset update", type, nextIds);
-                setProject(updated);
-                onUpdated(updated);
-                if (action === "detach") {
-                    closeIfTarget(type, assetId);
-                }
-                setAssetUpdating(false);
-                return;
-            }
             const updated = await updateProject(project.id, buildUpdatePayload({ [key]: nextIds }));
             setProject(updated);
             onUpdated(updated);
@@ -1156,11 +869,7 @@ function ProjectDetailModal({
         if (!confirmed) return;
         setDeletePending(true);
         try {
-            if (!useMockApi) {
-                await deleteProject(project.id);
-            } else {
-                console.info("[project API] mock delete project", project.id);
-            }
+            await deleteProject(project.id);
             onDeleted(project.id);
             onClose();
         } catch (err) {
@@ -1611,12 +1320,11 @@ function ProjectAssetSection({
 type ProjectCreateModalProps = {
     existingNames: string[];
     onClose: () => void;
-    onCreated: (project: ProjectRecord) => void;
-    useMockApi: boolean;
+    onCreated: () => void;
 };
 // === Component: ProjectCreateModal ===
 // 새 프로젝트 생성 모달 UI: 이름 입력 및 API/mocked 생성 요청을 핸들링한다.
-function ProjectCreateModal({ existingNames, onClose, onCreated, useMockApi }: ProjectCreateModalProps) {
+function ProjectCreateModal({ existingNames, onClose, onCreated }: ProjectCreateModalProps) {
     const [name, setName] = useState(""); // 입력된 프로젝트 이름
     const [error, setError] = useState<string | null>(null); // 검증/요청 에러 메시지
     const [pending, setPending] = useState(false); // 생성 요청 진행 여부
@@ -1640,11 +1348,9 @@ function ProjectCreateModal({ existingNames, onClose, onCreated, useMockApi }: P
         setPending(true);
         setError(null);
         try {
-            const project = useMockApi
-                ? createMockProjectRecord(trimmed)
-                : await createProject({ name: trimmed, logoIds: [], brandStrategyIds: [], colorGuideIds: [] });
+            const project = await createProject({ name: trimmed, logoIds: [], brandStrategyIds: [], colorGuideIds: [] });
             console.info("[project API] project create", project);
-            onCreated(project);
+            onCreated();
             onClose();
         } catch (err) {
             setError(err instanceof Error ? err.message : "프로젝트 생성 중 오류가 발생했습니다.");
