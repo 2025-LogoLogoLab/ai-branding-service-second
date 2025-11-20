@@ -444,6 +444,7 @@ function ProjectDetailModal({
             setLogoPage(0);
             return () => controller.abort();
         }
+        const targetSet = new Set(targetIds);
 
         setLogoAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchLogoPage(
@@ -452,9 +453,8 @@ function ProjectDetailModal({
         )
             .then((payload) => {
                 if (controller.signal.aborted) return;
-                const excluded = new Set(project.logoIds);
-                const filteredContent = payload.content.filter((item) => !excluded.has(item.id));
-                const filteredTotal = Math.max(payload.totalElements - excluded.size, 0);
+                const filteredContent = payload.content.filter((item) => targetSet.has(item.id));
+                const filteredTotal = targetIds.length;
                 const filteredPages = Math.max(1, Math.ceil(filteredTotal / Math.max(payload.size, 1)));
                 const adjustedPage = Math.min(payload.page, filteredPages - 1);
                 const adjusted: PaginatedResponse<LogoListItem> = {
@@ -465,10 +465,10 @@ function ProjectDetailModal({
                     page: adjustedPage,
                     last: adjustedPage >= filteredPages - 1,
                 };
-                if (adjustedPage !== payload.page || adjusted.content.length === 0) {
-                    setLogoPage((prev) => (prev !== adjustedPage ? adjustedPage : prev));
-                }
                 setLogoAssets({ loading: false, error: null, data: adjusted });
+                if (adjustedPage !== logoPage) {
+                    setLogoPage(adjustedPage);
+                }
             })
             .catch((err) => {
                 if (controller.signal.aborted) return;
@@ -493,6 +493,7 @@ function ProjectDetailModal({
             setBrandingPage(0);
             return () => controller.abort();
         }
+        const targetSet = new Set(targetIds);
 
         setBrandingAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchBrandStrategyPage(
@@ -501,9 +502,21 @@ function ProjectDetailModal({
         )
             .then((payload) => {
                 if (controller.signal.aborted) return;
-                setBrandingAssets({ loading: false, error: null, data: payload });
-                if (payload.page !== brandingPage) {
-                    setBrandingPage(payload.page);
+                const filteredContent = payload.content.filter((item) => targetSet.has(item.id));
+                const filteredTotal = targetIds.length;
+                const filteredPages = Math.max(1, Math.ceil(filteredTotal / Math.max(payload.size, 1)));
+                const adjustedPage = Math.min(payload.page, filteredPages - 1);
+                const adjusted: PaginatedResponse<BrandStrategyListItem> = {
+                    ...payload,
+                    content: filteredContent,
+                    totalElements: filteredTotal,
+                    totalPages: filteredPages,
+                    page: adjustedPage,
+                    last: adjustedPage >= filteredPages - 1,
+                };
+                setBrandingAssets({ loading: false, error: null, data: adjusted });
+                if (adjustedPage !== brandingPage) {
+                    setBrandingPage(adjustedPage);
                 }
             })
             .catch((err) => {
@@ -529,6 +542,7 @@ function ProjectDetailModal({
             setColorPage(0);
             return () => controller.abort();
         }
+        const targetSet = new Set(targetIds);
 
         setColorAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchColorGuidePage(
@@ -537,9 +551,21 @@ function ProjectDetailModal({
         )
             .then((payload) => {
                 if (controller.signal.aborted) return;
-                setColorAssets({ loading: false, error: null, data: payload });
-                if (payload.page !== colorPage) {
-                    setColorPage(payload.page);
+                const filteredContent = payload.content.filter((item) => targetSet.has(item.id));
+                const filteredTotal = targetIds.length;
+                const filteredPages = Math.max(1, Math.ceil(filteredTotal / Math.max(payload.size, 1)));
+                const adjustedPage = Math.min(payload.page, filteredPages - 1);
+                const adjusted: PaginatedResponse<ColorGuideListItem> = {
+                    ...payload,
+                    content: filteredContent,
+                    totalElements: filteredTotal,
+                    totalPages: filteredPages,
+                    page: adjustedPage,
+                    last: adjustedPage >= filteredPages - 1,
+                };
+                setColorAssets({ loading: false, error: null, data: adjusted });
+                if (adjustedPage !== colorPage) {
+                    setColorPage(adjustedPage);
                 }
             })
             .catch((err) => {
@@ -779,9 +805,9 @@ function ProjectDetailModal({
     // updateProject 호출용 payload builder
     const buildUpdatePayload = (draft: Partial<ProjectRecord>) => ({
         name: draft.name ?? project?.name ?? "",
-        logoIds: draft.logoIds ?? project?.logoIds ?? [],
-        brandStrategyIds: draft.brandStrategyIds ?? project?.brandStrategyIds ?? [],
-        colorGuideIds: draft.colorGuideIds ?? project?.colorGuideIds ?? [],
+        logoIds: dedupeIds(draft.logoIds ?? project?.logoIds ?? []),
+        brandStrategyIds: dedupeIds(draft.brandStrategyIds ?? project?.brandStrategyIds ?? []),
+        colorGuideIds: dedupeIds(draft.colorGuideIds ?? project?.colorGuideIds ?? []),
     });
     // 프로젝트 제목을 실제 API에 반영 (변경 사항 저장 시 함께 호출)
     const persistNameChange = async (): Promise<boolean> => {
@@ -795,15 +821,19 @@ function ProjectDetailModal({
             setFormError(null);
             return true;
         }
+        const payload = buildUpdatePayload({ name: nextName });
+        console.log("[project name] update request", payload);
         setSavingName(true);
         setFormError(null);
         try {
-            const updated = await updateProject(project.id, buildUpdatePayload({ name: nextName }));
+            const updated = await updateProject(project.id, payload);
+            console.log("[project name] update response", updated);
             setProject(updated);
             setNameValue(updated.name);
             onUpdated(updated);
             return true;
         } catch (err) {
+            console.error("[project name] update error", err);
             setFormError(err instanceof Error ? err.message : "프로젝트 이름 수정 중 오류가 발생했습니다.");
             return false;
         } finally {
@@ -813,15 +843,22 @@ function ProjectDetailModal({
 
     // 산출물 attach/detach 공통 루틴
     const mutateAssets = async (type: ProjectAssetType, assetId: number, action: "attach" | "detach") => {
-        if (!project) return;
+        if (!project) {
+            console.warn("[project assets] mutate aborted: no project in state");
+            return;
+        }
         if (!isAssetEditing) {
             setAssetError("프로젝트 수정 모드에서만 산출물을 변경할 수 있습니다.");
+            console.warn("[project assets] mutate blocked (not in edit mode)", { type, assetId, action });
             return;
         }
         if (action === "detach") {
             const label = ASSET_LABEL[type];
             const confirmed = window.confirm(`${label}을(를) 프로젝트에서 제외하면 즉시 적용됩니다. 계속할까요?`);
-            if (!confirmed) return;
+            if (!confirmed) {
+                console.info("[project assets] detach cancelled", { type, assetId });
+                return;
+            }
         }
         const key =
             type === "logo"
@@ -832,19 +869,37 @@ function ProjectDetailModal({
         const current = project[key];
         const hasId = current.includes(assetId);
 
-        if (action === "attach" && hasId) return;
-        if (action === "detach" && !hasId) return;
+        if (action === "attach" && hasId) {
+            console.info("[project assets] attach noop (already included)", { type, assetId, current });
+            return;
+        }
+        if (action === "detach" && !hasId) {
+            console.info("[project assets] detach noop (not included)", { type, assetId, current });
+            return;
+        }
 
-        const nextIds =
+        const nextIds = dedupeIds(
             action === "attach"
                 ? [...current, assetId]
-                : current.filter((id) => id !== assetId);
+                : current.filter((id) => id !== assetId),
+        );
+
+        const payload = buildUpdatePayload({ [key]: nextIds });
+        console.log("[project assets] mutate request", {
+            action,
+            type,
+            assetId,
+            payload,
+            before: current,
+            after: nextIds,
+        });
 
         setAssetUpdating(true);
         setAssetError(null);
 
         try {
-            const updated = await updateProject(project.id, buildUpdatePayload({ [key]: nextIds }));
+            const updated = await updateProject(project.id, payload);
+            console.log("[project assets] mutate response", updated);
             setProject(updated);
             onUpdated(updated);
             if (action === "detach") {
@@ -852,6 +907,7 @@ function ProjectDetailModal({
             }
             refreshAssets();
         } catch (err) {
+            console.error("[project assets] mutate error", err);
             setAssetError(err instanceof Error ? err.message : "프로젝트 산출물 갱신 중 오류가 발생했습니다.");
         } finally {
             setAssetUpdating(false);
