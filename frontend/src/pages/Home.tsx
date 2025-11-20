@@ -20,7 +20,7 @@ function Home() {
   
   return (
     <div>
-      <h1> Home Page **추후 홍보 및 사용법 설명이 들어갈 예정**</h1>
+      <h1> Home Page **추후 홍보 및 사용법 설명이 들어갈 예정** 백엔드랑 최신화해보기</h1>
       <Link to={'Login'}> Login </Link><br></br>
       <Link to={'Mypage'}> My Page </Link><br></br>
       <Link to={'/myPage?section=products'}> My Products </Link><br></br>
