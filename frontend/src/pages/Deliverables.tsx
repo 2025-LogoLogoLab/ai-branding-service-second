@@ -49,11 +49,6 @@ import {
     previewToLogoDetail,
     useDeliverableDetail,
 } from "../utils/deliverableDetail";
-// 태그 API 패널용
-import type { TagApiSettings } from "../custom_api/tags";
-import type { HttpMethod } from "../custom_api/types";
-import { TagApiSettingsPanel } from "../components/TagApiSettingsPanel/TagApiSettingsPanel";
-
 // 페이지별 기본 페이지 크기(시안에서는 3열 그리드이므로 9개 단위가 자연스러움)
 const PAGE_SIZE = 3;
 
@@ -172,13 +167,6 @@ function DeliverablesPage({
     // 체크 상태 및 페이지 인덱스
     const [selections, setSelections] = useState<DeliverableSelection>(() => createSelection(mode));
 
-    // 태그 API 패널용
-    const [tagApiSettings, setTagApiSettings] = useState<TagApiSettings>({
-        list: { method: "GET", url: "" },
-        add: { method: "POST", url: "" },
-        create: { method: "POST", url: "" },
-        delete: { method: "DELETE", url: "" },
-    });
     const [logoPage, setLogoPage] = useState(0);
     const [brandingPage, setBrandingPage] = useState(0);
     const [colorGuidePage, setColorGuidePage] = useState(0);
@@ -315,17 +303,6 @@ function DeliverablesPage({
     useEffect(() => {
         onSidebarPropsChange?.(sidebarBridge);
     }, [onSidebarPropsChange, sidebarBridge]);
-
-    // 태그 패널 상태 관리
-    const handleTagConfigChange = (section: keyof TagApiSettings, field: "url" | "method", value: string) => {
-        setTagApiSettings((prev) => ({
-            ...prev,
-            [section]: {
-                ...prev[section],
-                [field]: field === "method" ? (value as HttpMethod) : value,
-            },
-        }));
-    };
 
     // 공통 다운로드 유틸
     const downloadBinary = async (input: string, filename: string) => {
@@ -685,9 +662,6 @@ function DeliverablesPage({
                 </div>
             </div>
 
-            <TagApiSettingsPanel settings={tagApiSettings} onChange={handleTagConfigChange} />
-
-
             {detailState.open && detailState.type === "logo" && (
                 <DeliverableDetailModal
                     type="logo"
@@ -702,8 +676,6 @@ function DeliverablesPage({
                             : undefined
                     }
                     toolbarProps={detailToolbarProps}
-                    // 태그 API 패널용
-                    tagApiSettings={tagApiSettings}
                 />
             )}
 
@@ -721,8 +693,6 @@ function DeliverablesPage({
                             : undefined
                     }
                     toolbarProps={detailToolbarProps}
-                    // 태그 API 패널용
-                    tagApiSettings={tagApiSettings}
                 />
             )}
 
@@ -740,8 +710,6 @@ function DeliverablesPage({
                             : undefined
                     }
                     toolbarProps={detailToolbarProps}
-                    // 태그 API 패널용
-                    tagApiSettings={tagApiSettings}
                 />
             )}
         </div>

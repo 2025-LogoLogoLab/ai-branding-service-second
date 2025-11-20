@@ -8,8 +8,8 @@ import { Fragment, useEffect, useState } from "react";
 import { LOGO_STYLES } from "../../types/logoStyles";
 import ReactMarkdown from "react-markdown";
 import iconPlus from "../../assets/icons/icon_plus.png";
-import type { TagRecord } from "../../custom_api/tags";
-import { type TagApiSettings, addTag, deleteTag } from "../../custom_api/tags";
+import type { TagRecord, TagAttachTarget } from "../../custom_api/tags";
+import { addTag, deleteTag } from "../../custom_api/tags";
 import { TagPickerModal } from "../../components/TagPickerModal/TagPickerModal";
 
 type Variant = "default" | "blueprint";
@@ -21,7 +21,6 @@ type BaseDetailProps = {
     loading?: boolean;
     error?: string | null;
     onRetry?: () => void;
-    tagApiSettings?: TagApiSettings;
 };
 
 type LogoDetailProps = BaseDetailProps & {
@@ -137,12 +136,6 @@ const translateStyle = (style?: string | null) => {
 export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
     const { variant = "default", onClose, toolbarProps, loading, error, onRetry } = props;
     const isBlueprint = variant === "blueprint";
-    const effectiveTagSettings: TagApiSettings = props.tagApiSettings ?? {
-        list: {},
-        add: {},
-        create: {},
-        delete: {},
-    };
     const [localTags, setLocalTags] = useState<TagRecord[]>(
         ((props.data as { tags?: TagRecord[] } | null | undefined)?.tags) ?? [],
     );
@@ -175,6 +168,20 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
 
     const maxTagsReached = localTags.length >= 5;
 
+    const resolveTargetId = (): number | undefined => {
+        const direct = (props.data as { id?: number } | null | undefined)?.id;
+        if (typeof direct === "number" && Number.isFinite(direct)) {
+            return direct;
+        }
+        if (props.type === "branding") {
+            const brandingId = brandingDetail?.id;
+            if (typeof brandingId === "number" && Number.isFinite(brandingId)) {
+                return brandingId;
+            }
+        }
+        return undefined;
+    };
+
     const handleAttachTag = async (tag: TagRecord) => {
         if (localTags.some((item) => item.id === tag.id)) {
             alert("이미 추가된 태그입니다.");
@@ -184,9 +191,18 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
             alert("태그는 최대 5개까지 추가할 수 있습니다.");
             return;
         }
+        const targetId = resolveTargetId();
+        if (targetId == null) {
+            alert("산출물 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+            return;
+        }
         try {
-            await addTag(effectiveTagSettings.add, tag);
-            setLocalTags((prev) => [...prev, tag]);
+            const updated = await addTag(props.type as TagAttachTarget, targetId, tag);
+            if (updated.length > 0) {
+                setLocalTags(updated);
+            } else {
+                setLocalTags((prev) => [...prev, tag]);
+            }
         } catch (err) {
             console.error(err);
             alert("태그 추가에 실패했습니다.");
@@ -195,9 +211,18 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
     };
 
     const handleRemoveTag = async (tag: TagRecord) => {
+        const targetId = resolveTargetId();
+        if (targetId == null) {
+            alert("산출물 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+            return;
+        }
         try {
-            await deleteTag(effectiveTagSettings.delete, tag);
-            setLocalTags((prev) => prev.filter((item) => item.id !== tag.id));
+            const updated = await deleteTag(props.type as TagAttachTarget, targetId, tag);
+            if (updated.length > 0) {
+                setLocalTags(updated);
+            } else {
+                setLocalTags((prev) => prev.filter((item) => item.id !== tag.id));
+            }
         } catch (err) {
             console.error(err);
             alert("태그 삭제에 실패했습니다.");
@@ -471,7 +496,6 @@ const renderLogoDetail = (detail: LogoDetail) => {
                 <TagPickerModal
                     open={isTagPickerOpen}
                     onClose={() => setTagPickerOpen(false)}
-                    settings={effectiveTagSettings}
                     onAttach={handleAttachTag}
                     existingTags={localTags}
                 />

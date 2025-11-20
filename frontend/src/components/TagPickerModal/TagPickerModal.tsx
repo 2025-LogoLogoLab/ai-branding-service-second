@@ -1,17 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import styles from "./TagPickerModal.module.css";
-import type { TagApiSettings, TagRecord } from "../../custom_api/tags";
+import type { TagRecord } from "../../custom_api/tags";
 import { fetchTagList, createTag } from "../../custom_api/tags";
 
 export type TagPickerModalProps = {
     open: boolean;
     onClose: () => void;
-    settings: TagApiSettings;
     onAttach: (tag: TagRecord) => Promise<void> | void;
     existingTags: TagRecord[];
 };
 
-export function TagPickerModal({ open, onClose, settings, onAttach, existingTags }: TagPickerModalProps) {
+export function TagPickerModal({ open, onClose, onAttach, existingTags }: TagPickerModalProps) {
     const [tagList, setTagList] = useState<TagRecord[]>([]);
     const [searchValue, setSearchValue] = useState("");
     const [loading, setLoading] = useState(false);
@@ -26,14 +25,14 @@ export function TagPickerModal({ open, onClose, settings, onAttach, existingTags
             return;
         }
         setLoading(true);
-        fetchTagList(settings.list)
+        fetchTagList()
             .then((list) => setTagList(list))
             .catch((err) => {
                 console.error(err);
                 setError("태그 목록을 불러오지 못했습니다.");
             })
             .finally(() => setLoading(false));
-    }, [open, settings.list]);
+    }, [open]);
 
     const filteredTags = useMemo(() => {
         const query = searchValue.trim().toLowerCase();
@@ -56,7 +55,7 @@ export function TagPickerModal({ open, onClose, settings, onAttach, existingTags
         if (!name) return;
         setCreating(true);
         try {
-            const newTag = await createTag(settings.create, { id: -1, name });
+            const newTag = await createTag(name);
             await handleAttach(newTag);
         } catch (err) {
             console.error(err);

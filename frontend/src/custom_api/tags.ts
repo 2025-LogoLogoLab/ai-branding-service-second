@@ -1,118 +1,149 @@
-import type { HttpMethod } from "./types";
+const basePath = import.meta.env.VITE_API_BASE_URL;
+
+const tagEndpoint = `${basePath}/tags`;
+const tagGenerateEndpoint = `${tagEndpoint}/generate`;
+const tagAttachEndpoint = `${tagEndpoint}/attach`;
+const tagDetachEndpoint = `${tagEndpoint}/detach`;
+
+const JSON_HEADERS = {
+    "Content-Type": "application/json",
+};
 
 export type TagRecord = {
     id: number;
     name: string;
 };
 
-export type TagApiConfig = {
-    url?: string;
-    method?: HttpMethod;
+export type TagAttachTarget = "logo" | "branding" | "colorGuide";
+
+const normalizeTag = (raw: unknown): TagRecord => {
+    if (typeof raw === "string") {
+        return {
+            id: 0,
+            name: raw,
+        };
+    }
+    if (typeof raw === "number") {
+        return {
+            id: raw,
+            name: String(raw),
+        };
+    }
+    if (raw && typeof raw === "object") {
+        const record = raw as Record<string, unknown>;
+        const id = Number(record.id);
+        const nameValue = typeof record.name === "string" ? record.name : "";
+        return {
+            id: Number.isFinite(id) ? id : 0,
+            name: nameValue,
+        };
+    }
+    return { id: 0, name: "" };
 };
 
-export type TagApiSettings = {
-    list: TagApiConfig;
-    add: TagApiConfig;
-    create: TagApiConfig;
-    delete: TagApiConfig;
+const ensureTagList = (payload: unknown): TagRecord[] => {
+    if (Array.isArray(payload)) {
+        return payload.map(normalizeTag).filter((tag) => Boolean(tag.name));
+    }
+    if (payload && typeof payload === "object") {
+        const record = payload as Record<string, unknown>;
+        if (Array.isArray(record.tags)) {
+            return record.tags.map(normalizeTag).filter((tag) => Boolean(tag.name));
+        }
+        if (Array.isArray(record.tagList)) {
+            return record.tagList.map(normalizeTag).filter((tag) => Boolean(tag.name));
+        }
+        if (Array.isArray(record.data)) {
+            return record.data.map(normalizeTag).filter((tag) => Boolean(tag.name));
+        }
+    }
+    return [];
 };
 
-export const FALLBACK_TAGS: TagRecord[] = [
-    { id: 101, name: "패션" },
-    { id: 102, name: "브랜딩" },
-    { id: 103, name: "SNS" },
-    { id: 104, name: "스타트업" },
-    { id: 105, name: "이벤트" },
-];
-
-const JSON_HEADERS = {
-    "Content-Type": "application/json",
-};
-
-async function requestWithConfig<T>(
-    config: TagApiConfig,
-    init?: RequestInit,
-): Promise<T | null> {
-    if (!config.url || !config.method) return null;
-
-    console.info("[tag API] remote request:", config.method, config.url);
-    const response = await fetch(config.url, {
-        method: config.method,
-        headers: {
-            ...JSON_HEADERS,
-            ...(init?.headers ?? {}),
-        },
+export async function fetchTagList(): Promise<TagRecord[]> {
+    const response = await fetch(tagEndpoint, {
+        method: "GET",
         credentials: "include",
-        ...init,
     });
 
     if (!response.ok) {
-        throw new Error(`Tag API request failed (${response.status})`);
+        throw new Error("태그 목록을 불러오지 못했습니다. " + response.status);
     }
 
-    if (response.status === 204) return null;
-
-    return (await response.json()) as T;
+    const payload = await response.json();
+    const tags = ensureTagList(payload);
+    return tags;
 }
 
-export async function fetchTagList(config: TagApiConfig): Promise<TagRecord[]> {
-    try {
-        const remote = await requestWithConfig<{ tagList: TagRecord[] }>(config);
-        if (!remote) {
-            console.info("[tag API] fetchTagList fallback: using local tags");
-        }
-        return remote?.tagList ?? FALLBACK_TAGS;
-    } catch (error) {
-        console.warn("[tag API] fetchTagList fallback:", error);
-        return FALLBACK_TAGS;
+export async function createTag(name: string): Promise<TagRecord> {
+    const trimmed = name.trim();
+    if (!trimmed) {
+        throw new Error("태그 이름을 입력해주세요.");
     }
+
+    const response = await fetch(tagGenerateEndpoint, {
+        method: "POST",
+        headers: JSON_HEADERS,
+        credentials: "include",
+        body: JSON.stringify({ id: -1, name: trimmed }),
+    });
+
+    if (!response.ok) {
+        throw new Error("태그를 생성하지 못했습니다. " + response.status);
+    }
+
+    const payload = await response.json();
+    const [created] = ensureTagList(payload);
+    return created ?? normalizeTag(payload);
 }
 
-export async function addTag(config: TagApiConfig, tag: TagRecord): Promise<TagRecord> {
-    try {
-        console.info("[tag API] addTag payload:", tag);
-        const remote = await requestWithConfig<TagRecord>(config, {
-            body: JSON.stringify({ tag }),
-        });
-        if (!remote) {
-            console.info("[tag API] addTag fallback: using provided tag");
-            return tag;
-        }
-        return remote;
-    } catch (error) {
-        console.warn("[tag API] addTag fallback:", error);
-        return tag;
+export async function addTag(targetType: TagAttachTarget, targetId: number, tag: TagRecord): Promise<TagRecord[]> {
+    if (!targetId) {
+        throw new Error("태그를 추가할 산출물 정보를 찾을 수 없습니다.");
     }
+
+    const response = await fetch(tagAttachEndpoint, {
+        method: "POST",
+        headers: JSON_HEADERS,
+        credentials: "include",
+        body: JSON.stringify({
+            targetType,
+            targetId,
+            tagId: tag.id,
+            name: tag.name,
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error("태그를 추가하지 못했습니다. " + response.status);
+    }
+
+    const payload = await response.json();
+    const tags = ensureTagList(payload);
+    return tags.length > 0 ? tags : [normalizeTag(tag)];
 }
 
-export async function createTag(config: TagApiConfig, newTag: TagRecord): Promise<TagRecord> {
-    try {
-        console.info("[tag API] createTag payload:", newTag);
-        const remote = await requestWithConfig<TagRecord>(config, {
-            body: JSON.stringify({ newTag }),
-        });
-        if (!remote) {
-            console.info("[tag API] createTag fallback: using provided newTag");
-        }
-        return remote ?? newTag;
-    } catch (error) {
-        console.warn("[tag API] createTag fallback:", error);
-        return newTag;
+export async function deleteTag(targetType: TagAttachTarget, targetId: number, tag: TagRecord): Promise<TagRecord[]> {
+    if (!targetId) {
+        throw new Error("태그를 삭제할 산출물 정보를 찾을 수 없습니다.");
     }
-}
 
-export async function deleteTag(config: TagApiConfig, tag: TagRecord): Promise<boolean> {
-    try {
-        console.info("[tag API] deleteTag payload:", tag);
-        const remote = await requestWithConfig(config, {
-            body: JSON.stringify({ tagToDelete: tag }),
-        });
-        if (!remote) {
-            console.info("[tag API] deleteTag fallback: assuming success");
-        }
-        return true;
-    } catch (error) {
-        console.warn("[tag API] deleteTag fallback:", error);
-        return true;
+    const response = await fetch(tagDetachEndpoint, {
+        method: "POST",
+        headers: JSON_HEADERS,
+        credentials: "include",
+        body: JSON.stringify({
+            targetType,
+            targetId,
+            tagId: tag.id,
+            name: tag.name,
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error("태그를 삭제하지 못했습니다. " + response.status);
     }
+
+    const payload = await response.json();
+    return ensureTagList(payload);
 }
