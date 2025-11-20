@@ -58,7 +58,7 @@ public class MyAssetController {
         return myAssetService.getMyProducts();
     }
 
-    @Operation(summary = "내 프로젝트 목록 조회", description = "산출물 관리 페이지의 프로젝트 기준 보기에 사용됩니다.")
+    /*@Operation(summary = "내 프로젝트 목록 조회", description = "산출물 관리 페이지의 프로젝트 기준 보기에 사용됩니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))),
@@ -74,7 +74,7 @@ public class MyAssetController {
     @GetMapping("/api/my-projects")
     public List<ProjectListItem> getMyProjects() {
         return myAssetService.listMyProjects();
-    }
+    }*/
 
     @Operation(summary = "내가 사용한 태그 목록 조회", description = "산출물 관리 페이지의 태그 기준 보기에 사용됩니다.")
     @ApiResponses({

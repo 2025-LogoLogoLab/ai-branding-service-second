@@ -73,13 +73,13 @@ public class MyAssetService {
         return new MyProductsResponse(logoListItems, colorGuideListItems, brandStrategyListItems);
     }
 
-    /** 내 프로젝트 목록 조회 */
+    /** 내 프로젝트 목록 조회
     public List<ProjectListItem> listMyProjects() {
         User user = loginUserProvider.getLoginUser();
         return projectRepository.findByUserOrderByCreatedAtDesc(user).stream()
                 .map(ProjectListItem::from)
                 .collect(Collectors.toList());
-    }
+    }*/
 
     /** 내가 사용한 태그 목록 조회 */
     public List<TagResponse> listMyTags() {
