@@ -4,13 +4,15 @@ import com.example.logologolab.domain.Project;
 import com.example.logologolab.domain.User;
 import com.example.logologolab.dto.project.ProjectRequest;
 import com.example.logologolab.dto.project.ProjectResponse;
-import com.example.logologolab.exception.custom.OwnerMismatchException;
 import com.example.logologolab.repository.brand.BrandStrategyRepository;
 import com.example.logologolab.repository.color.ColorGuideRepository;
 import com.example.logologolab.repository.logo.LogoRepository;
 import com.example.logologolab.repository.project.ProjectRepository;
 import com.example.logologolab.security.LoginUserProvider;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -155,5 +157,22 @@ public class ProjectService {
         Long userId  = user  == null ? null : user.getId();
         System.out.printf("[LINK-%s] id=%d ownerId=%s userId=%s -> %s%n",
                 type, id, ownerId, userId, ok ? "LINKED" : "SKIPPED");
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProjectResponse> listMyProjects(Pageable pageable) {
+        User user = loginUserProvider.getLoginUser();
+
+        // 1. 내 프로젝트 페이징 조회
+        Page<Project> projectPage = projectRepository.findByUser(user, pageable);
+
+        // 2. 엔티티 -> DTO 변환
+        // Project 엔티티에 @OneToMany로 brandStrategies, colorGuides, logos가 매핑되어 있다고 가정합니다.
+        return projectPage.map(p -> ProjectResponse.of(
+                p,
+                p.getBrandStrategies(), // Lazy Loading 발생 (hibernate.default_batch_fetch_size 설정 권장)
+                p.getColorGuides(),
+                p.getLogos()
+        ));
     }
 }

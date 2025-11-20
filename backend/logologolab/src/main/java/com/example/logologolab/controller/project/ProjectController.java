@@ -1,8 +1,10 @@
 package com.example.logologolab.controller.project;
 
+import com.example.logologolab.dto.common.PageResponse;
 import com.example.logologolab.dto.project.ProjectRequest;
 import com.example.logologolab.dto.project.ProjectResponse;
 import com.example.logologolab.service.project.ProjectService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,8 +14,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -81,5 +90,51 @@ public class ProjectController {
 
         Map<String, String> response = Map.of("message", "프로젝트 삭제가 완료되었습니다.");
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "내 프로젝트 리스트 조회", description = "로그인한 사용자의 프로젝트 목록을 페이징하여 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PageResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "content": [
+                                        {
+                                          "id": 1,
+                                          "name": "캠페인 A",
+                                          "logoIds": [11, 12],
+                                          "brandStrategyIds": [21],
+                                          "colorGuideIds": [],
+                                          "createdAt": "2025-03-01T10:00:00Z",
+                                          "updatedAt": "2025-03-05T09:00:00Z"
+                                        }
+                                      ],
+                                      "page": 0,
+                                      "size": 10,
+                                      "totalElements": 1,
+                                      "totalPages": 1,
+                                      "last": true
+                                    }""")
+                    ))
+    })
+    @GetMapping("/api/projects")
+    public PageResponse<ProjectResponse> listProjects(
+            @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 당 항목 수") @RequestParam(defaultValue = "10") int size
+    ) {
+        // 최신순(createdAt DESC) 정렬 기본 설정
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<ProjectResponse> result = projectService.listMyProjects(pageable);
+
+        return new PageResponse<>(
+                result.getContent(),
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.isLast()
+        );
     }
 }
