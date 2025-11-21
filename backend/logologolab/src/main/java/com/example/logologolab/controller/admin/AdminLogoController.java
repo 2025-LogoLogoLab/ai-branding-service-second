@@ -153,7 +153,7 @@ public class AdminLogoController {
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "로고를 찾을 수 없거나 권한 없음")
     })
-    @GetMapping("/{id}")
+    @GetMapping("/api/admin/logo/{id}")
     public ResponseEntity<LogoResponse> getLogoDetail(@PathVariable Long id) {
         return ResponseEntity.ok(adminLogoService.getLogoDetail(id));
     }
