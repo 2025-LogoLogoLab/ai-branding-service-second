@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { TextInput } from "../atoms/TextInput/TextInput";
 import styles from './SignUpForm.module.css';
+import kakaoLoginImage from '../assets/social_login/kakao_login_medium_wide.png';
+import naverIconSquare from '../assets/social_login/btnG_아이콘사각.png';
 
 type SocialProvider = 'kakao' | 'naver';
 type social = SocialProvider | null;
@@ -88,7 +90,7 @@ function SignUpForm({
         <div className={styles.page}>
             <div className={styles.card}>
                 <div className={styles.titleGroup}>
-                    <h1 className={styles.title}>로그로고랩에 오신 것을 환영합니다</h1>
+                    <h1 className={styles.title}>로고로고랩에 오신 것을 환영합니다</h1>
                     <p className={styles.subtitle}>계정을 생성하고 서비스를 이용하세요.</p>
                 </div>
 
@@ -191,19 +193,30 @@ function SignUpForm({
                 <div className={styles.socialList}>
                     <button
                         type="button"
-                        className={styles.socialButton}
+                        className={`${styles.socialButton} ${styles.kakaoButton}`}
                         onClick={() => onKakaoLogin('kakao')}
+                        aria-label="카카오로 로그인"
                     >
-                        <span className={`${styles.socialIcon} ${styles.kakao}`} aria-hidden="true">K</span>
-                        Kakao
+                        <img
+                            src={kakaoLoginImage}
+                            alt="카카오 로그인"
+                            className={styles.kakaoImage}
+                        />
                     </button>
                     <button
                         type="button"
-                        className={styles.socialButton}
+                        className={`${styles.socialButton} ${styles.naverButton}`}
                         onClick={() => onNaverLogin('naver')}
+                        aria-label="네이버로 로그인"
                     >
-                        <span className={`${styles.socialIcon} ${styles.naver}`} aria-hidden="true">N</span>
-                        Naver
+                        <span className={styles.naverIconWrapper}>
+                            <img
+                                src={naverIconSquare}
+                                alt=""
+                                className={styles.naverIcon}
+                            />
+                        </span>
+                        <span className={styles.naverLabel}>네이버 로그인</span>
                     </button>
                 </div>
 

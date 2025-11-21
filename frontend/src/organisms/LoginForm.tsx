@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import type { SocialProvider } from '../custom_api/auth';
 import { TextInput } from '../atoms/TextInput/TextInput';
 import styles from './LoginForm.module.css';
+import kakaoLoginImage from '../assets/social_login/kakao_login_medium_wide.png';
+import naverIconSquare from '../assets/social_login/btnG_아이콘사각.png';
 
 type social = SocialProvider | null;
 
@@ -69,19 +71,30 @@ function LoginForm({
                 <div className={styles.socialList}>
                     <button
                         type="button"
-                        className={styles.socialButton}
+                        className={`${styles.socialButton} ${styles.kakaoButton}`}
                         onClick={() => onKakaoLogin('kakao')}
+                        aria-label="카카오로 로그인"
                     >
-                        <span className={`${styles.socialIcon} ${styles.kakao}`} aria-hidden="true">K</span>
-                        Kakao
+                        <img
+                            src={kakaoLoginImage}
+                            alt="카카오 로그인"
+                            className={styles.kakaoImage}
+                        />
                     </button>
                     <button
                         type="button"
-                        className={styles.socialButton}
+                        className={`${styles.socialButton} ${styles.naverButton}`}
                         onClick={() => onNaverLogin('naver')}
+                        aria-label="네이버로 로그인"
                     >
-                        <span className={`${styles.socialIcon} ${styles.naver}`} aria-hidden="true">N</span>
-                        Naver
+                        <span className={styles.naverIconWrapper}>
+                            <img
+                                src={naverIconSquare}
+                                alt=""
+                                className={styles.naverIcon}
+                            />
+                        </span>
+                        <span className={styles.naverLabel}>네이버 로그인</span>
                     </button>
                 </div>
 

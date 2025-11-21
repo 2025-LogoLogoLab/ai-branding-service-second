@@ -19,12 +19,13 @@ function Login() {
     const location = useLocation();
 
     // 전역 Context.
-    const { user, loading, error, login } = useAuth();
+    const { user, loading, error: authError, login } = useAuth();
 
     const [email, setEmail] = useState('');
     // const [provider, setProvider] = useState<social>(null);
     const [password, setPassword] = useState('');
     const [localError, setLocalError] = useState<string | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
     
     useEffect(()=>{
         
@@ -35,13 +36,15 @@ function Login() {
             navigate("/");
         }
 
-        if (error) {
-            // 에러 발생 처리
-            console.log(" 로그인 실패 : " + error);
-            navigate('/login');
-        }
+    }, [location, navigate, user])
 
-    }, [error])
+    // 로그인 실패 시 글로벌 에러를 노출 (비인증 상태에서 페이지 진입 시 401/403은 무시됨)
+    useEffect(() => {
+        if (authError && !user) {
+            setSubmitError(authError);
+            alert(authError);
+        }
+    }, [authError, user]);
 
     if (loading) {
         return (
@@ -56,9 +59,17 @@ function Login() {
             return;
         }
 
-        login({ email, password });  // login 클라이언트 호출
+        setSubmitError(null);
 
-        // alert('로그인 성공! ' + user?.role);
+        await login({ email, password });  // login 클라이언트 호출
+
+        // 로그인 실패 시 글로벌 에러를 로컬 상태로 노출
+        if (authError) {
+            setSubmitError(authError);
+            alert(authError);
+            return;
+        }
+
         navigate("/"); // 메인 페이지로
 
     };
@@ -79,7 +90,7 @@ function Login() {
         <LoginForm      // 로그인 Form UI 객체
             email={email}
             password={password}
-            error={localError}
+            error={localError || submitError}
             onEmailChange={(e) => setEmail(e.target.value)}
             onPasswordChange={(e) => setPassword(e.target.value)}
             onSubmit={handleLogin}

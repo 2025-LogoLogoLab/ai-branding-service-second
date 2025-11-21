@@ -74,7 +74,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
             catch (err) {
                 console.log(err);
-                setError(err as string);
+                // 인증되지 않은 경우(401/403)는 에러로 취급하지 않고 사용자만 없다고 표기
+                const message = err instanceof Error ? err.message : String(err);
+                if (message.includes("401") || message.includes("403")) {
+                    setUser(null);
+                    setError(null);
+                } else {
+                    setError(message);
+                }
             }
             finally{
                 setLoading(false);
