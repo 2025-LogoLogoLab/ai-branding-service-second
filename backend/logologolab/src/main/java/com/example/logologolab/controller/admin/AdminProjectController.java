@@ -30,7 +30,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "05. 관리자 프로젝트 관리", description = "관리자 전용 프로젝트 관리 API")
+@Tag(name = "15. 관리자 프로젝트 관리", description = "관리자 전용 프로젝트 관리 API")
 @SecurityRequirement(name = "bearerAuth")
 public class AdminProjectController {
 

@@ -19,7 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "태그", description = "산출물 태깅 관련 API")
+@Tag(name = "16. 태그", description = "산출물 태깅 관련 API")
 @SecurityRequirement(name = "bearerAuth") // 이 컨트롤러의 모든 API는 인증 필요
 public class TagController {
 

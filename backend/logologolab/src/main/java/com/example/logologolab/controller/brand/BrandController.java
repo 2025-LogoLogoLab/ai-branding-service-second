@@ -33,7 +33,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "브랜딩 전략", description = "브랜딩 전략 관련 API")
+@Tag(name = "14. 브랜딩 전략", description = "브랜딩 전략 관련 API")
 public class BrandController {
 
     private final GptPromptService gpt;

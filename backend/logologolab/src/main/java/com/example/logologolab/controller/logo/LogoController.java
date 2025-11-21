@@ -31,7 +31,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "로고", description = "로고 관련 API")
+@Tag(name = "12. 로고", description = "로고 관련 API")
 public class LogoController {
 
     private final LogoGenerationService logoGenerationService;

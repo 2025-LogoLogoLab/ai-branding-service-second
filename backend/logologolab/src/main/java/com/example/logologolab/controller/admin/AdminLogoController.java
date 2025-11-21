@@ -32,7 +32,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "02. 관리자 로고 관리", description = "관리자 전용 로고 관리 및 태그 기능 API")
+@Tag(name = "12. 관리자 로고 관리", description = "관리자 전용 로고 관리 및 태그 기능 API")
 @SecurityRequirement(name = "bearerAuth")
 public class AdminLogoController {
 

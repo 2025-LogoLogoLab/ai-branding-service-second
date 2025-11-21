@@ -30,7 +30,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "04. 관리자 브랜딩 전략 관리", description = "관리자 전용 브랜딩 전략 관리 및 태그 기능 API")
+@Tag(name = "14. 관리자 브랜딩 전략 관리", description = "관리자 전용 브랜딩 전략 관리 및 태그 기능 API")
 @SecurityRequirement(name = "bearerAuth")
 public class AdminBrandController {
 
