@@ -1,14 +1,10 @@
-package com.example.logologolab.controller.color;
+package com.example.logologolab.controller.admin;
 
-import com.example.logologolab.dto.color.ColorGuideDTO;
-import com.example.logologolab.dto.color.ColorGuideRequest;
-import com.example.logologolab.service.gpt.GptPromptService;
 import com.example.logologolab.dto.color.*;
 import com.example.logologolab.dto.common.PageResponse;
+import com.example.logologolab.dto.tag.TagRequest;
 import com.example.logologolab.security.CustomUserPrincipal;
-import com.example.logologolab.service.color.ColorGuideService;
-import com.example.logologolab.security.LoginUserProvider;
-
+import com.example.logologolab.service.admin.AdminColorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,30 +14,32 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.*;
-import org.springframework.http.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "컬러 가이드", description = "컬러 가이드 관련 API")
-public class ColorController {
+@Tag(name = "관리자 - 컬러 가이드", description = "관리자 전용 컬러 가이드 관리 및 태그 기능 API")
+@SecurityRequirement(name = "bearerAuth")
+public class AdminColorController {
 
-    private final GptPromptService gpt;
-    private final ColorGuideService service;
-    private final LoginUserProvider loginUserProvider;
+    private final AdminColorService adminColorService;
 
+    // 1. 생성
     @Operation(
-            summary = "컬러 가이드 생성",
-            description = "브랜드 브리프(텍스트)만 또는 텍스트+로고 이미지(이미지 URL 또는 data:base64)를 입력하면 컬러 가이드를 JSON 스키마로 반환합니다.",
+            summary = "[관리자] 컬러 가이드 생성",
+            description = "GPT를 이용해 컬러 가이드를 생성합니다.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
                     description = "컬러 가이드 요청 바디",
@@ -97,24 +95,15 @@ public class ColorController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
     })
-    @PostMapping(value="/api/color-guide/generate", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ColorGuideDTO colorGuide(@RequestBody ColorGuideRequest req) {
-        String style = req.style() == null ? "minimal" : req.style();
-
-        String img = null;
-        if (req.base64() != null && req.base64().startsWith("data:")) img = req.base64();
-        else if (req.imageUrl() != null && !req.imageUrl().isBlank()) img = req.imageUrl();
-
-        if (img != null) {
-            return gpt.generateColorGuideFromImage(req.briefKo(), style, img);
-        } else {
-            return gpt.generateColorGuideTextOnly(req.briefKo(), style);
-        }
+    @PostMapping(value = "/api/admin/color-guide/generate", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ColorGuideDTO> generate(@RequestBody ColorGuideRequest req) {
+        return ResponseEntity.ok(adminColorService.generateColorGuide(req));
     }
 
+    // 2. 저장
     @Operation(
-            summary = "컬러가이드 저장(이미 생성된 결과 영속화)",
-            description = "생성 API 응답(guide)을 포함하여 DB에 저장합니다.",
+            summary = "[관리자] 컬러 가이드 저장",
+            description = "생성된 가이드를 관리자 계정으로 저장합니다.",
             security = @SecurityRequirement(name = "bearerAuth"),
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
@@ -168,37 +157,19 @@ public class ColorController {
             @ApiResponse(responseCode = "400", description = "유효성 오류(guide 누락/HEX 형식 등)"),
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    @PostMapping(value = "/api/color-guide/save", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/api/admin/color-guide/save", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ColorGuideResponse> save(
             @RequestBody ColorGuidePersistRequest req,
             @AuthenticationPrincipal CustomUserPrincipal principal
     ) {
-        if (principal == null) {
-            // Security Filter에서 처리되겠지만, 방어적으로 401 반환
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        var saved = service.save(req, principal.getEmail(), principal.getProvider());
-        return ResponseEntity.created(URI.create("/api/color-guide/" + saved.id())).body(saved);
+        var saved = adminColorService.saveColorGuide(req, principal.getEmail(), principal.getProvider());
+        return ResponseEntity.created(URI.create("/api/admin/color-guide/" + saved.id())).body(saved);
     }
 
+    // 3. 리스트 조회
     @Operation(
-            summary = "컬러가이드 상세 조회",
-            parameters = @Parameter(name = "id", description = "ColorGuide ID", required = true)
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ColorGuideResponse.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 ID")
-    })
-    @GetMapping(value = "/api/color-guide/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ColorGuideResponse get(@PathVariable Long id) {
-        return service.get(id);
-    }
-
-    @Operation(
-            summary = "컬러가이드 리스트 조회",
-            description = "projectId가 있으면 프로젝트 기준, 없으면 내 데이터(createdBy) 기준으로 최신순 조회.",
+            summary = "[관리자] 전체 컬러 가이드 리스트 조회",
+            description = "모든 컬러 가이드를 최신순으로 조회합니다.",
             security = @SecurityRequirement(name = "bearerAuth"),
             parameters = {
                     @Parameter(name = "projectId", description = "Project ID (선택)"),
@@ -224,36 +195,37 @@ public class ColorController {
                                             }"""
                             )))
     })
-    @GetMapping(value = "/api/color-guides", produces = MediaType.APPLICATION_JSON_VALUE)
-    public PageResponse<ColorGuideListItem> list(
-            @Parameter(description = "특정 프로젝트 ID (선택 사항)") @RequestParam(required = false) Long projectId,
-            @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "페이지 당 항목 수") @RequestParam(defaultValue = "12") int size,
-            @Parameter(description = "'mine' 입력 시 내 가이드만 조회") @RequestParam(required = false) String filter,
-            @AuthenticationPrincipal CustomUserPrincipal principal
+    @GetMapping("/api/admin/color-guides")
+    public PageResponse<ColorGuideListItem> getAll(
+            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 사이즈") @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<ColorGuideListItem> p;
-
-        if ("mine".equalsIgnoreCase(filter)) {
-            // 2. 'mine' 필터가 있으면 내 목록 조회 (로그인 필수)
-            if (principal == null) {
-                // 'mine'을 요청했으나 비로그인 상태
-                p = Page.empty(pageable);
-            } else {
-                p = service.listMine(principal.getEmail(), principal.getProvider(), pageable);
-            }
-        } else {
-            // 3. 그 외 모든 경우 전체 목록 조회
-            p = service.listPublic(pageable);
-        }
-
-        return new PageResponse<>(p.getContent(), p.getNumber(), p.getSize(), p.getTotalElements(), p.getTotalPages(), p.isLast());
+        Page<ColorGuideListItem> result = adminColorService.getAllColorGuides(pageable);
+        return new PageResponse<>(result.getContent(), result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages(), result.isLast());
     }
 
+    // 4. 상세 조회
     @Operation(
-            summary = "컬러 가이드 수정",
-            description = "ID로 컬러 가이드를 찾아 guide 내용을 수정합니다. 본인의 데이터만 수정 가능합니다.",
+            summary = "[관리자] 상세 조회",
+            description = "ID로 컬러 가이드 상세 정보를 조회합니다.",
+            parameters = @Parameter(name = "id", description = "ColorGuide ID", required = true)
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ColorGuideResponse.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 ID")
+    })
+    @GetMapping("/api/admin/color-guide/{id}")
+    public ResponseEntity<ColorGuideResponse> getDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(adminColorService.getColorGuideDetail(id));
+    }
+
+    // 5. 수정
+    @Operation(
+            summary = "[관리자] 수정",
+            description = "컬러 가이드의 내용을 수정합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses({
@@ -264,27 +236,65 @@ public class ColorController {
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "항목을 찾을 수 없거나 권한 없음")
     })
-    @PatchMapping("/api/color-guide/{id}")
+    @PatchMapping("/api/admin/color-guide/{id}")
     public ResponseEntity<ColorGuideResponse> update(
             @PathVariable Long id,
             @RequestBody ColorGuideUpdateRequest req
     ) {
-        var updated = service.update(id, req);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(adminColorService.updateColorGuide(id, req));
     }
 
-    @Operation(summary = "컬러 가이드 삭제", security = @SecurityRequirement(name = "bearerAuth"))
+    // 6. 삭제
+    @Operation(summary = "[관리자] 삭제", description = "컬러 가이드를 강제로 삭제합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "항목을 찾을 수 없거나 권한 없음")
     })
-    @DeleteMapping("/api/color-guide/{id}")
-    public ResponseEntity<Map<String, String>> deleteColorGuide(@PathVariable Long id) {
-        service.deleteColorGuide(id);
+    @DeleteMapping("/api/admin/color-guide/{id}")
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
+        adminColorService.deleteColorGuideAny(id);
+        return ResponseEntity.ok(Map.of("message", "관리자 권한으로 컬러 가이드가 삭제되었습니다."));
+    }
 
-        Map<String, String> response = Map.of("message", "컬러 가이드 삭제가 완료되었습니다.");
-
+    // 7. 태그 달기
+    @Operation(
+            summary = "[관리자] 태그 수정/할당",
+            description = "컬러 가이드에 태그를 설정합니다 (기존 태그 덮어쓰기)."
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "할당할 태그 이름 목록 (최대 5개)",
+            required = true,
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = TagRequest.class),
+                    examples = @ExampleObject(
+                            name = "태그 할당 요청 예시",
+                            value = """
+                                    {
+                                      "tagNames": ["#디자인", "#팔레트", "#UX"]
+                                    }
+                                    """
+                    )
+            )
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "태그 할당 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Map.class),
+                            examples = @ExampleObject(value = "{\"message\": \"컬러 가이드에 태그 달기가 완료되었습니다.\"}")
+                    )
+            ),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 (예: 태그를 6개 이상 보내는 경우)", content = @Content),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (JWT 토큰 누락 또는 만료)", content = @Content),
+            @ApiResponse(responseCode = "404", description = "컬러 가이드를 찾을 수 없거나 현재 사용자의 소유가 아님", content = @Content)
+    })
+    @PostMapping("/api/admin/color-guide/{id}/tags")
+    public ResponseEntity<ColorGuideResponse> updateTags(
+            @PathVariable Long id,
+            @Valid @RequestBody TagRequest req
+    ) {
+        ColorGuideResponse response = adminColorService.updateTags(id, req.tagNames());
         return ResponseEntity.ok(response);
     }
 }
