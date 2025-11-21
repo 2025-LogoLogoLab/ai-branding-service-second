@@ -28,7 +28,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "관리자 기능 - 사용자", description = "관리자 전용 사용자(User) 관리 API")
+@Tag(name = "관리자 01. 사용자 관리", description = "관리자 전용 사용자(User) 관리 API")
 public class AdminUserController {
 
     private final AdminService adminService;
