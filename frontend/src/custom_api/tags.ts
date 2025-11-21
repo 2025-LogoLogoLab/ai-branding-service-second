@@ -1,6 +1,6 @@
 const basePath = import.meta.env.VITE_API_BASE_URL;
 
-const tagEndpoint = `${basePath}/tags`;
+const tagEndpoint = `${basePath}/my-tags`;
 
 const JSON_HEADERS = {
     "Content-Type": "application/json",
