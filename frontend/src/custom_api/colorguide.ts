@@ -189,7 +189,29 @@ export async function fetchColorGuidePage(
 
     console.log("컬러 가이드 목록 페이지 조회 성공");
     const payload = await result.json();
-    return payload as PaginatedResponse<ColorGuideListItem>;
+    const normalizeListItem = (item: any): ColorGuideListItem => {
+        const guide = item?.guide ?? {};
+        return {
+            id: item?.id ?? 0,
+            briefKo: item?.briefKo ?? "",
+            style: item?.style ?? undefined,
+            mainHex: guide?.main?.hex ?? item?.mainHex,
+            subHex: guide?.sub?.hex ?? item?.subHex,
+            pointHex: guide?.point?.hex ?? item?.pointHex,
+            backgroundHex: guide?.background?.hex ?? item?.backgroundHex,
+            mainDescription: guide?.main?.description ?? item?.mainDescription,
+            subDescription: guide?.sub?.description ?? item?.subDescription,
+            pointDescription: guide?.point?.description ?? item?.pointDescription,
+            backgroundDescription: guide?.background?.description ?? item?.backgroundDescription,
+            createdAt: item?.createdAt ?? "",
+        };
+    };
+
+    const mapped: PaginatedResponse<ColorGuideListItem> = {
+        ...payload,
+        content: Array.isArray(payload?.content) ? payload.content.map(normalizeListItem) : [],
+    };
+    return mapped;
 }
 
 export async function fetchAllColorGuide(): Promise<ColorGuideListItem[]> {

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import styles from "./TagPickerModal.module.css";
 import type { TagRecord } from "../../custom_api/tags";
-import { fetchTagList, createTag } from "../../custom_api/tags";
+import { fetchTagList } from "../../custom_api/tags";
 
 export type TagPickerModalProps = {
     open: boolean;
@@ -55,8 +55,7 @@ export function TagPickerModal({ open, onClose, onAttach, existingTags }: TagPic
         if (!name) return;
         setCreating(true);
         try {
-            const newTag = await createTag(name);
-            await handleAttach(newTag);
+            await handleAttach({ name });
         } catch (err) {
             console.error(err);
             alert("새 태그 생성에 실패했습니다.");
@@ -67,6 +66,7 @@ export function TagPickerModal({ open, onClose, onAttach, existingTags }: TagPic
 
     if (!open) return null;
 
+    const trimmedSearch = searchValue.trim();
     const noResults = filteredTags.length === 0;
 
     return (
@@ -110,10 +110,10 @@ export function TagPickerModal({ open, onClose, onAttach, existingTags }: TagPic
                                         type="button"
                                         className={styles.tagOption}
                                         onClick={() => handleAttach(tag)}
-                                        disabled={existingTags.some((item) => item.id === tag.id)}
+                                        disabled={existingTags.some((item) => item.id === tag.id || item.name === tag.name)}
                                     >
                                         #{tag.name}
-                                        {existingTags.some((item) => item.id === tag.id) && <span>이미 추가됨</span>}
+                                        {existingTags.some((item) => item.id === tag.id || item.name === tag.name) && <span>이미 추가됨</span>}
                                     </button>
                                 </li>
                             ))}
@@ -123,9 +123,19 @@ export function TagPickerModal({ open, onClose, onAttach, existingTags }: TagPic
                         <div className={styles.emptyState}>
                             <p>검색 결과가 없습니다.</p>
                             <button type="button" className={styles.createButton} onClick={handleCreate} disabled={creating}>
-                                + "{searchValue.trim() || "새 태그"}" 추가하기
+                                + "{trimmedSearch || "새 태그"}" 추가하기
                             </button>
                         </div>
+                    )}
+                    {error && (
+                        <button
+                            type="button"
+                            className={styles.createButton}
+                            onClick={handleCreate}
+                            disabled={creating || !trimmedSearch}
+                        >
+                            + "{trimmedSearch || "새 태그"}" 추가하기
+                        </button>
                     )}
                 </div>
             </div>

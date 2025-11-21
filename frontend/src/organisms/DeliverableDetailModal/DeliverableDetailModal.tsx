@@ -183,7 +183,7 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
     };
 
     const handleAttachTag = async (tag: TagRecord) => {
-        if (localTags.some((item) => item.id === tag.id)) {
+        if (localTags.some((item) => item.name === tag.name)) {
             alert("이미 추가된 태그입니다.");
             return;
         }
@@ -197,16 +197,11 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
             return;
         }
         try {
-            const updated = await addTag(props.type as TagAttachTarget, targetId, tag);
-            if (updated.length > 0) {
-                setLocalTags(updated);
-            } else {
-                setLocalTags((prev) => [...prev, tag]);
-            }
+            const updated = await addTag(props.type as TagAttachTarget, targetId, tag, localTags);
+            setLocalTags(updated);
         } catch (err) {
             console.error(err);
             alert("태그 추가에 실패했습니다.");
-            throw err;
         }
     };
 
@@ -217,12 +212,8 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
             return;
         }
         try {
-            const updated = await deleteTag(props.type as TagAttachTarget, targetId, tag);
-            if (updated.length > 0) {
-                setLocalTags(updated);
-            } else {
-                setLocalTags((prev) => prev.filter((item) => item.id !== tag.id));
-            }
+            const updated = await deleteTag(props.type as TagAttachTarget, targetId, tag, localTags);
+            setLocalTags(updated);
         } catch (err) {
             console.error(err);
             alert("태그 삭제에 실패했습니다.");

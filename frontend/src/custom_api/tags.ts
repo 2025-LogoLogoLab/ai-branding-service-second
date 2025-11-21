@@ -1,20 +1,23 @@
 const basePath = import.meta.env.VITE_API_BASE_URL;
 
 const tagEndpoint = `${basePath}/tags`;
-const tagGenerateEndpoint = `${tagEndpoint}/generate`;
-const tagAttachEndpoint = `${tagEndpoint}/attach`;
-const tagDetachEndpoint = `${tagEndpoint}/detach`;
 
 const JSON_HEADERS = {
     "Content-Type": "application/json",
 };
 
 export type TagRecord = {
-    id: number;
+    id?: number;
     name: string;
 };
 
 export type TagAttachTarget = "logo" | "branding" | "colorGuide";
+
+const TARGET_PATH: Record<TagAttachTarget, string> = {
+    logo: "logo",
+    branding: "brand-strategy",
+    colorGuide: "color-guide",
+};
 
 const normalizeTag = (raw: unknown): TagRecord => {
     if (typeof raw === "string") {
@@ -66,84 +69,92 @@ export async function fetchTagList(): Promise<TagRecord[]> {
         credentials: "include",
     });
 
+    const raw = await response.text();
+    let payload: unknown = null;
+    try {
+        payload = raw ? JSON.parse(raw) : null;
+    } catch (err) {
+        console.warn("[tags] fetchTagList JSON parse error", err);
+        payload = raw;
+    }
+    console.log("[tags] fetchTagList response", payload);
+
     if (!response.ok) {
         throw new Error("태그 목록을 불러오지 못했습니다. " + response.status);
     }
 
-    const payload = await response.json();
-    const tags = ensureTagList(payload);
+    const tags = ensureTagList(payload ?? []);
     return tags;
 }
 
-export async function createTag(name: string): Promise<TagRecord> {
-    const trimmed = name.trim();
-    if (!trimmed) {
-        throw new Error("태그 이름을 입력해주세요.");
-    }
+const toTargetPath = (targetType: TagAttachTarget): string => TARGET_PATH[targetType] ?? targetType;
 
-    const response = await fetch(tagGenerateEndpoint, {
+const postTagNames = async (targetType: TagAttachTarget, targetId: number, tagNames: string[]): Promise<void> => {
+    const requestBody = { tagNames };
+    console.log("[tags] postTagNames request", {
+        targetType,
+        targetId,
+        body: requestBody,
+    });
+
+    const response = await fetch(`${basePath}/${toTargetPath(targetType)}/${targetId}/tags`, {
         method: "POST",
         headers: JSON_HEADERS,
         credentials: "include",
-        body: JSON.stringify({ id: -1, name: trimmed }),
+        body: JSON.stringify(requestBody),
+    });
+
+    const responseText = await response.text();
+    console.log("[tags] postTagNames response", {
+        status: response.status,
+        ok: response.ok,
+        body: responseText || "(empty)",
     });
 
     if (!response.ok) {
-        throw new Error("태그를 생성하지 못했습니다. " + response.status);
+        throw new Error("태그를 갱신하지 못했습니다. " + response.status);
     }
+};
 
-    const payload = await response.json();
-    const [created] = ensureTagList(payload);
-    return created ?? normalizeTag(payload);
-}
-
-export async function addTag(targetType: TagAttachTarget, targetId: number, tag: TagRecord): Promise<TagRecord[]> {
+export async function addTag(
+    targetType: TagAttachTarget,
+    targetId: number,
+    tag: TagRecord,
+    existingTags: TagRecord[] = [],
+): Promise<TagRecord[]> {
+    const tagName = tag.name.trim();
+    if (!tagName) {
+        throw new Error("추가할 태그 이름을 입력해주세요.");
+    }
     if (!targetId) {
         throw new Error("태그를 추가할 산출물 정보를 찾을 수 없습니다.");
     }
-
-    const response = await fetch(tagAttachEndpoint, {
-        method: "POST",
-        headers: JSON_HEADERS,
-        credentials: "include",
-        body: JSON.stringify({
-            targetType,
-            targetId,
-            tagId: tag.id,
-            name: tag.name,
-        }),
-    });
-
-    if (!response.ok) {
-        throw new Error("태그를 추가하지 못했습니다. " + response.status);
+    if (existingTags.length >= 5) {
+        throw new Error("태그는 최대 5개까지 추가할 수 있습니다.");
+    }
+    if (existingTags.some((item) => item.name === tagName)) {
+        return existingTags;
     }
 
-    const payload = await response.json();
-    const tags = ensureTagList(payload);
-    return tags.length > 0 ? tags : [normalizeTag(tag)];
+    const nextTags = [...existingTags, { ...tag, name: tagName }];
+    const tagNames = Array.from(new Set(nextTags.map((item) => item.name.trim()).filter(Boolean)));
+    await postTagNames(targetType, targetId, tagNames);
+    return nextTags;
 }
 
-export async function deleteTag(targetType: TagAttachTarget, targetId: number, tag: TagRecord): Promise<TagRecord[]> {
+export async function deleteTag(
+    targetType: TagAttachTarget,
+    targetId: number,
+    tag: TagRecord,
+    existingTags: TagRecord[] = [],
+): Promise<TagRecord[]> {
     if (!targetId) {
         throw new Error("태그를 삭제할 산출물 정보를 찾을 수 없습니다.");
     }
 
-    const response = await fetch(tagDetachEndpoint, {
-        method: "POST",
-        headers: JSON_HEADERS,
-        credentials: "include",
-        body: JSON.stringify({
-            targetType,
-            targetId,
-            tagId: tag.id,
-            name: tag.name,
-        }),
-    });
+    const filtered = existingTags.filter((item) => item.id !== tag.id && item.name !== tag.name);
+    const tagNames = Array.from(new Set(filtered.map((item) => item.name.trim()).filter(Boolean)));
 
-    if (!response.ok) {
-        throw new Error("태그를 삭제하지 못했습니다. " + response.status);
-    }
-
-    const payload = await response.json();
-    return ensureTagList(payload);
+    await postTagNames(targetType, targetId, tagNames);
+    return filtered;
 }
