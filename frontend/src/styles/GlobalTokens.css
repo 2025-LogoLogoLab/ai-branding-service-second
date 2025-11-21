@@ -60,3 +60,11 @@
     --deliverable-card-width: 320px;
 
 }
+
+/* global form controls - unify input backgrounds */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+    background-color: var(--color-text-input-bg);
+    border: var(--border-divider-width) solid var(--color-input-border);
+}

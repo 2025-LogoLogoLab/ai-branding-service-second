@@ -8,10 +8,14 @@
   align-items: flex-end;
   gap: 8px;
   padding: 8px;
-  border: var(--border-divider-width) solid var(--color-divider-border);
+  border: var(--border-divider-width) solid var(--color-input-border);
   border-radius: 18px;
   /* Match the current TextArea background color */
   background: var(--color-text-input-bg);
+}
+
+.inner:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-button-primary-bg) 30%, transparent);
 }
 
 .inputWrap {

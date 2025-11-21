@@ -12,7 +12,8 @@
     font-family: inherit;
     box-sizing: border-box;
 
-    border: var(--border-divider-width) solid var(--color-divider-border);
+    /* border: var(--border-divider-width) solid var(--color-divider-border); */
+    border: var(--border-divider-width) solid var(--color-input-border);
     border-radius: 12px;
     outline: none;
 
@@ -37,7 +38,7 @@
 
 /* 포커스 */
 .textarea:focus {
-    border-color: var(--color-button-primary-bg);
+    /* border-color: var(--color-button-primary-bg); */
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-button-primary-bg) 30%, transparent);
 }
 

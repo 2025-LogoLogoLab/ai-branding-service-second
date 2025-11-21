@@ -64,17 +64,16 @@
 
 .fullWidthInput {
     width: 100% !important;
-    background-color: var(--color-text-input-bg) !important;
-    border: var(--border-divider-width) solid var(--color-divider-border) !important;
     border-radius: 12px !important;
     padding: 12px !important;
     min-height: 48px;
     box-sizing: border-box;
 }
 
-.fullWidthInput:focus {
-    border-color: var(--color-button-primary-bg) !important;
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-button-primary-bg) 30%, transparent) !important;
+.fullWidthInput:focus,
+.fullWidthInput:focus-visible {
+    /* border: 1px solid var(--color-button-primary-bg) !important; */
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.2) !important;
     outline: none;
 }
 
@@ -159,9 +158,11 @@
 
 .toggleButton[aria-checked="true"],
 .toggleButtonActive {
-    border-color: var(--color-button-primary-bg);
+    /* border-color: var(--color-button-primary-bg); */
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-button-primary-bg) 30%, transparent);
     background-color: color-mix(in oklab, var(--color-button-primary-bg) 12%, var(--color-text-input-bg));
-    color: var(--color-button-primary-bg);
+    /* color: var(--color-font-button-white); */
+    
 }
 
 .toggleButton:disabled {
@@ -170,8 +171,15 @@
 }
 
 .toggleButton:focus-visible {
-    outline: 2px solid color-mix(in oklab, var(--color-button-primary-bg) 40%, transparent);
-    outline-offset: 2px;
+    /* border-color: var(--color-button-primary-bg); */
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-button-primary-bg) 30%, transparent);
+    outline: none;
+}
+
+.toggleButton:active {
+    /* border-color: var(--color-button-primary-bg); */
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-button-primary-bg) 30%, transparent);
+    outline: none;
 }
 
 .actions {
