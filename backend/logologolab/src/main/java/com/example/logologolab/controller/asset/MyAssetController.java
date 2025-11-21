@@ -4,6 +4,7 @@ import com.example.logologolab.dto.asset.AssetListItem;
 import com.example.logologolab.dto.asset.MyProductsResponse;
 import com.example.logologolab.dto.tag.TagResponse;
 import com.example.logologolab.service.asset.MyAssetService;
+import com.example.logologolab.dto.tag.TagListResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -81,24 +82,16 @@ public class MyAssetController {
             @ApiResponse(responseCode = "200", description = "조회 성공",
                     content = @Content(
                             mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = TagResponse.class)),
+                            schema = @Schema(implementation = TagListResponse.class),
                             examples = @ExampleObject(
                                     name = "태그 목록 응답",
                                     value = """
-                                    [
-                                      {
-                                        "id": 12,
-                                        "name": "#브랜딩"
-                                      },
-                                      {
-                                        "id": 15,
-                                        "name": "#스타트업"
-                                      },
-                                      {
-                                        "id": 21,
-                                        "name": "#미니멀"
-                                      }
-                                    ]
+                                    {
+                                      "tagList": [
+                                        { "id": 101, "name": "패션" },
+                                        { "id": 102, "name": "SNS" }
+                                      ]
+                                    }
                                     """
                             )
                     )
@@ -113,7 +106,7 @@ public class MyAssetController {
                             """)))
     })
     @GetMapping("/api/my-tags")
-    public List<TagResponse> getMyTags() {
+    public TagListResponse getMyTags() {
         return myAssetService.listMyTags();
     }
 

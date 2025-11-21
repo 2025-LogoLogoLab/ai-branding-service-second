@@ -7,7 +7,7 @@ import com.example.logologolab.dto.brand.BrandStrategyListItem;
 import com.example.logologolab.dto.color.ColorGuideDTO;
 import com.example.logologolab.dto.color.ColorGuideListItem;
 import com.example.logologolab.dto.logo.LogoListItem;
-import com.example.logologolab.dto.project.ProjectListItem;
+import com.example.logologolab.dto.tag.TagListResponse;
 import com.example.logologolab.dto.tag.TagResponse;
 import com.example.logologolab.repository.brand.BrandStrategyRepository;
 import com.example.logologolab.repository.color.ColorGuideRepository;
@@ -82,7 +82,7 @@ public class MyAssetService {
     }*/
 
     /** 내가 사용한 태그 목록 조회 */
-    public List<TagResponse> listMyTags() {
+    public TagListResponse listMyTags() {
         User user = loginUserProvider.getLoginUser();
 
         // 내 모든 산출물을 가져와서 태그들을 합친 뒤 중복 제거
@@ -90,10 +90,12 @@ public class MyAssetService {
         Stream<Tag> colorTags = colorGuideRepository.findAllByCreatedBy(user).stream().flatMap(c -> c.getTags().stream());
         Stream<Tag> brandTags = brandStrategyRepository.findAllByCreatedBy(user).stream().flatMap(b -> b.getTags().stream());
 
-        return Stream.concat(Stream.concat(logoTags, colorTags), brandTags)
+        List<TagResponse> tags = Stream.concat(Stream.concat(logoTags, colorTags), brandTags)
                 .distinct()
                 .map(TagResponse::from)
-                .collect(Collectors.toList());
+                .toList();
+
+        return new TagListResponse(tags); // DTO로 감싸서 반환
     }
 
     /** 특정 태그가 달린 내 산출물 목록 조회 */
