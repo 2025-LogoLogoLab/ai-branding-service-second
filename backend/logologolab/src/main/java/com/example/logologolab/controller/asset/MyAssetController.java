@@ -2,12 +2,12 @@ package com.example.logologolab.controller.asset;
 
 import com.example.logologolab.dto.asset.AssetListItem;
 import com.example.logologolab.dto.asset.MyProductsResponse;
-import com.example.logologolab.dto.project.ProjectListItem;
 import com.example.logologolab.dto.tag.TagResponse;
 import com.example.logologolab.service.asset.MyAssetService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -79,7 +79,30 @@ public class MyAssetController {
     @Operation(summary = "내가 사용한 태그 목록 조회", description = "산출물 관리 페이지의 태그 기준 보기에 사용됩니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))),
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = TagResponse.class)),
+                            examples = @ExampleObject(
+                                    name = "태그 목록 응답",
+                                    value = """
+                                    [
+                                      {
+                                        "id": 12,
+                                        "name": "#브랜딩"
+                                      },
+                                      {
+                                        "id": 15,
+                                        "name": "#스타트업"
+                                      },
+                                      {
+                                        "id": 21,
+                                        "name": "#미니멀"
+                                      }
+                                    ]
+                                    """
+                            )
+                    )
+            ),
             @ApiResponse(responseCode = "401", description = "인증 실패",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
                             {
@@ -97,7 +120,39 @@ public class MyAssetController {
     @Operation(summary = "태그별 내 산출물 목록 조회", description = "특정 태그를 선택했을 때 해당하는 모든 내 산출물을 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))),
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = AssetListItem.class)),
+                            examples = @ExampleObject(
+                                    name = "자산 목록 응답",
+                                    value = """
+                                    [
+                                      {
+                                        "id": 77,
+                                        "assetType": "BRAND_STRATEGY",
+                                        "title": "친환경 세제, 가족/펫 타깃.",
+                                        "thumbnailUrl": null,
+                                        "createdAt": "2025-09-09T15:30:00.123456Z"
+                                      },
+                                      {
+                                        "id": 42,
+                                        "assetType": "COLOR_GUIDE",
+                                        "title": "프리미엄 캔들 브랜드...",
+                                        "thumbnailUrl": null,
+                                        "createdAt": "2025-09-08T18:12:34.567890Z"
+                                      },
+                                      {
+                                        "id": 25,
+                                        "assetType": "LOGO",
+                                        "title": "a minimal logo for an eco-friendly startup...",
+                                        "thumbnailUrl": "https://s3.ap-northeast-2.amazonaws.com/bucket/logos/2025/09/08/abc.png",
+                                        "createdAt": "2025-09-08T11:20:10.987654Z"
+                                      }
+                                    ]
+                                    """
+                            )
+                    )
+            ),
             @ApiResponse(responseCode = "400", description = "필수 파라미터 누락",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
                             {
