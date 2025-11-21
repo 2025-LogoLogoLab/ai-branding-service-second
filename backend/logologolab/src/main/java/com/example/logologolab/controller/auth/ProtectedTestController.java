@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "JWT 토큰", description = "JWT 토큰 유효 확인 API")
+@Tag(name = "회원", description = "회원 관련 API")
 public class ProtectedTestController {
 
     private final UserService userService;

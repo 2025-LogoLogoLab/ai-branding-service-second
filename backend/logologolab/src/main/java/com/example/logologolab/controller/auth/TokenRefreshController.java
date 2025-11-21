@@ -24,7 +24,7 @@ import java.time.Duration;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "토큰 재발급", description = "토큰 재발급 API")
+@Tag(name = "회원", description = "회원 관련 API")
 public class TokenRefreshController {
 
     private final JwtTokenProvider jwtTokenProvider;
