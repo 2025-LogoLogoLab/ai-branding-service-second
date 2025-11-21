@@ -26,12 +26,27 @@
   font-weight: 700;
 }
 
-.spark { color: var(--color-font-site-title); }
-.brandText { font-size: 18px; line-height: 1; }
+.brandImage {
+  display: block;
+  height: 24px;
+  width: auto;
+}
 
 .socials {
   display: flex;
   gap: 12px;
+}
+
+.socialLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.socialIcon {
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
 .linksGrid {
