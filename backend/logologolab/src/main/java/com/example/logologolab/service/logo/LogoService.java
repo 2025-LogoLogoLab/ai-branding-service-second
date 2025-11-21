@@ -32,17 +32,6 @@ public class LogoService {
         return LogoResponse.from(logo);
     }
 
-    @Transactional(readOnly = true)
-    public Page<LogoListItem> listByProject(Long projectId, Pageable pageable) {
-        return logoRepository.findByProjectId(projectId, pageable)
-                .map(logo -> new LogoListItem(
-                        logo.getId(),
-                        logo.getPrompt(),
-                        logo.getImageUrl(),
-                        logo.getCreatedAt()
-                ));
-    }
-
     public Page<LogoListItem> listMyLogos(Pageable pageable) {
         User user = loginUserProvider.getLoginUser();
         return logoRepository.findByCreatedBy(user, pageable)

@@ -57,20 +57,4 @@ public class Project extends BaseTimeEntity {
     )
     @Builder.Default
     private Set<Logo> logos = new HashSet<>();
-
-    public void addLogo(Logo l) {
-        if (l == null) return;
-        logos.add(l);
-        l.setProject(this);
-    }
-    public void addColorGuide(ColorGuide c) {
-        if (c == null) return;
-        colorGuides.add(c);
-        c.setProject(this);
-    }
-    public void addBrandStrategy(BrandStrategy b) {
-        if (b == null) return;
-        brandStrategies.add(b);
-        b.setProject(this);
-    }
 }

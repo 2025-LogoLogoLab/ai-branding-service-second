@@ -14,12 +14,6 @@ import java.util.List;
 
 public interface BrandStrategyRepository extends JpaRepository<BrandStrategy, Long> {
     Page<BrandStrategy> findByCreatedBy(User createdBy, Pageable pageable); // ← 수정
-    Page<BrandStrategy> findByProjectId(Long projectId, Pageable pageable);
-    List<BrandStrategy> findByProjectId(Long projectId);
-
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("update BrandStrategy b set b.project = null where b.project.id = :projectId")
-    int detachAllByProjectId(@org.springframework.data.repository.query.Param("projectId") Long projectId);
 
     Optional<BrandStrategy> findByIdAndCreatedBy(Long id, User createdBy);
 

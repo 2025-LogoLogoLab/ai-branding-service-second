@@ -13,12 +13,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface LogoRepository extends JpaRepository<Logo, Long> {
-    List<Logo> findByProjectId(Long projectId);
-    Page<Logo> findByProjectId(Long projectId, Pageable pageable);
-
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("update Logo l set l.project = null where l.project.id = :projectId")
-    int detachAllByProjectId(@Param("projectId") Long projectId);
 
     Optional<Logo> findByIdAndCreatedBy(Long id, User createdBy);
     Page<Logo> findByCreatedBy(User createdBy, Pageable pageable);

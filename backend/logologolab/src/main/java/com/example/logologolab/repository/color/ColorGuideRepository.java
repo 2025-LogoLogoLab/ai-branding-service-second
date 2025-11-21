@@ -16,13 +16,6 @@ public interface ColorGuideRepository extends JpaRepository<ColorGuide, Long> {
     // 수정: User 엔티티로 받기
     Page<ColorGuide> findByCreatedBy(User createdBy, Pageable pageable);
 
-    Page<ColorGuide> findByProjectId(Long projectId, Pageable pageable);
-    List<ColorGuide> findByProjectId(Long projectId);
-
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("update ColorGuide c set c.project = null where c.project.id = :projectId")
-    int detachAllByProjectId(@org.springframework.data.repository.query.Param("projectId") Long projectId);
-
     Optional<ColorGuide> findByIdAndCreatedBy(Long id, User createdBy);
 
     List<ColorGuide> findAllByCreatedBy(User user);

@@ -41,7 +41,6 @@ public class BrandStrategyService {
                 .caseType(caseType)
                 .sourceImage(req.imageUrl())
                 .markdown(req.markdown())
-                .project(null) // 프로젝트에 연결하지 않고 저장
                 .createdBy(creator)
                 .build();
 
@@ -66,12 +65,6 @@ public class BrandStrategyService {
                 e.getMarkdown(),
                 e.getCreatedAt()
         );
-    }
-
-    @Transactional(readOnly = true)
-    public Page<BrandStrategyListItem> listByProject(Long projectId, Pageable pageable) {
-        return repo.findByProjectId(projectId, pageable)
-                .map(this::mapToListItem);
     }
 
     @Transactional(readOnly = true)

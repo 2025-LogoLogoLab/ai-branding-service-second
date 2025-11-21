@@ -46,7 +46,6 @@ public class ColorGuideService {
                 .style(style)
                 .caseType(caseType)
                 .sourceImage(req.imageUrl())
-                .project(null) // 프로젝트에 연결하지 않고 저장
                 .createdBy(creator)
                 .mainHex(normHex(g.main().hex())).mainDesc(g.main().description())
                 .subHex(normHex(g.sub().hex())).subDesc(g.sub().description())
@@ -80,12 +79,6 @@ public class ColorGuideService {
                 ),
                 e.getCreatedAt()
         );
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ColorGuideListItem> listByProject(Long projectId, Pageable pageable) {
-        return repo.findByProjectId(projectId, pageable)
-                .map(this::mapToListItem);
     }
 
     @Transactional(readOnly = true)
