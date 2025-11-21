@@ -32,7 +32,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "13. 컬러 가이드", description = "컬러 가이드 관련 API")
+@Tag(name = "03. 컬러 가이드", description = "컬러 가이드 관련 API")
 public class ColorController {
 
     private final GptPromptService gpt;

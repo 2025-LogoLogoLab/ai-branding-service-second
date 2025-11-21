@@ -32,7 +32,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "15. 프로젝트 전략", description = "프로젝트 관련 API")
+@Tag(name = "05. 프로젝트 전략", description = "프로젝트 관련 API")
 public class ProjectController {
     private final ProjectService projectService;
 

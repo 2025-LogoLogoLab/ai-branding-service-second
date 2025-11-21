@@ -30,7 +30,7 @@ import java.time.Duration;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "11. 회원", description = "회원 관련 API")
+@Tag(name = "01. 회원", description = "회원 관련 API")
 public class AuthController {
 
     private final OAuth2UserInfoService oAuth2UserInfoService;

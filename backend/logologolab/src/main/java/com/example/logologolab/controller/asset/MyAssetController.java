@@ -27,7 +27,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "17. 내 산출물 관리", description = "산출물 관리 페이지 관련 API")
+@Tag(name = "07. 내 산출물 관리", description = "산출물 관리 페이지 관련 API")
 @SecurityRequirement(name = "bearerAuth")
 public class MyAssetController {
 

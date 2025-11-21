@@ -24,7 +24,7 @@ import java.util.Date;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "11. 회원", description = "회원 관련 API")
+@Tag(name = "01. 회원", description = "회원 관련 API")
 public class LogoutController {
     private final LogoutService logoutService;
     private final JwtTokenProvider jwtTokenProvider;
