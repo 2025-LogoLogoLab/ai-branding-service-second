@@ -26,6 +26,108 @@
     gap: 32px;
 }
 
+.headerBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    /* padding-bottom: 16px;
+    border-bottom: 1px solid var(--color-divider-border); */
+}
+
+.headerTitle {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-font-basic-content);
+}
+
+.headerActions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.primaryButton {
+    border: none;
+    background: var(--color-button-primary-bg);
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    min-width: 80px;
+}
+
+.secondaryButton {
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: #fff;
+    color: var(--color-font-basic-content);
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+}
+
+.tagInput {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid rgba(15, 23, 42, 0.15);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.tagModalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 4600;
+}
+
+.tagModal {
+    width: min(460px, 92%);
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+}
+
+.tagModalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.tagModalHeader h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.tagModalClose {
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.tagModalBody {
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+}
+
+.tagModalActions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
 .logoGrid {
     display: grid;
     gap: 20px;

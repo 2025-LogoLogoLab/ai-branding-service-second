@@ -150,7 +150,7 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
 
     useEffect(() => {
         setLocalTags(((props.data as { tags?: TagRecord[] } | null | undefined)?.tags) ?? []);
-    }, [props.data?.id, props.type]);
+    }, [props.data?.id, (props.data as { tags?: TagRecord[] } | null | undefined)?.tags, props.type]);
 
     useEffect(() => {
         if (props.type === "branding") {

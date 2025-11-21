@@ -49,6 +49,7 @@ import {
     previewToLogoDetail,
     useDeliverableDetail,
 } from "../utils/deliverableDetail";
+import { fetchAssetsByTag, type AssetSummary } from "../custom_api/assets";
 // 페이지별 기본 페이지 크기(시안에서는 3열 그리드이므로 9개 단위가 자연스러움)
 const PAGE_SIZE = 3;
 
@@ -170,6 +171,12 @@ function DeliverablesPage({
     const [logoPage, setLogoPage] = useState(0);
     const [brandingPage, setBrandingPage] = useState(0);
     const [colorGuidePage, setColorGuidePage] = useState(0);
+    const [tagQuery, setTagQuery] = useState("");
+    const [tagResults, setTagResults] = useState<AssetSummary[]>([]);
+    const [tagLoading, setTagLoading] = useState(false);
+    const [tagError, setTagError] = useState<string | null>(null);
+    const [tagApplied, setTagApplied] = useState<string | null>(null);
+    const [isTagModalOpen, setTagModalOpen] = useState(false);
 
     // refetch 트리거용 nonce
     const [logoNonce, setLogoNonce] = useState(0);
@@ -538,6 +545,150 @@ function DeliverablesPage({
         renderSidebar ? "" : s.layoutNoSidebar,
     ].join(" ").trim();
 
+    const typeLabelMap: Record<string, string> = {
+        LOGO: "로고",
+        BRAND_STRATEGY: "브랜딩 전략",
+        COLOR_GUIDE: "컬러 가이드",
+    };
+
+    const openTagResultDetail = (asset: AssetSummary) => {
+        const detailType =
+            asset.assetType === "LOGO"
+                ? "logo"
+                : asset.assetType === "BRAND_STRATEGY"
+                    ? "branding"
+                    : asset.assetType === "COLOR_GUIDE"
+                        ? "colorGuide"
+                        : null;
+        if (!detailType) return;
+
+        if (detailType === "logo") {
+            openDetail({
+                type: "logo",
+                item: {
+                    id: asset.id,
+                    prompt: asset.title,
+                    imageUrl: asset.thumbnailUrl ?? "",
+                    createdAt: asset.createdAt ?? "",
+                },
+            });
+            return;
+        }
+        if (detailType === "branding") {
+            openDetail({
+                type: "branding",
+                item: {
+                    id: asset.id,
+                    briefKo: asset.title,
+                    summaryKo: asset.title,
+                    markdown: asset.title,
+                    createdAt: asset.createdAt ?? "",
+                },
+            });
+            return;
+        }
+        openDetail({
+            type: "colorGuide",
+            item: {
+                id: asset.id,
+                briefKo: asset.title,
+                style: undefined,
+                mainHex: undefined,
+                subHex: undefined,
+                pointHex: undefined,
+                backgroundHex: undefined,
+                mainDescription: undefined,
+                subDescription: undefined,
+                pointDescription: undefined,
+                backgroundDescription: undefined,
+                createdAt: asset.createdAt ?? "",
+            },
+        });
+    };
+
+    const handleTagSearch = useCallback(async () => {
+        const trimmed = tagQuery.trim();
+        if (!trimmed) {
+            setTagError("검색할 태그를 입력해주세요.");
+            return;
+        }
+        setTagLoading(true);
+        setTagError(null);
+        try {
+            const assets = await fetchAssetsByTag(trimmed);
+            setTagResults(assets);
+            setTagApplied(trimmed);
+            setTagModalOpen(false);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "태그별 산출물을 불러오지 못했습니다.";
+            setTagError(message);
+            setTagResults([]);
+        } finally {
+            setTagLoading(false);
+        }
+    }, [tagQuery]);
+
+    const resetTagSearch = () => {
+        setTagResults([]);
+        setTagApplied(null);
+        setTagError(null);
+        setTagQuery("");
+    };
+
+    const isTagSearchActive = Boolean(tagApplied);
+
+    const tagLogoItems: LogoListItem[] = useMemo(
+        () =>
+            tagResults
+                .filter((asset) => asset.assetType === "LOGO")
+                .map((asset) => ({
+                    id: asset.id,
+                    prompt: asset.title,
+                    imageUrl: asset.thumbnailUrl ?? "",
+                    createdAt: asset.createdAt ?? "",
+                })),
+        [tagResults],
+    );
+
+    const tagBrandingItems: BrandStrategyListItem[] = useMemo(
+        () =>
+            tagResults
+                .filter((asset) => asset.assetType === "BRAND_STRATEGY")
+                .map((asset) => ({
+                    id: asset.id,
+                    briefKo: asset.title,
+                    summaryKo: asset.title,
+                    markdown: asset.title,
+                    createdAt: asset.createdAt ?? "",
+                })),
+        [tagResults],
+    );
+
+    const tagColorGuideItems: ColorGuideListItem[] = useMemo(
+        () =>
+            tagResults
+                .filter((asset) => asset.assetType === "COLOR_GUIDE")
+                .map((asset) => ({
+                    id: asset.id,
+                    briefKo: asset.title,
+                    style: undefined,
+                    mainHex: undefined,
+                    subHex: undefined,
+                    pointHex: undefined,
+                    backgroundHex: undefined,
+                    mainDescription: undefined,
+                    subDescription: undefined,
+                    pointDescription: undefined,
+                    backgroundDescription: undefined,
+                    createdAt: asset.createdAt ?? "",
+                })),
+        [tagResults],
+    );
+
+    const tagDisplay = tagApplied
+        ? (tagApplied.startsWith("#") ? tagApplied : `#${tagApplied}`)
+        : null;
+
     return (
         <div className={pageClassName}>
             <div className={layoutClassName}>
@@ -550,15 +701,32 @@ function DeliverablesPage({
                 )}
 
                 <div className={s.sections}>
+                    <div className={s.headerBar}>
+                        <div className={s.headerTitle}>{tagDisplay ? `${tagDisplay} 태그로 검색한 결과` : "전체 조회"}</div>
+                        <div className={s.headerActions}>
+                            {tagApplied && (
+                                <button type="button" className={s.secondaryButton} onClick={resetTagSearch}>
+                                    전체 조회로 돌아가기
+                                </button>
+                            )}
+                            <button type="button" className={s.primaryButton} onClick={() => setTagModalOpen(true)}>
+                                태그로 검색하기
+                            </button>
+                        </div>
+                    </div>
+
                     {selections.logo && (
                         <DeliverableSection title="로고 산출물" variant={variant}>
-                            {logoState.error && renderStatus(logoState.error, "error")}
-                            {!logoState.loading && !logoState.error && !logoState.data?.content.length && renderStatus("저장된 로고 산출물이 없습니다.")}
-                            {logoState.loading && renderStatus("로고 산출물을 불러오는 중입니다...")}
+                            {!isTagSearchActive && logoState.error && renderStatus(logoState.error, "error")}
+                            {!isTagSearchActive && !logoState.loading && !logoState.error && !logoState.data?.content.length && renderStatus("저장된 로고 산출물이 없습니다.")}
+                            {!isTagSearchActive && logoState.loading && renderStatus("로고 산출물을 불러오는 중입니다...")}
 
-                            {!!logoState.data?.content.length && (
+                            {isTagSearchActive && tagError && renderStatus(tagError, "error")}
+                            {isTagSearchActive && !tagError && !tagLogoItems.length && renderStatus("검색 결과가 없습니다.")}
+
+                            {(!isTagSearchActive && !!logoState.data?.content.length) || (isTagSearchActive && tagLogoItems.length > 0) ? (
                                 <div className={s.logoGrid}>
-                                    {logoState.data.content.map((item) => {
+                                    {(isTagSearchActive ? tagLogoItems : logoState.data?.content ?? []).map((item) => {
                                         const imageData = ensureDataUrl(item.imageUrl);
                                         return (
                                             <LogoCard
@@ -576,9 +744,9 @@ function DeliverablesPage({
                                         );
                                     })}
                                 </div>
-                            )}
+                            ) : null}
 
-                            {logoState.data && (
+                            {!isTagSearchActive && logoState.data && (
                                 <Pagination
                                     page={logoState.data.page}
                                     totalPages={logoState.data.totalPages}
@@ -590,13 +758,16 @@ function DeliverablesPage({
 
                     {selections.branding && (
                         <DeliverableSection title="브랜딩 전략 산출물" variant={variant}>
-                            {brandingState.error && renderStatus(brandingState.error, "error")}
-                            {!brandingState.loading && !brandingState.error && !brandingState.data?.content.length && renderStatus("브랜딩 전략 산출물이 없습니다.")}
-                            {brandingState.loading && renderStatus("브랜딩 전략을 불러오는 중입니다...")}
+                            {!isTagSearchActive && brandingState.error && renderStatus(brandingState.error, "error")}
+                            {!isTagSearchActive && !brandingState.loading && !brandingState.error && !brandingState.data?.content.length && renderStatus("브랜딩 전략 산출물이 없습니다.")}
+                            {!isTagSearchActive && brandingState.loading && renderStatus("브랜딩 전략을 불러오는 중입니다...")}
 
-                            {!!brandingState.data?.content.length && (
+                            {isTagSearchActive && tagError && renderStatus(tagError, "error")}
+                            {isTagSearchActive && !tagError && !tagBrandingItems.length && renderStatus("검색 결과가 없습니다.")}
+
+                            {(!isTagSearchActive && !!brandingState.data?.content.length) || (isTagSearchActive && tagBrandingItems.length > 0) ? (
                                 <div className={s.brandGrid}>
-                                    {brandingState.data.content.map((item) => (
+                                    {(isTagSearchActive ? tagBrandingItems : brandingState.data?.content ?? []).map((item) => (
                                         <BrandStrategyDeliverableCard
                                             key={item.id}
                                             item={item}
@@ -611,9 +782,9 @@ function DeliverablesPage({
                                         />
                                     ))}
                                 </div>
-                            )}
+                            ) : null}
 
-                            {brandingState.data && (
+                            {!isTagSearchActive && brandingState.data && (
                                 <Pagination
                                     page={brandingState.data.page}
                                     totalPages={brandingState.data.totalPages}
@@ -625,13 +796,16 @@ function DeliverablesPage({
 
                     {selections.colorGuide && (
                         <DeliverableSection title="컬러 가이드 산출물" variant={variant}>
-                            {colorGuideState.error && renderStatus(colorGuideState.error, "error")}
-                            {!colorGuideState.loading && !colorGuideState.error && !colorGuideState.data?.content.length && renderStatus("컬러 가이드 산출물이 없습니다.")}
-                            {colorGuideState.loading && renderStatus("컬러 가이드를 불러오는 중입니다...")}
+                            {!isTagSearchActive && colorGuideState.error && renderStatus(colorGuideState.error, "error")}
+                            {!isTagSearchActive && !colorGuideState.loading && !colorGuideState.error && !colorGuideState.data?.content.length && renderStatus("컬러 가이드 산출물이 없습니다.")}
+                            {!isTagSearchActive && colorGuideState.loading && renderStatus("컬러 가이드를 불러오는 중입니다...")}
 
-                            {!!colorGuideState.data?.content.length && (
+                            {isTagSearchActive && tagError && renderStatus(tagError, "error")}
+                            {isTagSearchActive && !tagError && !tagColorGuideItems.length && renderStatus("검색 결과가 없습니다.")}
+
+                            {(!isTagSearchActive && !!colorGuideState.data?.content.length) || (isTagSearchActive && tagColorGuideItems.length > 0) ? (
                                 <div className={s.colorGrid}>
-                                    {colorGuideState.data.content.map((item) => (
+                                    {(isTagSearchActive ? tagColorGuideItems : colorGuideState.data?.content ?? []).map((item) => (
                                         <ColorGuideDeliverableCard
                                             key={item.id}
                                             item={item}
@@ -646,9 +820,9 @@ function DeliverablesPage({
                                         />
                                     ))}
                                 </div>
-                            )}
+                            ) : null}
 
-                            {colorGuideState.data && (
+                            {!isTagSearchActive && colorGuideState.data && (
                                 <Pagination
                                     page={colorGuideState.data.page}
                                     totalPages={colorGuideState.data.totalPages}
@@ -711,6 +885,47 @@ function DeliverablesPage({
                     }
                     toolbarProps={detailToolbarProps}
                 />
+            )}
+
+            {isTagModalOpen && (
+                <div className={s.tagModalOverlay} role="dialog" aria-modal="true" aria-label="태그 검색">
+                    <div className={s.tagModal} onClick={(event) => event.stopPropagation()}>
+                        <header className={s.tagModalHeader}>
+                            <h3>태그 검색</h3>
+                            <button type="button" className={s.tagModalClose} onClick={() => setTagModalOpen(false)} aria-label="닫기">
+                                ×
+                            </button>
+                        </header>
+                        <div className={s.tagModalBody}>
+                            <input
+                                type="text"
+                                className={s.tagInput}
+                                placeholder="검색할 태그를 입력하세요"
+                                value={tagQuery}
+                                onChange={(event) => setTagQuery(event.target.value)}
+                                onKeyDown={(event) => {
+                                    if (event.key === "Enter") {
+                                        void handleTagSearch();
+                                    }
+                                }}
+                            />
+                            <div className={s.tagModalActions}>
+                                <button
+                                    type="button"
+                                    className={s.primaryButton}
+                                    onClick={() => void handleTagSearch()}
+                                    disabled={tagLoading}
+                                >
+                                    {tagLoading ? "검색 중…" : "태그로 검색하기"}
+                                </button>
+                                <button type="button" className={s.secondaryButton} onClick={() => setTagModalOpen(false)}>
+                                    닫기
+                                </button>
+                            </div>
+                            {tagError && <div className={`${s.status} ${s.error}`}>{tagError}</div>}
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
