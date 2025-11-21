@@ -30,7 +30,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "관리자 02. 컬러 가이드 관리", description = "관리자 전용 컬러 가이드 관리 및 태그 기능 API")
+@Tag(name = "03. 관리자 컬러 가이드 관리", description = "관리자 전용 컬러 가이드 관리 및 태그 기능 API")
 @SecurityRequirement(name = "bearerAuth")
 public class AdminColorController {
 
