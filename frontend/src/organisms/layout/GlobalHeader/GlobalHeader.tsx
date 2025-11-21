@@ -2,6 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import styles from "./GlobalHeader.module.css";
+import brandImage from "../../../assets/designs/LogoLogoLabHeader.png";
 import { useAuth } from "../../../context/AuthContext";
 import { TextButton } from "../../../atoms/TextButton/TextButton";
 
@@ -68,8 +69,7 @@ export default function GlobalHeader() {
           <span/>
         </button>
         <Link to="/" className={styles.brand} aria-label="LogoLogoLab home" onClick={closeAll}>
-          <span className={styles.spark}>✷</span>
-          <span className={styles.brandText}>LogoLogoLab</span>
+          <img src={brandImage} alt="LogoLogoLab" className={styles.brandImage} />
         </Link>
       </div>
 
@@ -106,14 +106,14 @@ export default function GlobalHeader() {
         {user ? (
           <>
             <TextButton
-              label="My Page"
+              label="Log out"
               variant="headerLink"
-              onClick={() => handleNavigate("/myPage")}
+              onClick={handleLogout}
             />
             <TextButton
-              label="Log out"
+              label="My Page"
               variant="headerPrimary"
-              onClick={handleLogout}
+              onClick={() => handleNavigate("/myPage")}
             />
           </>
         ) : (

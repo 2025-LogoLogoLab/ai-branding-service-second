@@ -1,7 +1,7 @@
 /* src/organisms/layout/GlobalFooter/GlobalFooter.module.css */
 .wrap {
   background: #fff;
-  border-top: 1px solid var(--color-divider-border);
+  border-top: var(--border-divider-width) solid var(--color-divider-border);
 }
 
 .topRow {
@@ -58,7 +58,7 @@
 
 .bottomRow {
   padding: 12px 24px;
-  border-top: 1px solid var(--color-divider-border);
+  border-top: var(--border-divider-width) solid var(--color-divider-border);
   color: var(--color-font-gray);
 }
 

@@ -17,7 +17,7 @@
     gap: 4px;
     margin-bottom: 24px;
     padding-bottom: 16px;
-    border-bottom: 1px solid var(--color-divider-border);
+    border-bottom: var(--border-divider-width) solid var(--color-divider-border);
 }
 
 .title {
@@ -35,7 +35,7 @@
 
 .section + .section {
     padding-top: 24px;
-    border-top: 1px solid var(--color-divider-border);
+    border-top: var(--border-divider-width) solid var(--color-divider-border);
 }
 
 .sectionHeader {
@@ -65,7 +65,7 @@
 .fullWidthInput {
     width: 100% !important;
     background-color: var(--color-text-input-bg) !important;
-    border: 1px solid var(--color-divider-border) !important;
+    border: var(--border-divider-width) solid var(--color-divider-border) !important;
     border-radius: 12px !important;
     padding: 12px !important;
     min-height: 48px;
@@ -146,7 +146,7 @@
 }
 
 .toggleButton {
-    border: 1px solid var(--color-divider-border);
+    border: var(--border-divider-width) solid var(--color-divider-border);
     background-color: var(--color-text-input-bg);
     color: var(--color-font-basic-content);
     border-radius: 999px;

@@ -3,11 +3,11 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 16px;
-  height: 64px; /* SectionLayout sticky top과 맞춤 (약간 여유 주려면 72px 사용) */
-  padding: 0 24px;
+  gap: 50px;
+  height: 72px; /* 전역 헤더 높이 */
+  padding: 0;
   background: #fff;
-  border-bottom: 1px solid var(--color-divider-border);
+  border-bottom: var(--border-divider-width) solid var(--color-divider-border);
 }
 
 .brandArea {
@@ -45,12 +45,13 @@
 
 .spark { color: var(--color-font-site-title); }
 .brandText { font-size: 18px; line-height: 1; }
+.brandImage { display: block; height: 32px; width: auto; }
 
 .navWrap { position: relative; }
 .nav {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 50px;
 }
 
 .navItem {
@@ -73,6 +74,8 @@
   display: flex;
   gap: 10px;
   align-items: center;
+  border-left: var(--border-divider-width) solid var(--color-divider-border);
+  padding-left: 16px;
 }
 
 /* Dropdown styling */
@@ -83,7 +86,7 @@
   left: 0;
   min-width: 200px;
   background: #fff;
-  border: 1px solid var(--color-divider-border);
+  border: var(--border-divider-width) solid var(--color-divider-border);
   border-radius: 12px;
   padding: 8px;
   box-shadow: 0 12px 24px rgba(0,0,0,0.06);
@@ -104,12 +107,12 @@
 
   .nav {
     position: absolute;
-    inset: 64px 0 auto 0; /* header height */
+    inset: 72px 0 auto 0; /* header height */
     display: none;
     flex-direction: column;
     background: #fff;
     padding: 12px;
-    border-bottom: 1px solid var(--color-divider-border);
+    border-bottom: var(--border-divider-width) solid var(--color-divider-border);
     gap: 8px;
   }
   .nav[data-open] { display: flex; }

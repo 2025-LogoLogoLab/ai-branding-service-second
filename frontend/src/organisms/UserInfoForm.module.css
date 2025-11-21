@@ -110,7 +110,7 @@
     gap: 32px;
     align-items: flex-start;
     padding-bottom: 24px;
-    border-bottom: 1px solid var(--color-divider-border);
+    border-bottom: var(--border-divider-width) solid var(--color-divider-border);
 }
 
 .avatarColumn {
@@ -208,7 +208,7 @@
 
 .sectionDivider {
     padding-bottom: 24px;
-    border-bottom: 1px solid var(--color-divider-border);
+    border-bottom: var(--border-divider-width) solid var(--color-divider-border);
 }
 
 .sectionHeader {

@@ -85,7 +85,7 @@
 /* 카드용(필요 시) */
 .card {
     background-color: #fff;
-    border: 1px solid var(--color-divider-border);
+    border: var(--border-divider-width) solid var(--color-divider-border);
     color: var(--color-font-basic-content);
 }
 .card:hover {

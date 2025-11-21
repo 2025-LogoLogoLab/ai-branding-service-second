@@ -4,9 +4,11 @@
     grid-template-rows: auto 1fr auto;
     min-height: 100dvh;
     background: var(--color-bg-base);
+    padding-left: 36px;
+    padding-right: 36px;
 }
 
-.headerInner { min-height: 64px; }
+.headerInner { min-height: 72px; }
 .footerInner { }
 
 .main {
