@@ -545,67 +545,6 @@ function DeliverablesPage({
         renderSidebar ? "" : s.layoutNoSidebar,
     ].join(" ").trim();
 
-    const typeLabelMap: Record<string, string> = {
-        LOGO: "로고",
-        BRAND_STRATEGY: "브랜딩 전략",
-        COLOR_GUIDE: "컬러 가이드",
-    };
-
-    const openTagResultDetail = (asset: AssetSummary) => {
-        const detailType =
-            asset.assetType === "LOGO"
-                ? "logo"
-                : asset.assetType === "BRAND_STRATEGY"
-                    ? "branding"
-                    : asset.assetType === "COLOR_GUIDE"
-                        ? "colorGuide"
-                        : null;
-        if (!detailType) return;
-
-        if (detailType === "logo") {
-            openDetail({
-                type: "logo",
-                item: {
-                    id: asset.id,
-                    prompt: asset.title,
-                    imageUrl: asset.thumbnailUrl ?? "",
-                    createdAt: asset.createdAt ?? "",
-                },
-            });
-            return;
-        }
-        if (detailType === "branding") {
-            openDetail({
-                type: "branding",
-                item: {
-                    id: asset.id,
-                    briefKo: asset.title,
-                    summaryKo: asset.title,
-                    markdown: asset.title,
-                    createdAt: asset.createdAt ?? "",
-                },
-            });
-            return;
-        }
-        openDetail({
-            type: "colorGuide",
-            item: {
-                id: asset.id,
-                briefKo: asset.title,
-                style: undefined,
-                mainHex: undefined,
-                subHex: undefined,
-                pointHex: undefined,
-                backgroundHex: undefined,
-                mainDescription: undefined,
-                subDescription: undefined,
-                pointDescription: undefined,
-                backgroundDescription: undefined,
-                createdAt: asset.createdAt ?? "",
-            },
-        });
-    };
-
     const handleTagSearch = useCallback(async () => {
         const trimmed = tagQuery.trim();
         if (!trimmed) {
