@@ -1,4 +1,5 @@
-/* --mw: 섹션 컨테이너 최대 폭(커스텀 속성으로 주입) */
+/* frontend/src/organisms/layout/SectionLayout/SectionLayout.module.css */
+/* 섹션 레이아웃(사이드바+콘텐츠) 스타일, --mw 커스텀 속성으로 최대 폭 주입 */
 .wrap {
     /* 페이지 폭: 100vw를 기본으로 하되 최대 1440px로 캡 */
     /* 

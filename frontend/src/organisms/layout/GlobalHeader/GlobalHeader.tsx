@@ -1,4 +1,6 @@
 // src/organisms/layout/GlobalHeader/GlobalHeader.tsx
+// frontend/src/organisms/layout/GlobalHeader/GlobalHeader.tsx
+// 전역 상단 헤더: 브랜드 로고, 내비게이션, 인증 버튼을 제공
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import styles from "./GlobalHeader.module.css";

@@ -21,7 +21,7 @@
   /* Remove hard border; keep subtle background and radius if desired */
   border: none;
   border-radius: 14px;
-  background: #fff;
+  background: var(--color-bg-base);
   padding: 12px;
   display: grid;
   gap: 8px;

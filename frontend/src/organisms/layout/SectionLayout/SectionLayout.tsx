@@ -1,3 +1,5 @@
+// frontend/src/organisms/layout/SectionLayout/SectionLayout.tsx
+// 섹션 전용 레이아웃: 좌측 사이드바와 우측 메인 콘텐츠를 2열로 배치
 import React from "react";
 import { useLocation } from "react-router-dom";
 import styles from "./SectionLayout.module.css";

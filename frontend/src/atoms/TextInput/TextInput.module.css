@@ -16,7 +16,7 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   outline: none;
-  background: #fff;
+  background: var(--color-bg-base);
 
   transition: border-color 0.2s ease;
 }

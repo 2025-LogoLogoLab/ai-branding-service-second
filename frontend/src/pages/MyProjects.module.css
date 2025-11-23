@@ -60,7 +60,7 @@
 }
 
 .panel {
-    background: #fff;
+    background: var(--color-bg-base);
     border-radius: 28px;
     padding: 32px;
     box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
@@ -173,7 +173,7 @@
 
 .detailButton {
     border: 1px solid #d1d5db;
-    background: #fff;
+    background: var(--color-bg-base);
     color: #111827;
     padding: 8px 14px;
     border-radius: 999px;
@@ -197,7 +197,7 @@
 }
 
 .modal {
-    background: #fff;
+    background: var(--color-bg-base);
     border-radius: 32px;
     box-shadow: 0 24px 80px rgba(15, 23, 42, 0.25);
     max-height: calc(100vh - 64px);
@@ -352,7 +352,7 @@
     border-radius: 14px;
     border: 1px solid #d1d5db;
     font-size: 15px;
-    background: #fff;
+    background: var(--color-bg-base);
 }
 
 .textInput:disabled {

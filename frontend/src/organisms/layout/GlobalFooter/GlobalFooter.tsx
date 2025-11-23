@@ -1,4 +1,6 @@
 // src/organisms/layout/GlobalFooter/GlobalFooter.tsx
+// frontend/src/organisms/layout/GlobalFooter/GlobalFooter.tsx
+// 전역 하단 푸터: 브랜드, 소셜, 퀵링크를 제공
 import { Link } from "react-router-dom";
 import type { MouseEvent } from "react";
 import styles from "./GlobalFooter.module.css";

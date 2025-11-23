@@ -1,4 +1,6 @@
 /* src/organisms/layout/GlobalHeader/GlobalHeader.module.css */
+/* frontend/src/organisms/layout/GlobalHeader/GlobalHeader.module.css */
+/* 전역 헤더 바 레이아웃 및 내비/드롭다운 스타일 */
 .bar {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -6,7 +8,7 @@
   gap: 50px;
   height: 72px; /* 전역 헤더 높이 */
   padding: 0;
-  background: #fff;
+  background: var(--color-bg-base);
   border-bottom: var(--border-divider-width) solid var(--color-divider-border);
 }
 
@@ -23,7 +25,7 @@
   justify-content: center;
   border-radius: 10px;
   border: 1px solid var(--color-white-button-border);
-  background: #fff;
+  background: var(--color-bg-base);
   margin-right: 6px;
 }
 .menuToggler span {
@@ -85,7 +87,7 @@
   top: calc(100% + 6px);
   left: 0;
   min-width: 200px;
-  background: #fff;
+  background: var(--color-bg-base);
   border: var(--border-divider-width) solid var(--color-divider-border);
   border-radius: 12px;
   padding: 8px;
@@ -110,7 +112,7 @@
     inset: 72px 0 auto 0; /* header height */
     display: none;
     flex-direction: column;
-    background: #fff;
+    background: var(--color-bg-base);
     padding: 12px;
     border-bottom: var(--border-divider-width) solid var(--color-divider-border);
     gap: 8px;

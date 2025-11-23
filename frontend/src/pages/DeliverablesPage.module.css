@@ -59,7 +59,7 @@
 
 .secondaryButton {
     border: 1px solid rgba(15, 23, 42, 0.12);
-    background: #fff;
+    background: var(--color-bg-base);
     color: var(--color-font-basic-content);
     border-radius: 10px;
     padding: 10px 16px;
@@ -88,7 +88,7 @@
 
 .tagModal {
     width: min(460px, 92%);
-    background: #fff;
+    background: var(--color-bg-base);
     border-radius: 16px;
     box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
     display: grid;

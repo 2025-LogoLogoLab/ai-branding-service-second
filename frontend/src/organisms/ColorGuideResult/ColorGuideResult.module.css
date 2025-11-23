@@ -7,7 +7,7 @@
 .panel {
   border: none;
   border-radius: 14px;
-  background: #fff;
+  background: var(--color-bg-base);
   padding: 12px;
   display: grid;
   gap: 8px;

@@ -1,0 +1,67 @@
+/* frontend/src/organisms/home/FeatureSplit.module.css */
+/* 좌우 스플릿 기능 섹션의 스타일 정의 */
+.split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(26px, 4vw, 80px);
+  align-items: center;
+  background: var(--color-bg-base);
+  padding: clamp(26px, 3vw, 44px);
+  border-radius: 26px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.split[data-reverse] {
+  direction: rtl;
+}
+.split[data-reverse] > * {
+  direction: ltr;
+}
+
+.textCol {
+  display: grid;
+  gap: 10px;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-font-site-title);
+  letter-spacing: 0.06em;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 30px);
+  color: #0f172a;
+  white-space: pre-wrap;
+}
+
+.description {
+  margin: 0;
+  color: var(--color-font-gray);
+  font-size: 16px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.cta {
+  width: fit-content;
+  padding-inline: 20px;
+  margin-top: 24px;
+}
+
+.visualCol {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 920px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+  .split[data-reverse] {
+    direction: ltr;
+  }
+}

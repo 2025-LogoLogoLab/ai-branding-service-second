@@ -1,4 +1,6 @@
 // src/atoms/TextButton/TextButton.tsx
+// frontend/src/atoms/TextButton/TextButton.tsx
+// 버튼 스타일 변형을 제공하는 텍스트 버튼 아톰
 import styles from "./TextButton.module.css";
 
 export type ButtonProps = {

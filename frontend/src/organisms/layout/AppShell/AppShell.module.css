@@ -1,4 +1,6 @@
 /* src/organisms/layout/AppShell/AppShell.module.css */
+/* frontend/src/organisms/layout/AppShell/AppShell.module.css */
+/* 전역 헤더/본문/푸터 3단 그리드 셸 스타일 */
 .page {
     display: grid;
     grid-template-rows: auto 1fr auto;
@@ -9,7 +11,11 @@
 }
 
 .headerInner { min-height: 72px; }
-.footerInner { }
+.headerInner,
+.footerInner {
+    width: min(1440px, 100%);
+    margin: 0;
+}
 
 .main {
     /* 전역 본문은 가운데 정렬된 컨테이너(섹션 레이아웃이 내부에서 다시 그리드 구성) */

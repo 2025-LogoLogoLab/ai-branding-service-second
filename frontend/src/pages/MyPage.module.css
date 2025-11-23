@@ -67,7 +67,7 @@
 }
 
 .sidebarDeliverablesPanel :global(.option) {
-    background: #fff;
+    background: var(--color-bg-base);
     border: 1px solid rgba(15, 23, 42, 0.08);
 }
 

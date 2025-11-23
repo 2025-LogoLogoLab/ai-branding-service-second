@@ -6,7 +6,7 @@
     height: var(--ls-card-h, 180px);
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    background-color: #ffffff;
+    background-color: var(--color-bg-base);
     display: flex;
     align-items: center;
     justify-content: center;

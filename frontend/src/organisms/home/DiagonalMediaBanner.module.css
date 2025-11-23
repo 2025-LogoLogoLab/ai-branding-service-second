@@ -1,0 +1,83 @@
+/* frontend/src/organisms/home/DiagonalMediaBanner.module.css */
+/* 사선 패턴 미디어 배너의 스타일 정의 */
+.banner {
+  background: var(--color-bg-base);
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 48px);
+  align-items: stretch;
+  padding: clamp(26px, 3vw, 40px);
+}
+
+.textCol {
+  display: grid;
+  gap: 10px;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(20px, 2.6vw, 26px);
+  color: #0f172a;
+  white-space: pre-wrap;
+}
+
+.description {
+  margin: 0;
+  color: var(--color-font-gray);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.cta {
+  width: fit-content;
+  padding-inline: 20px;
+}
+
+.mediaCol {
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(37, 60, 126, 0.08),
+    rgba(37, 60, 126, 0.08) 14px,
+    rgba(37, 60, 126, 0.02) 14px,
+    rgba(37, 60, 126, 0.02) 28px
+  );
+  border-radius: 18px;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 220px;
+  position: relative;
+}
+
+.media {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 18px;
+  border: 1px dashed rgba(37, 60, 126, 0.26);
+  padding: 18px;
+  text-align: center;
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.overlay {
+  opacity: 0.8;
+}
+
+.banner[data-muted] .mediaCol {
+  opacity: 0.9;
+}
+
+@media (max-width: 900px) {
+  .inner {
+    grid-template-columns: 1fr;
+  }
+}

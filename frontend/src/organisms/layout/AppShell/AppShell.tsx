@@ -1,4 +1,6 @@
 // src/organisms/layout/AppShell/AppShell.tsx
+// frontend/src/organisms/layout/AppShell/AppShell.tsx
+// 전역 헤더/푸터를 감싸고 각 페이지를 Outlet으로 렌더링하는 앱 셸
 import { Outlet } from "react-router-dom";
 import styles from "./AppShell.module.css";
 import GlobalHeader from "../GlobalHeader/GlobalHeader";

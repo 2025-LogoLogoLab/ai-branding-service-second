@@ -1,7 +1,5 @@
-/*
-    src/atoms/TextButton/TextButton.module.css
-    기본 버튼 Atom 스타일
-*/
+/* frontend/src/atoms/TextButton/TextButton.module.css */
+/* 기본 텍스트 버튼 아톰 스타일 및 변형 */
 
 /* 공통 버튼 스타일 */
 .base {

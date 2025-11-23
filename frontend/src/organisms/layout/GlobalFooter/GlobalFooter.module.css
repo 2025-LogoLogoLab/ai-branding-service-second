@@ -1,6 +1,8 @@
 /* src/organisms/layout/GlobalFooter/GlobalFooter.module.css */
+/* frontend/src/organisms/layout/GlobalFooter/GlobalFooter.module.css */
+/* 전역 푸터 레이아웃 및 링크 스타일 */
 .wrap {
-  background: #fff;
+  background: var(--color-bg-base);
   border-top: var(--border-divider-width) solid var(--color-divider-border);
 }
 

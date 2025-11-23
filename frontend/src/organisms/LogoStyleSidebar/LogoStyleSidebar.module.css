@@ -81,7 +81,7 @@
     width: 100%;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    background: #fff;
+    background: var(--color-bg-base);
     padding: 10px 12px;
     font-size: 13px;
     color: #374151;

@@ -2,7 +2,7 @@
     display: grid;
     gap: 0;
     padding: 0 0 0 10px;
-    background: #ffffff;
+    background: var(--color-bg-base);
     border-radius: 24px;
     min-width: 280px;
 }
@@ -86,7 +86,7 @@
     border-radius: 6px;
     appearance: none;
     border: 1px solid rgba(20, 27, 46, 0.15);
-    background: #ffffff;
+    background: var(--color-bg-base);
     display: grid;
     place-items: center;
     transition: background 0.2s ease, border-color 0.2s ease;
