@@ -2,7 +2,7 @@ import styles from "./DeliverableDetailModal.module.css";
 import { ProductToolbar, type ProductToolbarProps } from "../../molecules/ProductToolbar/ProductToolbar";
 import type { LogoDetail } from "../../custom_api/logo";
 import { updateBrandStrategy, type BrandStrategyDetail } from "../../custom_api/branding";
-import type { ColorGuideDetail, palette } from "../../custom_api/colorguide";
+import { updateColorGuide, type ColorGuideDetail, type palette } from "../../custom_api/colorguide";
 import { ensureDataUrl } from "../../utils/image";
 import { Fragment, useEffect, useState } from "react";
 import { LOGO_STYLES } from "../../types/logoStyles";
@@ -21,6 +21,8 @@ type BaseDetailProps = {
     loading?: boolean;
     error?: string | null;
     onRetry?: () => void;
+    onBrandingUpdated?: (detail: BrandStrategyDetail) => void;
+    onColorGuideUpdated?: (detail: ColorGuideDetail) => void;
 };
 
 type LogoDetailProps = BaseDetailProps & {
@@ -134,7 +136,16 @@ const translateStyle = (style?: string | null) => {
 };
 
 export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
-    const { variant = "default", onClose, toolbarProps, loading, error, onRetry } = props;
+    const {
+        variant = "default",
+        onClose,
+        toolbarProps,
+        loading,
+        error,
+        onRetry,
+        onBrandingUpdated,
+        onColorGuideUpdated,
+    } = props;
     const isBlueprint = variant === "blueprint";
     const [localTags, setLocalTags] = useState<TagRecord[]>(
         ((props.data as { tags?: TagRecord[] } | null | undefined)?.tags) ?? [],
@@ -147,6 +158,13 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
     const [brandingEditing, setBrandingEditing] = useState(false);
     const [brandingSaving, setBrandingSaving] = useState(false);
     const [brandingEditError, setBrandingEditError] = useState<string | null>(null);
+    const [colorGuideDetail, setColorGuideDetail] = useState<ColorGuideDetail | null>(
+        props.type === "colorGuide" ? ((props.data as ColorGuideDetail | null | undefined) ?? null) : null,
+    );
+    const [colorGuideDraft, setColorGuideDraft] = useState<ColorGuideDetail["guide"] | null>(null);
+    const [colorGuideEditing, setColorGuideEditing] = useState(false);
+    const [colorGuideSaving, setColorGuideSaving] = useState(false);
+    const [colorGuideError, setColorGuideError] = useState<string | null>(null);
 
     useEffect(() => {
         setLocalTags(((props.data as { tags?: TagRecord[] } | null | undefined)?.tags) ?? []);
@@ -163,6 +181,21 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
             setBrandingDetail(null);
             setBrandingEditing(false);
             setBrandingEditError(null);
+        }
+    }, [props.type, props.data]);
+
+    useEffect(() => {
+        if (props.type === "colorGuide") {
+            const nextDetail = (props.data as ColorGuideDetail | null | undefined) ?? null;
+            setColorGuideDetail(nextDetail);
+            setColorGuideDraft(nextDetail?.guide ?? null);
+            setColorGuideEditing(false);
+            setColorGuideError(null);
+        } else {
+            setColorGuideDetail(null);
+            setColorGuideDraft(null);
+            setColorGuideEditing(false);
+            setColorGuideError(null);
         }
     }, [props.type, props.data]);
 
@@ -329,10 +362,50 @@ const renderLogoDetail = (detail: LogoDetail) => {
             setBrandingBodyDraft(updated.markdown ?? "");
             setBrandingEditing(false);
             setLocalTags(Array.isArray(updated.tags) ? updated.tags : []);
+            onBrandingUpdated?.(updated);
         } catch (err) {
             setBrandingEditError(err instanceof Error ? err.message : "브랜딩 전략 수정에 실패했습니다.");
         } finally {
             setBrandingSaving(false);
+        }
+    };
+
+    const handleColorGuideEditStart = () => {
+        setColorGuideEditing(true);
+        setColorGuideDraft((colorGuideDetail ?? (props.data as ColorGuideDetail | null | undefined))?.guide ?? null);
+        setColorGuideError(null);
+    };
+
+    const handleColorGuideEditCancel = () => {
+        const current = colorGuideDetail ?? (props.data as ColorGuideDetail | null | undefined);
+        setColorGuideDraft(current?.guide ?? null);
+        setColorGuideEditing(false);
+        setColorGuideError(null);
+    };
+
+    const handleColorGuideDraftChange = (key: keyof ColorGuideDetail["guide"], field: "hex" | "description", value: string) => {
+        setColorGuideDraft((prev) => ({
+            ...(prev ?? {}),
+            [key]: { ...(prev?.[key] ?? { hex: "", description: "" }), [field]: value },
+        }));
+    };
+
+    const handleColorGuideSave = async () => {
+        const current = colorGuideDetail ?? (props.data as ColorGuideDetail | null | undefined);
+        if (!current || !colorGuideDraft) return;
+        setColorGuideSaving(true);
+        setColorGuideError(null);
+        try {
+            const updated = await updateColorGuide(current.id, { guide: colorGuideDraft });
+            setColorGuideDetail(updated);
+            setColorGuideDraft(updated.guide);
+            setColorGuideEditing(false);
+            setLocalTags(Array.isArray(updated.tags) ? updated.tags : []);
+            onColorGuideUpdated?.(updated);
+        } catch (err) {
+            setColorGuideError(err instanceof Error ? err.message : "컬러 가이드 수정에 실패했습니다.");
+        } finally {
+            setColorGuideSaving(false);
         }
     };
 
@@ -407,46 +480,103 @@ const renderLogoDetail = (detail: LogoDetail) => {
         );
     };
 
-    const renderColorGuideDetail = (detail: ColorGuideDetail) => (
-        <Fragment>
-            <div className={styles.metadata}>
-                {detail.createdAt && <span>생성일 {formatDate(detail.createdAt)}</span>}
-                {detail.updatedAt && <span>수정일 {formatDate(detail.updatedAt)}</span>}
-                {translateStyle(detail.style) && <span>스타일 {translateStyle(detail.style)}</span>}
-            </div>
+    const renderColorGuideDetail = (detail: ColorGuideDetail) => {
+        const activeDetail = colorGuideDetail ?? detail;
+        const guideDraft = colorGuideDraft ?? activeDetail.guide;
 
-            <section className={styles.section}>
-                <h3 className={styles.sectionTitle}>Prompt</h3>
-                <div className={styles.promptBlock}>{detail.briefKo || "컬러 가이드 프롬프트가 없습니다."}</div>
-            </section>
-
-            <section className={styles.section}>
-                <h3 className={styles.sectionTitle}>Color Guide</h3>
-                <div className={styles.paletteDetails}>
-                    {(Object.keys(detail.guide) as Array<keyof ColorGuideDetail["guide"]>).map((key) => {
-                        const swatch = detail.guide[key] as palette;
-                        return (
-                            <div className={styles.paletteRow} key={key}>
-                                <div
-                                    className={styles.swatch}
-                                    style={{ backgroundColor: swatch.hex || "#e2e8f0" }}
-                                    aria-label={`${LABELS[key]} 색상 미리보기`}
-                                />
-                                <div className={styles.swatchInfo}>
-                                    <div className={styles.hex}>
-                                        {LABELS[key]} · {swatch.hex || "미입력"}
-                                    </div>
-                                    <p className={styles.textBlock}>{swatch.description || "설명이 제공되지 않았습니다."}</p>
-                                </div>
-                            </div>
-                        );
-                    })}
+        return (
+            <Fragment>
+                <div className={styles.metadataRow}>
+                    <div className={styles.metadata}>
+                        {activeDetail.createdAt && <span>생성일 {formatDate(activeDetail.createdAt)}</span>}
+                        {activeDetail.updatedAt && <span>수정일 {formatDate(activeDetail.updatedAt)}</span>}
+                        {translateStyle(activeDetail.style) && <span>스타일 {translateStyle(activeDetail.style)}</span>}
+                    </div>
+                    <div className={styles.brandingEditActions}>
+                        {colorGuideEditing ? (
+                            <>
+                                <button
+                                    type="button"
+                                    className={styles.brandingEditPrimary}
+                                    onClick={handleColorGuideSave}
+                                    disabled={colorGuideSaving}
+                                >
+                                    {colorGuideSaving ? "저장 중…" : "저장"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className={styles.brandingEditButton}
+                                    onClick={handleColorGuideEditCancel}
+                                    disabled={colorGuideSaving}
+                                >
+                                    취소
+                                </button>
+                            </>
+                        ) : (
+                            <button type="button" className={styles.brandingEditButton} onClick={handleColorGuideEditStart}>
+                                수정
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </section>
 
-            {renderTagsSection(localTags, () => setTagPickerOpen(true), handleRemoveTag)}
-        </Fragment>
-    );
+                <section className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Prompt</h3>
+                    <div className={styles.promptBlock}>{activeDetail.briefKo || "컬러 가이드 프롬프트가 없습니다."}</div>
+                </section>
+
+                <section className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Color Guide</h3>
+                    <div className={styles.paletteDetails}>
+                        {(Object.keys(guideDraft) as Array<keyof ColorGuideDetail["guide"]>).map((key) => {
+                            const swatch = guideDraft[key] as palette;
+                            return (
+                                <div className={styles.paletteRow} key={key}>
+                                    <div
+                                        className={styles.swatch}
+                                        style={{ backgroundColor: swatch?.hex || "#e2e8f0" }}
+                                        aria-label={`${LABELS[key]} 색상 미리보기`}
+                                    />
+                                    <div className={styles.swatchInfo}>
+                                        <div className={styles.hex}>
+                                            {LABELS[key]} · {swatch?.hex || "미입력"}
+                                        </div>
+                                        {colorGuideEditing ? (
+                                            <div className={styles.swatchForm}>
+                                                <input
+                                                    className={styles.input}
+                                                    value={swatch?.hex ?? ""}
+                                                    onChange={(event) =>
+                                                        handleColorGuideDraftChange(key, "hex", event.target.value)
+                                                    }
+                                                    placeholder="#HEX 코드"
+                                                />
+                                                <textarea
+                                                    className={styles.textarea}
+                                                    value={swatch?.description ?? ""}
+                                                    onChange={(event) =>
+                                                        handleColorGuideDraftChange(key, "description", event.target.value)
+                                                    }
+                                                    placeholder="색상 설명을 입력하세요."
+                                                />
+                                            </div>
+                                        ) : (
+                                            <p className={styles.textBlock}>{swatch?.description || "설명이 제공되지 않았습니다."}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    {colorGuideEditing && colorGuideError && (
+                        <p className={styles.brandingEditError}>{colorGuideError}</p>
+                    )}
+                </section>
+
+                {renderTagsSection(localTags, () => setTagPickerOpen(true), handleRemoveTag)}
+            </Fragment>
+        );
+    };
 
     return (
         <div className={styles.overlay} role="presentation" onClick={onClose}>

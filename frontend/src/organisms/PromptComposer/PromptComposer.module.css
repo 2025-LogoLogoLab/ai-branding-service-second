@@ -35,15 +35,15 @@
 }
 
 .sendBtn {
-  width: 36px;
-  height: 36px;
+  width: auto;
+  height: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 50%;         /* circular button */
-  background: var(--color-button-primary-bg);
-  color: var(--color-font-button-white);
+  border-radius: 0;
+  background: transparent;    /* 아이콘 자체가 배경을 포함 */
+  padding: 0;
 }
 
 .sendBtn:disabled, .iconBtn:disabled {
@@ -51,5 +51,10 @@
   cursor: not-allowed;
 }
 
-.iconImg { width: 18px; height: 18px; display: block; }
+.iconImg {
+  width: 36px;
+  height: 36px;
+  display: block;
+  object-fit: contain;
+}
 

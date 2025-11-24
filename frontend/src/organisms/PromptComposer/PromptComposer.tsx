@@ -1,6 +1,7 @@
 // src/organisms/PromptComposer/PromptComposer.tsx
 import { TextArea } from "../../atoms/TextArea/TextArea";
 import styles from "./PromptComposer.module.css";
+import sendIcon from "../../assets/icons/icon_Send_ButtonFilledCompact.png";
 
 export type PromptComposerProps = {
   value: string;
@@ -62,7 +63,7 @@ export default function PromptComposer({
 
         {/* 보내기 */}
         <button className={styles.sendBtn} type="button" onClick={onSubmit} disabled={!!disabled}>
-          <SendIcon />
+          <img src={sendIcon} alt="보내기" className={styles.iconImg} />
         </button>
       </div>
     </div>
@@ -86,13 +87,3 @@ function MicIcon() {
     </svg>
   );
 }
-
-function SendIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <path d="M22 2L11 13" stroke="#ffffff" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="#ffffff" strokeWidth="2" strokeLinejoin="round" fill="none"/>
-    </svg>
-  );
-}
-

@@ -150,6 +150,10 @@ export type ColorGuideDetail = {
     [key: string]: unknown;
 };
 
+export type UpdateColorGuideBody = {
+    guide: colorGuide;
+};
+
 export type ColorGuidePageParams = {
     projectId?: number;
     page?: number;
@@ -261,5 +265,45 @@ export async function fetchColorGuideDetail(
         tags: Array.isArray(payload.tags) ? payload.tags : undefined,
     };
     console.log("컬러 가이드 상세 조회 성공");
+    return detail;
+}
+
+export async function updateColorGuide(
+    id: number,
+    body: UpdateColorGuideBody,
+): Promise<ColorGuideDetail> {
+    console.log("컬러 가이드 수정 요청 시작");
+    const result = await fetch(`${colorGuideDetailEndpoint}/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(body),
+    });
+
+    if (!result.ok) {
+        console.log("컬러 가이드 수정 요청 오류");
+        throw new Error("컬러 가이드 수정 실패 " + result.status);
+    }
+
+    const payload = await result.json();
+    const guideSource = payload.guide ?? payload;
+    const detail: ColorGuideDetail = {
+        id: payload.id,
+        briefKo: payload.briefKo ?? "",
+        style: payload.style ?? undefined,
+        caseType: payload.caseType ?? payload.case ?? undefined,
+        guide: {
+            main: normalizePalette(guideSource.main, payload.mainHex, payload.mainDescription),
+            sub: normalizePalette(guideSource.sub, payload.subHex, payload.subDescription),
+            point: normalizePalette(guideSource.point, payload.pointHex, payload.pointDescription),
+            background: normalizePalette(guideSource.background, payload.backgroundHex, payload.backgroundDescription),
+        },
+        createdAt: payload.createdAt,
+        updatedAt: payload.updatedAt,
+        tags: Array.isArray(payload.tags) ? payload.tags : undefined,
+    };
+    console.log("컬러 가이드 수정 요청 성공");
     return detail;
 }

@@ -54,6 +54,12 @@
   font-size: 0.9rem;
   line-height: 1.4;
   word-break: keep-all;
+  min-height: 60px; /* 약 3줄 기준 높이 고정으로 카드 높이 균일화 */
+  max-height: 60px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* 잘못된 HEX일 때 시각적 표시 */

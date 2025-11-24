@@ -22,8 +22,10 @@ src/atoms/SidebarOptionItem/SidebarOptionItem.module.css
 }
 .active {
     font-weight: 800;
-    /* text-align: center; */
-    background-color: #e7ebff;
+    background-color: var(--color-menu-selected-bg);
+}
+.active .label {
+    font-size: 16px; /* 선택 시 약간 크게 표시 */
 }
 .label {
     font-size: 14px;

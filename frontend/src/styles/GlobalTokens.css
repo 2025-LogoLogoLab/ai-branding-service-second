@@ -4,8 +4,10 @@
     --color-bg-base: #FBFCFE;
     --color-text-input-bg: #253C7E17;
     --color-button-primary-bg: #1E3A8A;
+    --color-preview-promt-user-bg: #1E3A8A;
     --color-button-hover-bg: #1F3C8E29;
-    --color-menu-selected-bg: #1F3C8E29;
+    --color-menu-selected-bg: #D2DAF2;
+    /* --color-menu-selected-bg: #1F3C8E29; */
 
     --color-hover-on-white: #F3F4F6;
     --color-active-on-white: #1F3C8E29;
@@ -25,6 +27,7 @@
     --color-font-weak: #1B1E284D;
     
     --color-font-button-white: #FBFCFE;
+    --color-font-prompt-white: #FBFCFE;
     --color-font-input-label: #141B2E66;
 
     --color-font-site-title: #264AB1;
@@ -35,6 +38,7 @@
     /* 브랜딩/컬러 가이드 블루프린트 전용 색상 */
     --color-card-blueprint-accent: #1E3A8A;
     --color-card-blueprint-header: #253C7E;
+    --color-text-detail-box-bg: #253C7E17;
 
     /* 테두리 색상 모음 */
     --color-input-border: #00000000;

@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import styles from "./GlobalHeader.module.css";
 import brandImage from "../../../assets/designs/LogoLogoLabHeader.png";
+import dropdownIcon from "../../../assets/icons/icon_dropdown.png";
 import { useAuth } from "../../../context/AuthContext";
 import { TextButton } from "../../../atoms/TextButton/TextButton";
 
@@ -89,7 +90,8 @@ export default function GlobalHeader() {
               aria-expanded={featuresOpen}
               onClick={() => setFeaturesOpen(v => !v)}
             >
-              Features ▾
+              <span>Features</span>
+              <img src={dropdownIcon} alt="" aria-hidden="true" className={styles.navItemIcon} />
             </button>
             {featuresOpen && (
               <div className={styles.dropdownPanel} role="menu">

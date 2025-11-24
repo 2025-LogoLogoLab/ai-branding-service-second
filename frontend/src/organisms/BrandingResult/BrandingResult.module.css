@@ -42,6 +42,9 @@
   max-width: var(--msg-max-width);
   width: 100%;          /* do not shrink container; prevents affecting siblings */
   justify-items: start; /* keep bubble left-aligned */
+  background: var(--color-text-detail-box-bg);
+  border-radius: 14px;
+  padding: 12px;
 }
 
 /* ensure the bubble itself shrink-wraps but stays within group width */

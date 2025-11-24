@@ -64,7 +64,7 @@ export function LogoCard({
             >
                 <ProductToolbar
                     id={id}
-                    size={20}
+                    size={24}
                     onDelete={onDelete}
                     onSave={onSave}
                     onDownload={onDownload}

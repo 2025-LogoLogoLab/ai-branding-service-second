@@ -10,6 +10,8 @@ type FeatureSplitProps = {
   description: string;
   ctaLabel?: string;
   onCtaClick?: () => void;
+  imageSrc?: string;
+  imageAlt?: string;
   image?: {
     title?: string;
     badge?: string;
@@ -30,6 +32,8 @@ export default function FeatureSplit({
   description,
   ctaLabel,
   onCtaClick,
+  imageSrc,
+  imageAlt,
   image,
   imagePosition = "right",
 }: FeatureSplitProps) {
@@ -48,14 +52,18 @@ export default function FeatureSplit({
           />
         )}
       </div>
-      <div className={styles.visualCol} aria-hidden={!image}>
-        {image && (
-          <PreviewCard
-            title={image.title}
-            badge={image.badge}
-            chipLabel={image.chipLabel}
-            accent={image.accent}
-          />
+      <div className={styles.visualCol} aria-hidden={!image && !imageSrc}>
+        {imageSrc ? (
+          <img src={imageSrc} alt={imageAlt ?? ""} className={styles.imageMedia} />
+        ) : (
+          image && (
+            <PreviewCard
+              title={image.title}
+              badge={image.badge}
+              chipLabel={image.chipLabel}
+              accent={image.accent}
+            />
+          )
         )}
       </div>
     </section>

@@ -50,6 +50,7 @@ import {
     useDeliverableDetail,
 } from "../utils/deliverableDetail";
 import { fetchAssetsByTag, type AssetSummary } from "../custom_api/assets";
+import { fetchTagList, type TagRecord } from "../custom_api/tags";
 // 페이지별 기본 페이지 크기(시안에서는 3열 그리드이므로 9개 단위가 자연스러움)
 const PAGE_SIZE = 3;
 
@@ -177,6 +178,9 @@ function DeliverablesPage({
     const [tagError, setTagError] = useState<string | null>(null);
     const [tagApplied, setTagApplied] = useState<string | null>(null);
     const [isTagModalOpen, setTagModalOpen] = useState(false);
+    const [tagList, setTagList] = useState<TagRecord[]>([]);
+    const [tagListLoading, setTagListLoading] = useState(false);
+    const [tagListError, setTagListError] = useState<string | null>(null);
 
     // refetch 트리거용 nonce
     const [logoNonce, setLogoNonce] = useState(0);
@@ -545,8 +549,8 @@ function DeliverablesPage({
         renderSidebar ? "" : s.layoutNoSidebar,
     ].join(" ").trim();
 
-    const handleTagSearch = useCallback(async () => {
-        const trimmed = tagQuery.trim();
+    const handleTagSearch = useCallback(async (value?: string) => {
+        const trimmed = (value ?? tagQuery).trim();
         if (!trimmed) {
             setTagError("검색할 태그를 입력해주세요.");
             return;
@@ -573,6 +577,26 @@ function DeliverablesPage({
         setTagError(null);
         setTagQuery("");
     };
+
+    // 태그 목록 로드 (모달 열릴 때)
+    useEffect(() => {
+        if (!isTagModalOpen) return;
+        setTagListLoading(true);
+        setTagListError(null);
+        fetchTagList()
+            .then((list) => setTagList(list))
+            .catch((err) => {
+                console.error(err);
+                setTagListError("태그 목록을 불러오지 못했습니다.");
+            })
+            .finally(() => setTagListLoading(false));
+    }, [isTagModalOpen]);
+
+    const filteredTagList = useMemo(() => {
+        const query = tagQuery.trim().toLowerCase();
+        if (!query) return tagList;
+        return tagList.filter((tag) => tag.name.toLowerCase().includes(query));
+    }, [tagList, tagQuery]);
 
     const isTagSearchActive = Boolean(tagApplied);
 
@@ -655,10 +679,10 @@ function DeliverablesPage({
                     </div>
 
                     {selections.logo && (
-                        <DeliverableSection title="로고 산출물" variant={variant}>
+                        <DeliverableSection title="로고" variant={variant}>
                             {!isTagSearchActive && logoState.error && renderStatus(logoState.error, "error")}
-                            {!isTagSearchActive && !logoState.loading && !logoState.error && !logoState.data?.content.length && renderStatus("저장된 로고 산출물이 없습니다.")}
-                            {!isTagSearchActive && logoState.loading && renderStatus("로고 산출물을 불러오는 중입니다...")}
+                            {!isTagSearchActive && !logoState.loading && !logoState.error && !logoState.data?.content.length && renderStatus("저장된 로고가 없습니다.")}
+                            {!isTagSearchActive && logoState.loading && renderStatus("로고를 불러오는 중입니다...")}
 
                             {isTagSearchActive && tagError && renderStatus(tagError, "error")}
                             {isTagSearchActive && !tagError && !tagLogoItems.length && renderStatus("검색 결과가 없습니다.")}
@@ -696,9 +720,9 @@ function DeliverablesPage({
                     )}
 
                     {selections.branding && (
-                        <DeliverableSection title="브랜딩 전략 산출물" variant={variant}>
+                        <DeliverableSection title="브랜딩 전략" variant={variant}>
                             {!isTagSearchActive && brandingState.error && renderStatus(brandingState.error, "error")}
-                            {!isTagSearchActive && !brandingState.loading && !brandingState.error && !brandingState.data?.content.length && renderStatus("브랜딩 전략 산출물이 없습니다.")}
+                            {!isTagSearchActive && !brandingState.loading && !brandingState.error && !brandingState.data?.content.length && renderStatus("브랜딩 전략이 없습니다.")}
                             {!isTagSearchActive && brandingState.loading && renderStatus("브랜딩 전략을 불러오는 중입니다...")}
 
                             {isTagSearchActive && tagError && renderStatus(tagError, "error")}
@@ -734,9 +758,9 @@ function DeliverablesPage({
                     )}
 
                     {selections.colorGuide && (
-                        <DeliverableSection title="컬러 가이드 산출물" variant={variant}>
+                        <DeliverableSection title="컬러 가이드" variant={variant}>
                             {!isTagSearchActive && colorGuideState.error && renderStatus(colorGuideState.error, "error")}
-                            {!isTagSearchActive && !colorGuideState.loading && !colorGuideState.error && !colorGuideState.data?.content.length && renderStatus("컬러 가이드 산출물이 없습니다.")}
+                            {!isTagSearchActive && !colorGuideState.loading && !colorGuideState.error && !colorGuideState.data?.content.length && renderStatus("컬러 가이드가 없습니다.")}
                             {!isTagSearchActive && colorGuideState.loading && renderStatus("컬러 가이드를 불러오는 중입니다...")}
 
                             {isTagSearchActive && tagError && renderStatus(tagError, "error")}
@@ -771,7 +795,7 @@ function DeliverablesPage({
                         </DeliverableSection>
                     )}
 
-                    {activeCount === 0 && renderStatus("표시할 산출물을 선택해주세요.")}
+                    {activeCount === 0 && renderStatus("표시할 항목을 선택해주세요.")}
                 </div>
             </div>
 
@@ -806,6 +830,7 @@ function DeliverablesPage({
                             : undefined
                     }
                     toolbarProps={detailToolbarProps}
+                    onBrandingUpdated={() => setBrandingNonce((v) => v + 1)}
                 />
             )}
 
@@ -823,6 +848,7 @@ function DeliverablesPage({
                             : undefined
                     }
                     toolbarProps={detailToolbarProps}
+                    onColorGuideUpdated={() => setColorGuideNonce((v) => v + 1)}
                 />
             )}
 
@@ -848,6 +874,26 @@ function DeliverablesPage({
                                     }
                                 }}
                             />
+                            {tagListLoading && <div className={s.status}>태그 목록을 불러오는 중…</div>}
+                            {tagListError && <div className={`${s.status} ${s.error}`}>{tagListError}</div>}
+                            {!tagListLoading && !tagListError && (
+                                <ul className={s.tagList} role="list">
+                                    {filteredTagList.map((tag) => (
+                                        <li key={tag.id ?? tag.name}>
+                                            <button
+                                                type="button"
+                                                className={s.tagOption}
+                                                onClick={() => void handleTagSearch(tag.name)}
+                                            >
+                                                #{tag.name}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                            {!tagListLoading && !tagListError && filteredTagList.length === 0 && (
+                                <div className={s.tagEmpty}>검색 결과가 없습니다.</div>
+                            )}
                             <div className={s.tagModalActions}>
                                 <button
                                     type="button"

@@ -1,6 +1,7 @@
 .card {
     display: grid;
     gap: 16px;
+    grid-template-rows: auto 1fr auto;
     padding: 20px;
     border-radius: 20px;
     width: min(100%, var(--deliverable-card-width, 320px));
@@ -19,9 +20,13 @@
 }
 
 .header {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
+    display: grid;
+    gap: 12px;
+}
+
+.meta {
+    display: grid;
+    gap: 6px;
 }
 
 .label {
@@ -35,10 +40,21 @@
 }
 
 .prompt {
-    margin: 4px 0 0;
+    margin: 0;
     font-size: 15px;
     font-weight: 600;
-    color: var(--color-font-basic-content);
+    color: var(--color-font-prompt-white);
+    line-height: 1.4;
+    min-height: 66px; /* 3줄 기준 높이 고정으로 카드 높이 균일화 */
+    max-height: 66px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    background: var(--color-preview-promt-user-bg);
+    padding: 8px 10px;
+    border-radius: 10px;
 }
 
 .promptBlueprint {

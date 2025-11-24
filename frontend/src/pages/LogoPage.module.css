@@ -13,7 +13,7 @@
 */
 .container {
     /* Sidebars shrink earlier: lower the minimum to 220px */
-    --side: clamp(220px, 23vw, 320px);
+    --side: clamp(200px, 20vw, 300px);
     /* Single source for preview sizing used by both sidebars */
     --ls-card-h: 300px;
     --ls-img-max: 220px;
@@ -26,17 +26,24 @@
     align-items: start;
 }
 
+.allMode {
+    grid-template-columns: var(--side) minmax(0, 1fr);
+}
+
 .styleExpanded {
     grid-template-columns: var(--side) minmax(420px, 2.2fr) minmax(calc(2 * var(--side)), 2.4fr);
 }
 
 /* Large screens: enforce main >= 2x a sidebar */
 @media (min-width: 1280px) {
-    .container {
+.container {
         grid-template-columns: var(--side) var(--side) minmax(calc(2 * var(--side)), 1fr);
     }
     .styleExpanded {
         grid-template-columns: var(--side) minmax(520px, 2.4fr) minmax(calc(2 * var(--side)), 2.6fr);
+    }
+    .allMode {
+        grid-template-columns: var(--side) minmax(calc(2.2 * var(--side)), 1fr);
     }
 }
 
@@ -103,6 +110,51 @@
 }
 
 .cardActions { display: grid; gap: 6px; }
+
+.allContent {
+    border: 0;
+    border-radius: 12px;
+    padding: 4px;
+    background: var(--color-bg-base);
+    display: grid;
+    gap: 12px;
+}
+
+.allHeader {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111827;
+    padding: 8px 4px 0;
+}
+
+.allGrid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.allCardBtn {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    text-align: inherit;
+}
+
+.allCardBtn:hover {
+    filter: brightness(0.98);
+}
+
+.allCardBtn:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
+}
+
+.allActions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 4px 0 0;
+}
 
 /* 반응형: 폭이 좁아지면 단일 컬럼 */
 @media (max-width: 920px) {

@@ -9,7 +9,7 @@ type ContentStripProps = {
   description: string;
   ctaLabel?: string;
   onCtaClick?: () => void;
-  align?: "left" | "center";
+  align?: "left" | "center" | "right";
 };
 
 /**

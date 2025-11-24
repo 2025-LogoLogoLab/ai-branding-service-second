@@ -6,8 +6,10 @@ import { useAuth } from "../context/AuthContext";
 import HeroBanner from "../organisms/home/HeroBanner";
 import ContentStrip from "../organisms/home/ContentStrip";
 import FeatureSplit from "../organisms/home/FeatureSplit";
-import DiagonalMediaBanner from "../organisms/home/DiagonalMediaBanner";
+// import DiagonalMediaBanner from "../organisms/home/DiagonalMediaBanner";
 import styles from "./Home.module.css";
+import featureStylesImage from "../assets/images/for_front/front_img_styles.png";
+import featureBrandingImage from "../assets/images/for_front/front_img_branding.png";
 
 function Home() {
   const { user } = useAuth();
@@ -19,7 +21,7 @@ function Home() {
         eyebrow: "AI Logo Generator",
         title: "높은 텍스트 구현율의 로고 생성",
         description:
-          "FLUX 모델 기반으로 구축한 로고 생성기는 \n다른 서비스 대비 사용자가 표출하기를 원하는 \n텍스트를 정확하게 표현합니다.",
+          "\nFLUX 모델 기반으로 구축한 로고 생성기는 \n다른 서비스 대비 사용자가 표출하기를 원하는 \n텍스트를 정확하게 표현합니다.",
         ctaLabel: "로고 생성하기",
         onCtaClick: () => navigate("/logo"),
         image: { title: "로고 생성기", badge: "AI", chipLabel: "브랜드 워드", accent: "softBlue" as const },
@@ -29,10 +31,11 @@ function Home() {
         eyebrow: "Tailored Logo Design",
         title: "다채로운 로고 생성 옵션",
         description:
-          "자유로운 해상도, 8개의 스타일, 3개의 타입을 바탕으로 \n여러분의 브랜드에 최적화 된 로고를 생성해보세요.",
+          "\n\n자유로운 해상도, 8개의 스타일, 3개의 타입을 바탕으로 \n여러분의 브랜드에 최적화 된 로고를 생성해보세요.",
         ctaLabel: "샘플 살펴보기",
         // onCtaClick: () => navigate("/branding"),
-        image: { title: "AI 분석", badge: "브랜드 리서치", chipLabel: "브랜드 리서치", accent: "softGray" as const },
+        imageSrc: featureStylesImage,
+        imageAlt: "여러 스타일의 로고 예시 미리보기",
         imagePosition: "left" as const,
       },
       {
@@ -62,7 +65,8 @@ function Home() {
           user? "프로젝트 및 태그를 기반으로 \n작업물들을 효율적으로 관리하세요." : "지금 로고로고랩의 회원이 되시면 \n작업물들을 보다 효율적으로 관리할 수 있습니다.",
         ctaLabel: "살펴보기",
         onCtaClick: () => navigate(user ? "/myPage" : "/signUp"),
-        image: { title: "워크플로우", badge: "Team", chipLabel: "작업 승인", accent: "softGray" as const },
+        imageSrc: featureBrandingImage,
+        imageAlt: "워크플로우 예시 미리보기",
         imagePosition: "right" as const,
       },
     ],
@@ -101,8 +105,9 @@ function Home() {
         <ContentStrip
           eyebrow="AI 기반 워크플로우"
           title="AI 기반의 빠르고 일관성 있는 브랜딩 솔루션"
-          description={"인공지능의 힘을 활용하여 일관성 있는 브랜드 아이덴티티를 클릭 한번으로 완성하세요. \n로고로고랩에서는 여러분에게 특화된 결과물을 무료로 빠르게 확인할 수 있습니다."}
+          description={"\n\n\n\n\n\n\n\n인공지능의 힘을 활용하여 일관성 있는 브랜드 아이덴티티를 클릭 한번으로 완성하세요. \n로고로고랩에서는 여러분에게 특화된 결과물을 무료로 빠르게 확인할 수 있습니다.\n\n"}
           ctaLabel="무료로 시작하기"
+          align="right"
           // onCtaClick={() => navigate("/logo")}
         />
       </div>
@@ -113,7 +118,7 @@ function Home() {
         ))}
       </div>
 
-      <div className={styles.section}>
+      {/* <div className={styles.section}>
         <DiagonalMediaBanner
           title="준비 중인 임베드 영역"
           description="영상 또는 이미지가 삽입될 예정인 영역을 미리 마련했습니다. 시연 영상, 데모 샘플, 고객 사례 등을 자유롭게 꽂아 사용할 수 있습니다."
@@ -122,7 +127,7 @@ function Home() {
           onCtaClick={() => navigate(user ? "/logo" : "/signUp")}
           muted
         />
-      </div>
+      </div> */}
     </div>
   );
 }

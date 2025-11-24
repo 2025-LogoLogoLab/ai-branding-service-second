@@ -51,9 +51,8 @@
     - 사용자에게 현재 모드를 명확히 전달
 */
 .allHeader {
-    font-size: 24px;
+    font-size: 27px;
     font-weight: 900;
-    /* text-align: center; */
     padding: 12px 0;
     color: #111827;
 }
@@ -67,7 +66,7 @@
 .gridAll {
     display: grid;
     gap: 12px;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 /* auto-fill 설정으로 열이 자연스럽게 채워지므로 별도 브레이크포인트 정의 불필요 */

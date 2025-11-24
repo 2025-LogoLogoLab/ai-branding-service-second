@@ -82,6 +82,7 @@ function ColorGuide(){
         try {
             const result = await saveColorGuide( { briefKo:promptText, guide:colorGuideGenResult} );
             console.log(result);
+            alert('컬러 가이드가 저장되었습니다.');
 
         }
         catch (err){
@@ -128,6 +129,14 @@ function ColorGuide(){
         });
     };
 
+    // 안내 메시지: 프롬프트 입력/생성 전 단계에서만 표시
+    const showPrePromptNotice = !colorGuideGenResult && !loading;
+    const isLinkedFlow = Boolean(selection.logoBase64 || imageUrl || selection.brandingMarkdown);
+    const colorGuideLinkedNotice =
+        "컬러 가이드 - 연계 시 설명: 로고나 브랜딩 정보를 함께 전달하면 핵심 톤앤매너를 더 정확히 반영한 팔레트를 제안합니다. (예시 문구 길이를 늘려둔 상태)";
+    const colorGuideStandaloneNotice =
+        "컬러 가이드 - 단독 시 설명: 브랜드의 감성, 분위기, 활용 채널을 구체적으로 적어주면 색상 제안이 더 정밀해집니다. (예시 문구 길이를 늘려둔 상태)";
+
     const hasLogoContext = Boolean(selection.logoBase64 || imageUrl);
 
     return(
@@ -136,6 +145,20 @@ function ColorGuide(){
             <h2 style={{ margin: 0 }}>
                 {hasLogoContext ? '로고를 기반으로 컬러 가이드 작성' : '컬러 가이드 생성'}
             </h2>
+            <div style={{ borderBottom: '1px solid var(--color-divider-border)', margin: '4px 0 8px' }} />
+            {showPrePromptNotice && (
+                <div
+                    style={{
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        background: '#eef2ff',
+                        color: '#1f2937',
+                        lineHeight: 1.6,
+                    }}
+                >
+                    {isLinkedFlow ? colorGuideLinkedNotice : colorGuideStandaloneNotice}
+                </div>
+            )}
             {lastPrompt && <MarkdownMessage content={lastPrompt} isUser />}
 
             {/* 결과 표시 */}
@@ -152,7 +175,7 @@ function ColorGuide(){
             )}
 
             {colorGuideGenResult && (
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', margin: '50px 0' }}>
                     {selection.brandingMarkdown ? (
                         <TextButton
                             label="추가기능"

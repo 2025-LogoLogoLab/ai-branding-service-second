@@ -85,7 +85,7 @@ export default function ColorGuideDeliverableCard({
             aria-label={onSelect ? "컬러 가이드 상세 보기" : undefined}
         >
             <header className={styles.header}>
-                <div>
+                <div className={styles.meta}>
                     <span
                         className={[
                             styles.label,

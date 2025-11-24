@@ -20,6 +20,17 @@
   justify-items: center;
 }
 
+.strip[data-align="right"] {
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+}
+.strip[data-align="right"] .body {
+  align-items: flex-end;
+  text-align: right;
+}
+.strip[data-align="right"] .description {
+  text-align: right;
+}
+
 .header {
   display: grid;
   gap: 8px;
@@ -53,6 +64,7 @@
   font-size: 16px;
   line-height: 1.6;
   white-space: pre-wrap;
+  text-align: inherit;
 }
 
 .cta {

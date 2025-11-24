@@ -23,7 +23,9 @@ export default function AppShell() {
 
             {/* 본문: 하위 레이아웃/페이지가 들어올 자리 */}
             <main className={styles.main} aria-label="Content">
-                <Outlet />
+                <div className={styles.mainInner}>
+                    <Outlet />
+                </div>
             </main>
 
             {/* 전역 푸터: 모든 페이지 하단에 표시 */}

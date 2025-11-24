@@ -1,9 +1,9 @@
 /* frontend/src/organisms/layout/SectionLayout/SectionLayout.module.css */
 /* 섹션 레이아웃(사이드바+콘텐츠) 스타일, --mw 커스텀 속성으로 최대 폭 주입 */
 .wrap {
-    /* 페이지 폭: 100vw를 기본으로 하되 최대 1440px로 캡 */
+    /* 페이지 폭: 100vw를 기본으로 하되 최대 1550px로 캡 */
     /* 
-    width: min(100vw, 1440px); */
+    width: min(100vw, 1550px); */
     margin-inline: 0;
     padding: 8px 0px;
     box-sizing: border-box;
@@ -32,8 +32,8 @@
 .content {
     min-width: 0;
     /* display: block; */
-    /* 콘텐츠 폭: 뷰포트 전체를 기본으로, 최대 1440px */
-    width: min(100%, 1500px);
+    /* 콘텐츠 폭: 뷰포트 전체를 기본으로, 최대 1550px */
+    width: min(100%, 1550px);
     /* width: auto; */
     /* align-items: start; */
     /* justify-content: start; */

@@ -1,13 +1,13 @@
 // src/organisms/UserInfoForm.tsx
 // 회원 정보 수정 페이지의 주요 UI를 구성하는 Organism
 
-import type React from 'react';
+import React, { useRef } from 'react';
 import styles from './UserInfoForm.module.css';
 import { TextInput } from '../atoms/TextInput/TextInput';
 import { TextButton } from '../atoms/TextButton/TextButton';
 
 type UserInfoFormProps = {
-    profileImageData: string | null;
+    profileImage: string | null;
     nickname: string;
     emailNoti: boolean;
     smsNoti: boolean;
@@ -16,6 +16,7 @@ type UserInfoFormProps = {
     phone: string;
     error: string | null;
     isEditing: boolean;
+    onProfileImageChange: (base64: string | null) => void;
     onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onNickNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onPhoneChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -26,17 +27,17 @@ type UserInfoFormProps = {
     onStartEdit: () => void;
 };
 
-function normalizeProfileImageSrc(profileImageData: string | null): string | null {
-    if (!profileImageData) return null;
-    if (profileImageData.startsWith('data:')) return profileImageData;
-    if (profileImageData.startsWith('http://') || profileImageData.startsWith('https://')) {
-        return profileImageData;
+function normalizeProfileImageSrc(profileImage: string | null): string | null {
+    if (!profileImage) return null;
+    if (profileImage.startsWith('data:')) return profileImage;
+    if (profileImage.startsWith('http://') || profileImage.startsWith('https://')) {
+        return profileImage;
     }
-    return `data:image/png;base64,${profileImageData}`;
+    return `data:image/png;base64,${profileImage}`;
 }
 
 function UserInfoForm({
-    profileImageData,
+    profileImage,
     nickname,
     emailNoti,
     smsNoti,
@@ -45,6 +46,7 @@ function UserInfoForm({
     phone,
     error,
     isEditing,
+    onProfileImageChange,
     onEmailChange,
     onNickNameChange,
     onPhoneChange,
@@ -54,8 +56,35 @@ function UserInfoForm({
     onCancel,
     onStartEdit,
 }: UserInfoFormProps) {
-    const profileImageSrc = normalizeProfileImageSrc(profileImageData);
+    const profileImageSrc = normalizeProfileImageSrc(profileImage);
     const pageTitle = isEditing ? '회원 정보 수정' : '회원 정보';
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+    const handlePickImage = () => {
+        if (!isEditing) return;
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const result = reader.result;
+            if (typeof result === "string") {
+                onProfileImageChange(result);
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleRemoveImage = () => {
+        if (!isEditing) return;
+        onProfileImageChange(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
 
     const notificationPreferences: Array<{
         key: 'emailNoti' | 'smsNoti' | 'newsLetter';
@@ -106,12 +135,30 @@ function UserInfoForm({
                                 type="button"
                                 className={styles.avatarEditButton}
                                 aria-label="프로필 이미지 변경"
-                                disabled
+                                onClick={handlePickImage}
+                                disabled={!isEditing}
                             >
                                 ✎
                             </button>
+                            {profileImageSrc && isEditing && (
+                                <button
+                                    type="button"
+                                    className={styles.avatarRemoveButton}
+                                    onClick={handleRemoveImage}
+                                    aria-label="프로필 이미지 삭제"
+                                >
+                                    ×
+                                </button>
+                            )}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                style={{ display: "none" }}
+                            />
                         </div>
-                        <span className={styles.avatarCaption}>프로필 이미지는 추후 업로드 가능합니다.</span>
+                        <span className={styles.avatarCaption}>프로필 이미지를 업로드하거나 교체할 수 있습니다.</span>
                     </div>
 
                     <div className={styles.nicknameColumn}>

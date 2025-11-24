@@ -6,9 +6,9 @@
 
 .panel {
   border: none;
-  border-radius: 14px;
+  border-radius: 16px;
   background: var(--color-bg-base);
-  padding: 12px;
+  padding: 0;
   display: grid;
   gap: 8px;
   /* 더 넓은 폭에서 4열을 허용하기 위해 기본 폭 토큰을 상향 */
@@ -33,5 +33,10 @@
   flex-direction: column;
   gap: 16px;
   width: fit-content;
+  background: var(--color-text-detail-box-bg);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
 }
 .contentBox { display: none; }

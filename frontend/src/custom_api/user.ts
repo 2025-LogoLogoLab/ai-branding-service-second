@@ -11,7 +11,7 @@ const userDeleteEndPoint = basePath + '/users/me'  // 유저 탈퇴 api 엔드 �
 
 // 유저 정보 수정 요청을 위한 type
 export type UserModifyRequest = {
-    profileImageData: string | null;
+    profileImage: string | null;
     nickname: string;
     emailNoti: boolean;
     smsNoti: boolean;
@@ -21,7 +21,7 @@ export type UserModifyRequest = {
 };
 
 export type UserInfoResponse = {   // 유저 정보 응답용 type.
-    profileImageData: string | null;
+    profileImage: string | null;
     nickname: string;
     emailNoti: boolean;
     smsNoti: boolean;
@@ -61,7 +61,7 @@ export async function fetchUserInfo( ): Promise<UserInfoResponse> {
 }
 
 export async function modifyUserInfo({ 
-    profileImageData,
+    profileImage,
     nickname,
     emailNoti = false,
     smsNoti = false,
@@ -83,7 +83,7 @@ export async function modifyUserInfo({
         },
         credentials: 'include',
         body: JSON.stringify({ 
-            profileImageData, 
+            profileImage, 
             nickname,
             emailNoti,
             smsNoti,

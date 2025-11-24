@@ -75,6 +75,10 @@
     font-size: 14px;
     box-sizing: border-box;
 }
+.tagInput:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-button-primary-bg) 30%, transparent);
+}
 
 .tagModalOverlay {
     position: fixed;
@@ -128,24 +132,62 @@
     justify-content: flex-end;
 }
 
+.tagList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.tagOption {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid rgba(15, 23, 42, 0.2);
+    border-radius: 10px;
+    background: var(--color-bg-base);
+    cursor: pointer;
+}
+
+.tagOption[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.tagEmpty {
+    padding: 12px;
+    text-align: center;
+    color: #6b7280;
+    border: 1px dashed rgba(15, 23, 42, 0.15);
+    border-radius: 10px;
+    font-size: 14px;
+}
+
 .logoGrid {
     display: grid;
     gap: 20px;
-    grid-template-columns: repeat(auto-fill, minmax(var(--deliverable-card-width), 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     justify-items: start;
 }
 
 .brandGrid {
     display: grid;
     gap: 20px;
-    grid-template-columns: repeat(auto-fill, minmax(var(--deliverable-card-width), 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     justify-items: start;
 }
 
 .colorGrid {
     display: grid;
     gap: 20px;
-    grid-template-columns: repeat(auto-fill, minmax(var(--deliverable-card-width), 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     justify-items: start;
 }
 

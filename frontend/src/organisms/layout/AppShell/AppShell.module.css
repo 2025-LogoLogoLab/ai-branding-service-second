@@ -13,12 +13,17 @@
 .headerInner { min-height: 72px; }
 .headerInner,
 .footerInner {
-    width: min(1440px, 100%);
-    margin: 0;
+    width: min(1550px, 100%);
+    margin: 0 auto;
 }
 
 .main {
     /* 전역 본문은 가운데 정렬된 컨테이너(섹션 레이아웃이 내부에서 다시 그리드 구성) */
     display: block;
     width: 100%;
+}
+
+.mainInner {
+    width: min(1550px, 100%);
+    margin: 0 auto;
 }

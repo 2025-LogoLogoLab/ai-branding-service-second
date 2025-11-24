@@ -6,6 +6,16 @@ import { useNavigate } from 'react-router-dom';
 import { deleteMyAccount, fetchUserInfo, modifyUserInfo, type UserInfoResponse } from '../custom_api/user';
 import { logOut } from '../custom_api/auth';
 
+const normalizeUserInfo = (data: UserInfoResponse): UserInfoResponse => ({
+    profileImage: data.profileImage ?? null,
+    nickname: data.nickname ?? '',
+    emailNoti: Boolean(data.emailNoti),
+    smsNoti: Boolean(data.smsNoti),
+    newsLetter: Boolean(data.newsLetter),
+    email: data.email ?? '',
+    phone: data.phone ?? '',
+});
+
 
 // 회원 정보 페이지
 function UserInfo(){
@@ -16,7 +26,7 @@ function UserInfo(){
     const [isEditing, setIsEditing] = useState(false);
 
     const [userInfo, setUserInfo] = useState<UserInfoResponse>({
-        profileImageData: null,
+        profileImage: null,
         nickname: '',
         emailNoti: false,
         smsNoti: false,
@@ -25,6 +35,15 @@ function UserInfo(){
         phone: '',
     });
 
+    const updateProfileImage = (base64: string | null) => {
+        // 서버는 data URI prefix 없이 순수 base64만 기대하므로 prefix 제거
+        const normalized =
+            base64 && base64.startsWith("data:")
+                ? base64.split(",").slice(1).join(",")
+                : base64;
+        setUserInfo((prev) => ({ ...prev, profileImage: normalized ?? null }));
+    };
+
     useEffect(() => {   // 서버에서 사용자 정보 불러와서 저장해두기
 
         async function fetchProfile() {
@@ -32,8 +51,9 @@ function UserInfo(){
             try {   // api 클라이언트 호출
 
                 const userData = await fetchUserInfo();
-                setUserInfo(userData);
-                setInitialUserInfo(userData);
+                const normalized = normalizeUserInfo(userData);
+                setUserInfo(normalized);
+                setInitialUserInfo(normalized);
                 setIsEditing(false);
             }
     
@@ -54,8 +74,9 @@ function UserInfo(){
         }
         try {
             const res = await modifyUserInfo(userInfo);
-            setUserInfo(res);
-            setInitialUserInfo(res);
+            const normalized = normalizeUserInfo(res);
+            setUserInfo(normalized);
+            setInitialUserInfo(normalized);
             alert('회원 정보 수정 성공!');
             setIsEditing(false);
         } catch (err) {
@@ -117,7 +138,7 @@ function UserInfo(){
 
     return(
         <UserInfoForm 
-            profileImageData={userInfo.profileImageData}
+            profileImage={userInfo.profileImage}
             nickname={userInfo.nickname}
             emailNoti={userInfo.emailNoti}
             smsNoti={userInfo.smsNoti}
@@ -131,6 +152,7 @@ function UserInfo(){
             onPhoneChange={(e) => handleFieldChange(e)}
             onSubmit={handleUserInfoModification}                
             onDelete={handleDeleteMyAccount}
+            onProfileImageChange={updateProfileImage}
             setChecked={handleCheckboxChange}
             onCancel={handleCancel}
             onStartEdit={handleStartEdit}

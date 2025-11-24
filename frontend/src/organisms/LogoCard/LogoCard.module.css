@@ -13,6 +13,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    padding: 12px; /* 브랜딩/컬러 카드와 유사한 안쪽 여백 부여 */
 }
 
 /* 툴바 포지션 조정 */
@@ -20,6 +21,6 @@
     align-self: flex-end;          /* 오른쪽 정렬 */
     display: flex;    
     justify-content: center;
-    margin-top: 8px;
-    margin-right: 8px;
+    margin-top: 12px;
+    margin-right: 4px;
 }

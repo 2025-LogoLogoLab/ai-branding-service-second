@@ -21,7 +21,9 @@ import s from "./LogoPage.module.css";
 import { LogoTypeSidebar } from "../organisms/LogoTypeSidebar/LogoTypeSidebar";
 import { LogoStyleSidebar } from "../organisms/LogoStyleSidebar/LogoStyleSidebar";
 import type { LogoType } from "../types/logoTypes";
+import { LOGO_TYPES } from "../types/logoTypes";
 import type { LogoStyleKey } from "../types/logoStyles";
+import { LOGO_STYLES } from "../types/logoStyles";
 
 import LogoForm from "../organisms/LogoForm";
 import type { TextNotationOption } from "../organisms/LogoForm";
@@ -31,6 +33,8 @@ import { TextButton } from "../atoms/TextButton/TextButton";
 import { generateLogo, saveLogo } from "../custom_api/logo";
 import { useSelectionStore } from "../context/selectionStore";
 import { ensureDataUrl } from "../utils/image";
+import { LogoExampleBox } from "../atoms/LogoExampleBox/LogoExampleBox";
+import { LogoStyleExampleBox } from "../atoms/LogoStyleExampleBox/LogoStyleExampleBox";
 
 const NUM_IMAGES_DEFAULT = 2; // 생성 이미지 개수(정책상 현재 2장 고정)
 
@@ -98,6 +102,11 @@ export default function Logo() {
 
     // 타입/스타일 중 하나라도 전체보기가 켜져 있으면 폼 숨김
     const isAnyAllOpen = showAllType || showAllStyle;
+    const containerClass = [
+        s.container,
+        !isAnyAllOpen && showAllStyle ? s.styleExpanded : "",
+        isAnyAllOpen ? s.allMode : ""
+    ].join(" ").trim();
 
     const LOGO_DOWNLOAD_ERROR = "로고 다운로드에 실패했습니다.";
     const LOGO_COPY_ERROR = "클립보드 복사에 실패했습니다. 브라우저 설정을 확인해주세요.";
@@ -334,7 +343,7 @@ export default function Logo() {
         // 메타 정보 포함
         const prompt = `style: ${style}, negative_prompt: ${negativ_prompt}, ${promptText}`;
         await saveLogo({ prompt, base64: imageData });
-        // TODO: 저장 성공/실패 UX(토스트 등) 추가 가능
+        alert("로고가 저장되었습니다.");
     };
 
     // 결과 섹션 제목(필요 시 사용)
@@ -350,134 +359,194 @@ export default function Logo() {
         }
     };
 
+    const renderTypeAllView = () => (
+        <section className={s.allContent} aria-label="로고 타입 예시 전체보기">
+            <div className={s.allHeader}>로고 타입 예시 전체보기</div>
+            <div className={s.allGrid}>
+                {LOGO_TYPES.map(({ key }) => (
+                    <button
+                        key={key}
+                        type="button"
+                        className={s.allCardBtn}
+                        onClick={() => {
+                            setType(key);
+                            setShowAllType(false);
+                        }}
+                    >
+                        <LogoExampleBox type={key} />
+                    </button>
+                ))}
+            </div>
+            <div className={s.allActions}>
+                <TextButton label="닫기" onClick={() => setShowAllType(false)} />
+            </div>
+        </section>
+    );
+
+    const renderStyleAllView = () => (
+        <section className={s.allContent} aria-label="로고 스타일 예시 전체보기">
+            <div className={s.allHeader}>스타일 전체 예시 보기</div>
+            <div className={s.allGrid}>
+                {LOGO_STYLES.map(({ key, label }) => (
+                    <button
+                        key={key}
+                        type="button"
+                        className={s.allCardBtn}
+                        onClick={() => {
+                            setStyle(key);
+                            setShowAllStyle(false);
+                        }}
+                    >
+                        <LogoStyleExampleBox styleKey={key} label={label} />
+                    </button>
+                ))}
+            </div>
+            <div className={s.allActions}>
+                <TextButton label="닫기" onClick={() => setShowAllStyle(false)} />
+            </div>
+        </section>
+    );
+
     return (
         <div className={s.page}>
 
             {/* 본문: [타입] [스타일] [폼/결과] */}
-            <div className={`${s.container} ${showAllStyle ? s.styleExpanded : ""}`}>
-                {/* 좌: 타입 */}
-                <section
-                    className={s.col}
-                    aria-label="로고 타입 선택"
-                    aria-expanded={showAllType}
-                >
-                    <LogoTypeSidebar
-                        selected={type}
-                        showAll={showAllType}
-                        onSelect={(t) => setType(t)}
-                        onShowAll={() => toggleAll("type")}
-                        onPickFromAll={(t) => {
-                            setType(t);
-                            setShowAllType(false);
-                        }}
-                    />
-                </section>
-
-                {/* 중: 스타일 */}
-                <section
-                    className={s.col}
-                    aria-label="로고 스타일 선택"
-                    aria-expanded={showAllStyle}
-                >
-                    <LogoStyleSidebar
-                        selected={style}
-                        showAll={showAllStyle}
-                        onSelect={(k) => setStyle(k)}
-                        onShowAll={() => toggleAll("style")}
-                        onPickFromAll={(k) => {
-                            setStyle(k);
-                            setShowAllStyle(false);
-                        }}
-                    />
-                </section>
-
-                {/* 우: 폼 + 결과(폼은 전체보기일 때 숨김) */}
-                <main className={s.main} aria-label="로고 생성 영역" aria-busy={isLoading}>
-                    {!logoResult && !isAnyAllOpen && (
-                        <LogoForm
-                            businessName={businessName}
-                            width={imageWidth}
-                            height={imageHeight}
-                            sizeError={sizeError}
-                            businessNameError={businessNameError}
-                            promptError={promptError}
-                            value={promptText}
-                            error={error}
-                            loading={isLoading}
-                            showTextFields={shouldShowTextInputs}
-                            textNotation={textNotation}
-                            onBusinessNameChange={handleBusinessNameChange}
-                            onWidthChange={handleWidthChange}
-                            onHeightChange={handleHeightChange}
-                            onChange={handlePromptFieldChange}
-                            onTextNotationChange={handleTextNotationChange}
-                            onSubmit={handleLogoGenaration}
-                            // 필요 시 title/promptLabel/submitLabel prop으로 오버라이드 가능
+            <div className={containerClass}>
+                {/* 좌측: 전체보기일 때는 다른 사이드바만 표시, 일반 모드에서는 둘 다 표시 */}
+                {(!isAnyAllOpen || showAllStyle) && (
+                    <section
+                        className={s.col}
+                        aria-label="로고 타입 선택"
+                        aria-expanded={showAllType}
+                    >
+                        <LogoTypeSidebar
+                            selected={type}
+                            showAll={false}
+                            onSelect={(t) => setType(t)}
+                            onShowAll={() => toggleAll("type")}
+                            onPickFromAll={(t) => {
+                                setType(t);
+                                setShowAllType(false);
+                            }}
                         />
-                    )}
+                    </section>
+                )}
 
-                    {/* 결과 그리드: 폼과 독립적으로 표시 */}
-                    {logoResult && !selectPurpose && (
+                {(!isAnyAllOpen || showAllType) && (
+                    <section
+                        className={s.col}
+                        aria-label="로고 스타일 선택"
+                        aria-expanded={showAllStyle}
+                    >
+                        <LogoStyleSidebar
+                            selected={style}
+                            showAll={false}
+                            onSelect={(k) => setStyle(k)}
+                            onShowAll={() => toggleAll("style")}
+                            onPickFromAll={(k) => {
+                                setStyle(k);
+                                setShowAllStyle(false);
+                            }}
+                        />
+                    </section>
+                )}
+
+                {/* 우: 메인 영역 */}
+                <main className={s.main} aria-label="로고 생성 영역" aria-busy={isLoading}>
+                    {isAnyAllOpen ? (
                         <>
-                            <h3 className={s.resultTitle}>{resultTitle}</h3>
-                            <ul className={s.grid} role="list">
-                                {logoResult.map((logo, id) => (
-                                    <li className={s.card} key={`logo-${id}`}>
-                                        <LogoCard
-                                            id={id}
-                                            logoBase64={logo}
-                                            onDelete={handleLogoDelete}
-                                            onSave={handleLogoSave}
-                                            onDownload={handleLogoDownload}
-                                            onCopy={handleLogoCopy}
-                                            isDownloading={downloadingLogoId === id}
-                                            isCopying={copyingLogoId === id}
-                                        />
-                                    </li>
-                                ))}
-                            </ul>
-                            <div className={s.cardActions}>
-                                <TextButton
-                                    label="이 로고를 기반으로 브랜딩 전략 생성하기"
-                                    onClick={() => setSelectPurpose("branding")}
-                                    variant="blue"
-                                />
-                                <TextButton
-                                    label="이 로고를 기반으로 컬러 가이드 생성하기"
-                                    onClick={() => setSelectPurpose("colorGuide")}
-                                    variant="blue"
-                                />
-                            </div>
+                            {showAllType && renderTypeAllView()}
+                            {showAllStyle && renderStyleAllView()}
                         </>
-                    )}
-
-                    {logoResult && selectPurpose && (
+                    ) : (
                         <>
-                            <h3 className={s.resultTitle}>
-                                {selectPurpose === "branding"
-                                    ? "브랜딩 전략 생성을 위해 가장 마음에 드는 로고를 선택해주세요."
-                                    : "컬러 가이드 생성을 위해 사용할 로고를 선택해주세요."}
-                            </h3>
-                            <ul className={s.grid} role="list">
-                                {logoResult.map((logo, id) => (
-                                    <li className={s.card} key={`select-logo-${id}`}>
-                                        <LogoCard id={id} logoBase64={logo} />
-                                        <div className={s.cardActions}>
-                                            <TextButton
-                                                label="선택 하기"
-                                                onClick={() => handleSelectLogo(logo)}
-                                                variant="blue"
-                                            />
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                            <div className={s.cardActions}>
-                                <TextButton
-                                    label="취소"
-                                    onClick={() => setSelectPurpose(null)}
+                            {!logoResult && (
+                                <LogoForm
+                                    businessName={businessName}
+                                    width={imageWidth}
+                                    height={imageHeight}
+                                    sizeError={sizeError}
+                                    businessNameError={businessNameError}
+                                    promptError={promptError}
+                                    value={promptText}
+                                    error={error}
+                                    loading={isLoading}
+                                    showTextFields={shouldShowTextInputs}
+                                    textNotation={textNotation}
+                                    onBusinessNameChange={handleBusinessNameChange}
+                                    onWidthChange={handleWidthChange}
+                                    onHeightChange={handleHeightChange}
+                                    onChange={handlePromptFieldChange}
+                                    onTextNotationChange={handleTextNotationChange}
+                                    onSubmit={handleLogoGenaration}
+                                    // 필요 시 title/promptLabel/submitLabel prop으로 오버라이드 가능
                                 />
-                            </div>
+                            )}
+
+                            {/* 결과 그리드: 폼과 독립적으로 표시 */}
+                            {logoResult && !selectPurpose && (
+                                <>
+                                    <h3 className={s.resultTitle}>{resultTitle}</h3>
+                                    <ul className={s.grid} role="list">
+                                        {logoResult.map((logo, id) => (
+                                            <li className={s.card} key={`logo-${id}`}>
+                                                <LogoCard
+                                                    id={id}
+                                                    logoBase64={logo}
+                                                    onDelete={handleLogoDelete}
+                                                    onSave={handleLogoSave}
+                                                    onDownload={handleLogoDownload}
+                                                    onCopy={handleLogoCopy}
+                                                    isDownloading={downloadingLogoId === id}
+                                                    isCopying={copyingLogoId === id}
+                                                />
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <div className={s.cardActions}>
+                                        <TextButton
+                                            label="이 로고를 기반으로 브랜딩 전략 생성하기"
+                                            onClick={() => setSelectPurpose("branding")}
+                                            variant="blue"
+                                        />
+                                        <TextButton
+                                            label="이 로고를 기반으로 컬러 가이드 생성하기"
+                                            onClick={() => setSelectPurpose("colorGuide")}
+                                            variant="blue"
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            {logoResult && selectPurpose && (
+                                <>
+                                    <h3 className={s.resultTitle}>
+                                        {selectPurpose === "branding"
+                                            ? "브랜딩 전략 생성을 위해 가장 마음에 드는 로고를 선택해주세요."
+                                            : "컬러 가이드 생성을 위해 사용할 로고를 선택해주세요."}
+                                    </h3>
+                                    <ul className={s.grid} role="list">
+                                        {logoResult.map((logo, id) => (
+                                            <li className={s.card} key={`select-logo-${id}`}>
+                                                <LogoCard id={id} logoBase64={logo} />
+                                                <div className={s.cardActions}>
+                                                    <TextButton
+                                                        label="선택 하기"
+                                                        onClick={() => handleSelectLogo(logo)}
+                                                        variant="blue"
+                                                    />
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <div className={s.cardActions}>
+                                        <TextButton
+                                            label="취소"
+                                            onClick={() => setSelectPurpose(null)}
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </>
                     )}
                 </main>

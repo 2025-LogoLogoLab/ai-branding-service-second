@@ -38,8 +38,21 @@ const imageMap: Record<LogoStyleKey, string> = {
     watercolor: imgWatercolor,
 };
 
+// 스타일별 설명 문구 매핑
+const styleDescriptionMap: Record<LogoStyleKey, string> = {
+    cute: '귀여운 느낌의 \n발랄하고 친근한 디자인',
+    simple: '군더더기 없는 선과 \n현대적 폰트가 적용된 디자인',
+    vintage: '바랜 질감과 \n클래식한 복고 감성',
+    luxury: '프리미엄 감성을 살린 \n고급스러운 로고',
+    tattoo: '굵은 블랙 라인의 \n올드스쿨 타투 스타일.',
+    cartoon: '귀여운 동물 캐릭터를 \n담은 미니멀한 디자인',
+    futuristic: '메탈릭하고 홀로그래픽한 \n효과로 미래적 분위기를 주는 디자인',
+    watercolor: '수채화 터치와 파스텔 색감의 \n자연스러운 로고',
+};
+
 export const LogoStyleExampleBox: React.FC<LogoStyleExampleBoxProps> = ({ styleKey, showCaption = true, className, label}) => {
     const src = imageMap[styleKey];
+    const description = styleDescriptionMap[styleKey] ?? '스타일 예시';
 
     return (
         // .box: 예시 카드를 감싸는 컨테이너 (고정 높이 + 중앙 정렬)
@@ -54,7 +67,7 @@ export const LogoStyleExampleBox: React.FC<LogoStyleExampleBoxProps> = ({ styleK
                 {/* 스타일 이름 굵은 글씨로 추가 */}
                 {label && <div className={styles.title}>{label}</div>}
                 {/* .caption: 예시 하단 설명 텍스트 (옵션) */}
-                {showCaption && <div className={styles.caption}>스타일 예시</div>}
+                {showCaption && <div className={styles.caption}>{description}</div>}
             </div>
         </div>
     );

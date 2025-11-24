@@ -13,7 +13,7 @@
 
 /* 시스템 (AI) 메시지: 좌측 상단 각짐 */
 .systemMessage {
-    background-color: #f7f7f8;
+    /* background-color: #f7f7f8; */
     color: #000;
     align-self: start;      /* for flex parents */
     justify-self: start;    /* for grid parents */

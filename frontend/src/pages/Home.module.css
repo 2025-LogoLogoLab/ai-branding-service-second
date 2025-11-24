@@ -6,12 +6,12 @@
   gap: clamp(32px, 5vw, 64px);
   padding: 0 0 clamp(60px, 8vw, 110px);
   color: var(--color-font-basic-content);
-  max-width: 1440px;
+  max-width: 1550px;
   width: 100%;
 }
 
 .section {
-  width: min(1440px, 100%);
+  width: min(1550px, 100%);
   margin: 0;
 }
 

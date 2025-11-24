@@ -185,12 +185,34 @@ function Branding() {
     });
   };
 
+  // 안내 메시지: 프롬프트 전/생성 전 단계에서만 표시
+  const showPrePromptNotice = !brandingResult && !loading;
+  const isLinkedFlow = Boolean(selection.logoBase64 || base64 || selection.colorGuide);
+  const brandingLinkedNotice =
+    "브랜딩 전략 - 연계 시 설명: 로고나 컬러 가이드를 함께 전달하면 브랜드 톤앤매너를 더 세밀하게 반영합니다. (예시 문구 길이를 늘려둔 상태)";
+  const brandingStandaloneNotice =
+    "브랜딩 전략 - 단독 시 설명: 로고 없이도 핵심 가치, 타깃, 톤을 구체적으로 적어주면 전략의 완성도가 높아집니다. (예시 문구 길이를 늘려둔 상태)";
+
   return (
     <div style={{ padding: '12px 16px', display: 'grid', gap: 16 }}>
       {/* 페이지 타이틀 */}
       <h2 style={{ margin: 0 }}>
         {base64 ? '로고를 기반으로 브랜딩 전략 생성' : '브랜딩 전략 생성'}
       </h2>
+      <div style={{ borderBottom: '1px solid var(--color-divider-border)', margin: '4px 0 8px' }} />
+      {showPrePromptNotice && (
+        <div
+          style={{
+            padding: '12px 14px',
+            borderRadius: '12px',
+            background: '#eef2ff',
+            color: '#1f2937',
+            lineHeight: 1.6,
+          }}
+        >
+          {isLinkedFlow ? brandingLinkedNotice : brandingStandaloneNotice}
+        </div>
+      )}
       {/* 상단 프롬프트 말풍선 (있을 때만) */}
       {lastPrompt && (
         <MarkdownMessage content={lastPrompt} isUser />
@@ -212,7 +234,7 @@ function Branding() {
 
       {/* 컬러 가이드 생성으로 이동 */}
       {brandingResult && (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '50px 0' }}>
           {selection.colorGuide ? (
             <TextButton
               label="추가기능"

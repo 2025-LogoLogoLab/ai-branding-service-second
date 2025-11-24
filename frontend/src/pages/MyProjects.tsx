@@ -1296,6 +1296,7 @@ function ProjectDetailModal({
                             ? () => loadDetail("branding", detailState.id!)
                             : undefined
                     }
+                    onBrandingUpdated={() => setAssetRefreshToken((token) => token + 1)}
                 />
             )}
             {detailState.open && detailState.type === "colorGuide" && detailColorPreview && (
@@ -1311,6 +1312,7 @@ function ProjectDetailModal({
                             ? () => loadDetail("colorGuide", detailState.id!)
                             : undefined
                     }
+                    onColorGuideUpdated={() => setAssetRefreshToken((token) => token + 1)}
                 />
             )}
         </div>

@@ -60,4 +60,5 @@
     font-size: 12px;
     color: #6b7280; /* 회색 톤으로 보조 텍스트 느낌 */
     text-align: center;
+    white-space: pre-line; /* 문자열 내 \n을 줄바꿈으로 렌더링 */
 }
