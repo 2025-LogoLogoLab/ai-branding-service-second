@@ -7,17 +7,7 @@ import type { PaginatedResponse } from "./types";
 // import { useAuth } from "../context/AuthContext";
 
 const basePath = import.meta.env.VITE_API_BASE_URL;
-const logoGenEndPoint = basePath + '/logo/generate'
-const logoSaveEndPoint = basePath + '/logo/save'
-const fetchAllEndPoint = basePath + '/logo'
-const logoDeleteEndPoint = basePath + '/logo'
-const logoDetailEndPoint = basePath + '/logo'
-
-/**
- * 새로운 산출물 관리 UI에서는 페이징이 적용된 로고 목록이 필요하므로
- * /api/logos 엔드포인트를 별도로 정의한다. (기존 /logo 는 구버전 호환용)
- */
-const logoListEndPoint = basePath + '/logos'
+const withRolePrefix = (path: string, isAdmin?: boolean) => `${basePath}${isAdmin ? "/admin" : ""}${path}`;
 
 
 export type LogoRequest = { // 로고 요청 타입
@@ -102,16 +92,18 @@ export type LogoStoreRequest = {    // 로고 저장 요청용
 //     return (user !== null);
 // }
 
-export async function generateLogo( {
-    prompt,
-    style = "cute",
-    type,
-    negative_prompt = "no watermark",
-    num_images= 2,
-    width,
-    height,
-} : LogoRequest ) 
-    : Promise<LogoGenResponse> {
+export async function generateLogo(
+    {
+        prompt,
+        style = "cute",
+        type,
+        negative_prompt = "no watermark",
+        num_images = 2,
+        width,
+        height,
+    }: LogoRequest,
+    options: { isAdmin?: boolean } = {},
+): Promise<LogoGenResponse> {
     // 로고 생성 api 클라이언트
 
     const controller = new AbortController();
@@ -124,7 +116,7 @@ export async function generateLogo( {
     console.log("로고 생성 요청 시작");
 
     try {
-        const result = await fetch( logoGenEndPoint, {
+        const result = await fetch(withRolePrefix("/logo/generate", options.isAdmin), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -161,12 +153,15 @@ export async function generateLogo( {
     }
 }
 
-export async function saveLogo( { prompt, base64: imageData }: LogoStoreRequest ) 
-// : Promise<boolean> 
+export async function saveLogo(
+    { prompt, base64: imageData }: LogoStoreRequest,
+    options: { isAdmin?: boolean } = {},
+)
+// : Promise<boolean>
 {
     // 로고 저장용 api 클라이언트. 어떤 값이 리턴될 지 아직 모름.
     console.log("로고 저장 요청 시작");
-    const result = await fetch( logoSaveEndPoint, {
+    const result = await fetch(withRolePrefix("/logo/save", options.isAdmin), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -185,10 +180,10 @@ export async function saveLogo( { prompt, base64: imageData }: LogoStoreRequest 
     return result.json();
 }
 
-export async function fetchAllLogo(): Promise<LogoListItem[]>{
+export async function fetchAllLogo(options: { isAdmin?: boolean } = {}): Promise<LogoListItem[]> {
     // 사용자의 모든 로고 가져오기
     console.log("사용자 전체 로고 가져오기");
-    const result = await fetch( fetchAllEndPoint, {
+    const result = await fetch(withRolePrefix("/logo", options.isAdmin), {
         method: 'GET',
         // headers:{
         //     // 'Authorization': `Bearer ${token}`,          // JWT 토큰은 쿠키로 관리.
@@ -214,11 +209,11 @@ export async function fetchAllLogo(): Promise<LogoListItem[]>{
  */
 export async function fetchLogoPage(
     params: LogoListParams = {},
-    options: { signal?: AbortSignal } = {}
+    options: { signal?: AbortSignal; isAdmin?: boolean } = {}
 ): Promise<PaginatedResponse<LogoListItem>> {
     console.log("로고 목록 페이지 조회 요청 시작");
 
-    const url = new URL(logoListEndPoint);
+    const url = new URL(withRolePrefix("/logos", options.isAdmin));
     const qs = new URLSearchParams();
 
     if (params.projectId != null) qs.set("projectId", String(params.projectId));
@@ -244,13 +239,15 @@ export async function fetchLogoPage(
     return payload as PaginatedResponse<LogoListItem>;
 }
 
-export async function deleteLogo( id:number )
+export async function deleteLogo(
+    id: number,
+    options: { isAdmin?: boolean } = {},
     // :Promise<boolean>
-{
+) {
     // 로고 삭제 요청. 리턴 타입 정해지지 않음.
 
     console.log("로고 삭제 요청 시작");    
-    const result = await fetch( `${logoDeleteEndPoint}/${id}`, {
+    const result = await fetch(withRolePrefix(`/logo/${id}`, options.isAdmin), {
         method: 'DELETE',
         headers:{
             // 'Content-Type': 'application/json',
@@ -271,10 +268,10 @@ export async function deleteLogo( id:number )
 
 export async function fetchLogoDetail(
     id: number,
-    options: { signal?: AbortSignal } = {}
+    options: { signal?: AbortSignal; isAdmin?: boolean } = {}
 ): Promise<LogoDetail> {
     console.log("로고 상세 조회 요청 시작");
-    const result = await fetch(`${logoDetailEndPoint}/${id}`, {
+    const result = await fetch(withRolePrefix(`/logo/${id}`, options.isAdmin), {
         method: "GET",
         credentials: "include",
         signal: options.signal,

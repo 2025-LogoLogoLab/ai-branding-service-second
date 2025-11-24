@@ -23,6 +23,7 @@ type BaseDetailProps = {
     onRetry?: () => void;
     onBrandingUpdated?: (detail: BrandStrategyDetail) => void;
     onColorGuideUpdated?: (detail: ColorGuideDetail) => void;
+    isAdmin?: boolean;
 };
 
 type LogoDetailProps = BaseDetailProps & {
@@ -145,6 +146,7 @@ export function DeliverableDetailModal(props: DeliverableDetailModalProps) {
         onRetry,
         onBrandingUpdated,
         onColorGuideUpdated,
+        isAdmin,
     } = props;
     const isBlueprint = variant === "blueprint";
     const [localTags, setLocalTags] = useState<TagRecord[]>(
@@ -355,9 +357,13 @@ const renderLogoDetail = (detail: LogoDetail) => {
         setBrandingSaving(true);
         setBrandingEditError(null);
         try {
-            const updated = await updateBrandStrategy(current.id, {
-                markdown: nextBody,
-            });
+            const updated = await updateBrandStrategy(
+                current.id,
+                {
+                    markdown: nextBody,
+                },
+                { isAdmin },
+            );
             setBrandingDetail(updated);
             setBrandingBodyDraft(updated.markdown ?? "");
             setBrandingEditing(false);
@@ -406,7 +412,7 @@ const renderLogoDetail = (detail: LogoDetail) => {
         setColorGuideSaving(true);
         setColorGuideError(null);
         try {
-            const updated = await updateColorGuide(current.id, { guide: colorGuideDraft });
+            const updated = await updateColorGuide(current.id, { guide: colorGuideDraft }, { isAdmin });
             setColorGuideDetail(updated);
             setColorGuideDraft(updated.guide);
             setColorGuideEditing(false);

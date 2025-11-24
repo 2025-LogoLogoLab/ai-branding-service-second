@@ -1,0 +1,183 @@
+.card {
+    background: var(--color-bg-base);
+    border-radius: 22px;
+    padding: 20px;
+    border: 1px solid var(--color-divider-border);
+    box-shadow: 0 14px 40px rgba(6, 15, 39, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.kicker {
+    margin: 0 0 6px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-font-gray);
+    font-weight: 600;
+}
+
+.title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-font-header);
+}
+
+.subtitle {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--color-font-gray);
+    line-height: 1.5;
+}
+
+.counts {
+    min-width: 120px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(30, 58, 138, 0.06);
+    border: 1px solid rgba(30, 58, 138, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: flex-end;
+}
+
+.countValue {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--color-font-header);
+}
+
+.countLabel {
+    font-size: 12px;
+    color: var(--color-font-gray);
+}
+
+.tableWrapper {
+    overflow: auto;
+    border: 1px solid var(--color-divider-border);
+    border-radius: 16px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+}
+
+.table th {
+    text-align: left;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-font-gray);
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--color-divider-border);
+    background: rgba(37, 60, 126, 0.04);
+}
+
+.table td {
+    font-size: 14px;
+    color: var(--color-font-basic-content);
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(73, 83, 110, 0.12);
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr {
+    cursor: pointer;
+    transition: background 0.16s ease;
+}
+
+.table tbody tr:hover {
+    background: var(--color-hover-on-white);
+}
+
+.idCell {
+    width: 60px;
+    font-weight: 700;
+}
+
+.mainCell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nickname {
+    font-weight: 700;
+}
+
+.meta,
+.metaCell {
+    color: var(--color-font-gray);
+    font-size: 13px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 12px;
+    border: 1px solid transparent;
+}
+
+.badgeAdmin {
+    background: rgba(30, 58, 138, 0.12);
+    color: var(--color-font-header);
+    border-color: rgba(30, 58, 138, 0.3);
+}
+
+.badgeUser {
+    background: rgba(73, 83, 110, 0.12);
+    color: var(--color-font-basic-content);
+    border-color: rgba(73, 83, 110, 0.22);
+}
+
+.state {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(37, 60, 126, 0.05);
+    color: var(--color-font-basic-content);
+    font-size: 14px;
+}
+
+.stateError {
+    background: rgba(217, 45, 32, 0.1);
+    color: #9b1c1c;
+}
+
+.rowButton {
+    min-width: 100px;
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .counts {
+        align-self: flex-end;
+    }
+}

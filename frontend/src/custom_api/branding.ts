@@ -2,14 +2,15 @@
 import type { PaginatedResponse } from "./types";
 
 const basePath = import.meta.env.VITE_API_BASE_URL;
+const withRolePrefix = (path: string, isAdmin?: boolean) => `${basePath}${isAdmin ? "/admin" : ""}${path}`;
 
-const brandingGenEndPoint = basePath + '/brand-strategy/generate';  // 브랜딩 전략 생성
-const brandingStoreEndPoint = basePath + '/brand-strategy/save';    // 브랜딩 전략 저장
-const brandingDeleteEndPoint = basePath + '/brand-strategy/';       // 브랜딩 전략 삭제
-const brandStrategyDetailEndpoint = basePath + '/brand-strategy';   // 브랜딩 전략 상세 조회
+const brandingGenEndPoint = '/brand-strategy/generate';  // 브랜딩 전략 생성
+const brandingStoreEndPoint = '/brand-strategy/save';    // 브랜딩 전략 저장
+const brandingDeleteEndPoint = '/brand-strategy/';       // 브랜딩 전략 삭제
+const brandStrategyDetailEndpoint = '/brand-strategy';   // 브랜딩 전략 상세 조회
 // const brandingUpdateEndPoint = basePath + '/brand-strategy/';       // 브랜딩 전략 수정
-const fetchAllBrandingEndPoint = basePath + '/brand-strategies';    // 브랜딩 전략 리스트 조회
-const brandStrategyListEndpoint = basePath + '/brand-strategies'; // 페이징 목록 조회(신규 UI)
+const fetchAllBrandingEndPoint = '/brand-strategies';    // 브랜딩 전략 리스트 조회
+const brandStrategyListEndpoint = '/brand-strategies'; // 페이징 목록 조회(신규 UI)
 // const brandingTagEndPoint = '/api/branding';
 // const brandingProjectEndPoint = '/api/branding';
 
@@ -107,12 +108,15 @@ export type BrandStrategyPageParams = {
     filter?: 'mine';
 };
 
-export async function generateBranding( { briefKo: briefKo, style, base64 } : BrandingRequest): Promise<BrandingResponse> {
+export async function generateBranding(
+    { briefKo: briefKo, style, base64 }: BrandingRequest,
+    options: { isAdmin?: boolean } = {},
+): Promise<BrandingResponse> {
     // 브랜딩 전략 생성 클라이언트
 
     console.log("브랜딩 전략 생성 요청 시작");    
 
-    const result = await fetch(brandingGenEndPoint, {
+    const result = await fetch(withRolePrefix(brandingGenEndPoint, options.isAdmin), {
         method: 'POST',
         headers:{
             'Content-Type': 'application/json',
@@ -133,12 +137,12 @@ export async function generateBranding( { briefKo: briefKo, style, base64 } : Br
 
 }
 
-export async function deleteBranding( {id} : BrandingDeleteRequest ) {
+export async function deleteBranding( {id} : BrandingDeleteRequest, options: { isAdmin?: boolean } = {} ) {
     // 브랜딩 전략 삭제 클라이언트. 리턴 타입 모름.
 
     console.log("브랜딩 전략 삭제 요청 시작");    
 
-    const result = await fetch(brandingDeleteEndPoint + id, {   // 삭제할 id 를 url에 붙여서 요청.
+    const result = await fetch(withRolePrefix(brandingDeleteEndPoint + id, options.isAdmin), {   // 삭제할 id 를 url에 붙여서 요청.
         method: 'DELETE',
         // headers:{
         //     'Content-Type': 'application/json',
@@ -163,12 +167,12 @@ export async function saveBranding({
     imageUrl,
     projectId,
     markdown
-}: BrandingStroeRequest) : Promise<BrandingStroeResponse> {
+}: BrandingStroeRequest, options: { isAdmin?: boolean } = {}) : Promise<BrandingStroeResponse> {
     // 브랜딩 전락 저장 클라이언트.
 
     console.log("브랜딩 전략 저장 요청 시작");    
 
-    const result = await fetch(brandingStoreEndPoint, {
+    const result = await fetch(withRolePrefix(brandingStoreEndPoint, options.isAdmin), {
         method: 'POST',
         headers:{
             'Content-Type': 'application/json',
@@ -186,12 +190,12 @@ export async function saveBranding({
     return result.json();    
 }
 
-export async function fetchAllBranding( params : AllBrandingFetchParams): Promise<BrandingResponse[]> {
+export async function fetchAllBranding( params : AllBrandingFetchParams, options: { isAdmin?: boolean } = {}): Promise<BrandingResponse[]> {
     // 전체 브랜딩 전략 가져오는 함수. 
 
     console.log("브랜딩 전략 전체 가져오기 요청 시작");    
 
-    const url = new URL (fetchAllBrandingEndPoint);
+    const url = new URL (withRolePrefix(fetchAllBrandingEndPoint, options.isAdmin));
     const qs = new URLSearchParams();
 
     // 파라메터들 있으면 쿼리 스트링에 붙이기.
@@ -224,11 +228,11 @@ export async function fetchAllBranding( params : AllBrandingFetchParams): Promis
  */
 export async function fetchBrandStrategyPage(
     params: BrandStrategyPageParams = {},
-    options: { signal?: AbortSignal } = {}
+    options: { signal?: AbortSignal; isAdmin?: boolean } = {}
 ): Promise<PaginatedResponse<BrandStrategyListItem>> {
     console.log("브랜딩 전략 목록 페이지 조회 요청 시작");
 
-    const url = new URL(brandStrategyListEndpoint);
+    const url = new URL(withRolePrefix(brandStrategyListEndpoint, options.isAdmin));
     const qs = new URLSearchParams();
 
     if (params.projectId != null) qs.set("projectId", String(params.projectId));
@@ -256,10 +260,10 @@ export async function fetchBrandStrategyPage(
 
 export async function fetchBrandStrategyDetail(
     id: number,
-    options: { signal?: AbortSignal } = {}
+    options: { signal?: AbortSignal; isAdmin?: boolean } = {}
 ): Promise<BrandStrategyDetail> {
     console.log("브랜딩 전략 상세 조회 요청 시작");
-    const result = await fetch(`${brandStrategyDetailEndpoint}/${id}`, {
+    const result = await fetch(withRolePrefix(`${brandStrategyDetailEndpoint}/${id}`, options.isAdmin), {
         method: "GET",
         credentials: "include",
         signal: options.signal,
@@ -290,9 +294,10 @@ export async function fetchBrandStrategyDetail(
 export async function updateBrandStrategy(
     id: number,
     body: BrandStrategyUpdateRequest,
+    options: { isAdmin?: boolean } = {},
 ): Promise<BrandStrategyDetail> {
     console.log("브랜딩 전략 수정 요청 시작");
-    const result = await fetch(`${brandStrategyDetailEndpoint}/${id}`, {
+    const result = await fetch(withRolePrefix(`${brandStrategyDetailEndpoint}/${id}`, options.isAdmin), {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",

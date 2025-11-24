@@ -21,6 +21,7 @@ export default function GlobalHeader() {
   const [featuresOpen, setFeaturesOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const isAdmin = (user?.role ?? "").toString().toUpperCase() === "ADMIN";
 
   const featuresRef = useRef<HTMLDivElement | null>(null);
 
@@ -109,6 +110,13 @@ export default function GlobalHeader() {
       <div className={styles.authArea}>
         {user ? (
           <>
+            {isAdmin && (
+              <TextButton
+                label="Admin"
+                variant="headerLink"
+                onClick={() => handleNavigate("/admin")}
+              />
+            )}
             <TextButton
               label="Log out"
               variant="headerLink"

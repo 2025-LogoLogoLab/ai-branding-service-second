@@ -54,6 +54,7 @@ import {
     previewToLogoDetail,
     useDeliverableDetail,
 } from "../utils/deliverableDetail";
+import { useAuth } from "../context/AuthContext";
 
 type ProjectAssetType = "logo" | "branding" | "colorGuide";
 
@@ -133,6 +134,8 @@ const cx = (...values: Array<string | false | null | undefined>) =>
 // === Component: MyProjects ===
 // 내 프로젝트 전체 화면을 구성하며 목록, 설정 패널, 상세/생성 모달까지 모두 오케스트레이션한다.
 export default function MyProjects({ variant = "page" }: MyProjectsProps) {
+    const { user } = useAuth();
+    const isAdmin = user?.role === "ADMIN";
     const [projects, setProjects] = useState<ProjectRecord[]>([]); // 목록 테이블 데이터
     const [projectPage, setProjectPage] = useState(0); // 현재 목록 페이지 인덱스
     const [projectPageInfo, setProjectPageInfo] = useState<ProjectPageInfo>({
@@ -152,7 +155,7 @@ export default function MyProjects({ variant = "page" }: MyProjectsProps) {
         setError(null);
         setLoading(true);
         console.info("[project API] fetch project list start", { page: projectPage, size: PROJECT_LIST_PAGE_SIZE });
-        fetchProjectList({ page: projectPage, size: PROJECT_LIST_PAGE_SIZE }, { signal: controller.signal })
+        fetchProjectList({ page: projectPage, size: PROJECT_LIST_PAGE_SIZE }, { signal: controller.signal, isAdmin })
             .then((response) => {
                 if (controller.signal.aborted) return;
                 console.info("[project API] fetch project list success", response);
@@ -179,7 +182,7 @@ export default function MyProjects({ variant = "page" }: MyProjectsProps) {
             });
 
         return () => controller.abort();
-    }, [projectPage, projectListNonce]);
+    }, [projectPage, projectListNonce, isAdmin]);
 
     const selectedProject = useMemo(
         () => projects.find((item) => item.id === detailId),
@@ -323,6 +326,7 @@ export default function MyProjects({ variant = "page" }: MyProjectsProps) {
                     onClose={() => setDetailId(null)}
                     onUpdated={handleProjectUpdated}
                     onDeleted={handleProjectDeleted}
+                    isAdmin={isAdmin}
                 />
             )}
 
@@ -331,6 +335,7 @@ export default function MyProjects({ variant = "page" }: MyProjectsProps) {
                     existingNames={projects.map((item) => item.name)}
                     onClose={() => setCreateOpen(false)}
                     onCreated={handleProjectCreated}
+                    isAdmin={isAdmin}
                 />
             )}
         </div>
@@ -343,6 +348,7 @@ type ProjectDetailModalProps = {
     onClose: () => void;
     onUpdated: (project: ProjectRecord) => void;
     onDeleted: (projectId: number) => void;
+    isAdmin?: boolean;
 };
 // === Component: ProjectDetailModal ===
 // 프로젝트 상세 모달 UI: 기본 정보 편집, 산출물 카드, 삭제/추가 모달 트리거를 담당한다.
@@ -352,6 +358,7 @@ function ProjectDetailModal({
     onClose,
     onUpdated,
     onDeleted,
+    isAdmin,
 }: ProjectDetailModalProps) {
     const [project, setProject] = useState<ProjectRecord | null>(initialProject ?? null); // 모달에 표시할 프로젝트 데이터
     const [loading, setLoading] = useState(!initialProject); // 상세 로딩 여부
@@ -389,7 +396,7 @@ function ProjectDetailModal({
         detailLogoData,
         detailBrandData,
         detailColorData,
-    } = useDeliverableDetail();
+    } = useDeliverableDetail(isAdmin);
 
     // 초기 prop으로 받은 project를 상태에 동기화
     useEffect(() => {
@@ -414,7 +421,7 @@ function ProjectDetailModal({
         setLoading(true);
         setError(null);
         console.info("[project API] fetch project detail start", projectId);
-        fetchProjectDetail(projectId, { signal: controller.signal })
+        fetchProjectDetail(projectId, { signal: controller.signal, isAdmin })
             .then((record) => {
                 if (controller.signal.aborted) return;
                 console.info("[project API] fetch project detail success", record);
@@ -431,7 +438,7 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [projectId]);
+    }, [projectId, isAdmin]);
 
     // 포함된 로고 목록을 프로젝트 ID + 페이지 기준으로 로드
     useEffect(() => {
@@ -449,7 +456,7 @@ function ProjectDetailModal({
         setLogoAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchLogoPage(
             { projectId: project.id, page: logoPage, size: PROJECT_ASSET_PAGE_SIZE, filter: "mine" },
-            { signal: controller.signal },
+            { signal: controller.signal, isAdmin },
         )
             .then((payload) => {
                 if (controller.signal.aborted) return;
@@ -480,7 +487,7 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, logoPage]);
+    }, [project, assetRefreshToken, logoPage, isAdmin]);
 
     // 포함된 브랜딩 전략을 프로젝트 ID + 페이지 기준으로 로드
     useEffect(() => {
@@ -498,7 +505,7 @@ function ProjectDetailModal({
         setBrandingAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchBrandStrategyPage(
             { projectId: project.id, page: brandingPage, size: PROJECT_ASSET_PAGE_SIZE, filter: "mine" },
-            { signal: controller.signal },
+            { signal: controller.signal, isAdmin },
         )
             .then((payload) => {
                 if (controller.signal.aborted) return;
@@ -529,7 +536,7 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, brandingPage]);
+    }, [project, assetRefreshToken, brandingPage, isAdmin]);
 
     // 포함된 컬러 가이드를 프로젝트 ID + 페이지 기준으로 로드
     useEffect(() => {
@@ -547,7 +554,7 @@ function ProjectDetailModal({
         setColorAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchColorGuidePage(
             { projectId: project.id, page: colorPage, size: PROJECT_ASSET_PAGE_SIZE, filter: "mine" },
-            { signal: controller.signal },
+            { signal: controller.signal, isAdmin },
         )
             .then((payload) => {
                 if (controller.signal.aborted) return;
@@ -578,7 +585,7 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, colorPage]);
+    }, [project, assetRefreshToken, colorPage, isAdmin]);
 
     // 산출물 API를 다시 호출하도록 토큰 증가
     const refreshAssets = () => {
@@ -677,7 +684,7 @@ function ProjectDetailModal({
     const handleLogoDelete = async (id: number) => {
         setLogoActions((prev) => ({ ...prev, deletingId: id }));
         try {
-            await deleteLogo(id);
+            await deleteLogo(id, { isAdmin });
             removeAssetReference("logo", id);
             closeIfTarget("logo", id);
             refreshAssets();
@@ -719,7 +726,7 @@ function ProjectDetailModal({
     const handleBrandingDelete = async (id: number) => {
         setBrandingActions((prev) => ({ ...prev, deletingId: id }));
         try {
-            await deleteBranding({ id });
+            await deleteBranding({ id }, { isAdmin });
             removeAssetReference("branding", id);
             closeIfTarget("branding", id);
             refreshAssets();
@@ -757,7 +764,7 @@ function ProjectDetailModal({
     const handleColorGuideDelete = async (id: number) => {
         setColorActions((prev) => ({ ...prev, deletingId: id }));
         try {
-            await deleteColorGuide(id);
+            await deleteColorGuide(id, { isAdmin });
             removeAssetReference("colorGuide", id);
             closeIfTarget("colorGuide", id);
             refreshAssets();
@@ -826,7 +833,7 @@ function ProjectDetailModal({
         setSavingName(true);
         setFormError(null);
         try {
-            const updated = await updateProject(project.id, payload);
+            const updated = await updateProject(project.id, payload, { isAdmin });
             console.log("[project name] update response", updated);
             setProject(updated);
             setNameValue(updated.name);
@@ -898,7 +905,7 @@ function ProjectDetailModal({
         setAssetError(null);
 
         try {
-            const updated = await updateProject(project.id, payload);
+            const updated = await updateProject(project.id, payload, { isAdmin });
             console.log("[project assets] mutate response", updated);
             setProject(updated);
             onUpdated(updated);
@@ -925,7 +932,7 @@ function ProjectDetailModal({
         if (!confirmed) return;
         setDeletePending(true);
         try {
-            await deleteProject(project.id);
+            await deleteProject(project.id, { isAdmin });
             onDeleted(project.id);
             onClose();
         } catch (err) {
@@ -1266,6 +1273,7 @@ function ProjectDetailModal({
                     onClose={() => setPickerType(null)}
                     onAttach={(assetId) => mutateAssets(pickerType, assetId, "attach")}
                     disabled={assetUpdating}
+                    isAdmin={isAdmin}
                 />
             )}
             {detailState.open && detailState.type === "logo" && detailLogoPreview && (
@@ -1281,6 +1289,7 @@ function ProjectDetailModal({
                             ? () => loadDetail("logo", detailState.id!)
                             : undefined
                     }
+                    isAdmin={isAdmin}
                 />
             )}
             {detailState.open && detailState.type === "branding" && detailBrandPreview && (
@@ -1297,6 +1306,7 @@ function ProjectDetailModal({
                             : undefined
                     }
                     onBrandingUpdated={() => setAssetRefreshToken((token) => token + 1)}
+                    isAdmin={isAdmin}
                 />
             )}
             {detailState.open && detailState.type === "colorGuide" && detailColorPreview && (
@@ -1313,6 +1323,7 @@ function ProjectDetailModal({
                             : undefined
                     }
                     onColorGuideUpdated={() => setAssetRefreshToken((token) => token + 1)}
+                    isAdmin={isAdmin}
                 />
             )}
         </div>
@@ -1379,10 +1390,11 @@ type ProjectCreateModalProps = {
     existingNames: string[];
     onClose: () => void;
     onCreated: () => void;
+    isAdmin?: boolean;
 };
 // === Component: ProjectCreateModal ===
 // 새 프로젝트 생성 모달 UI: 이름 입력 및 API/mocked 생성 요청을 핸들링한다.
-function ProjectCreateModal({ existingNames, onClose, onCreated }: ProjectCreateModalProps) {
+function ProjectCreateModal({ existingNames, onClose, onCreated, isAdmin }: ProjectCreateModalProps) {
     const [name, setName] = useState(""); // 입력된 프로젝트 이름
     const [error, setError] = useState<string | null>(null); // 검증/요청 에러 메시지
     const [pending, setPending] = useState(false); // 생성 요청 진행 여부
@@ -1406,7 +1418,10 @@ function ProjectCreateModal({ existingNames, onClose, onCreated }: ProjectCreate
         setPending(true);
         setError(null);
         try {
-            const project = await createProject({ name: trimmed, logoIds: [], brandStrategyIds: [], colorGuideIds: [] });
+            const project = await createProject(
+                { name: trimmed, logoIds: [], brandStrategyIds: [], colorGuideIds: [] },
+                { isAdmin },
+            );
             console.info("[project API] project create", project);
             onCreated();
             onClose();
@@ -1475,6 +1490,7 @@ type ProjectAssetPickerModalProps = {
     onClose: () => void;
     onAttach: (assetId: number) => Promise<void> | void;
     disabled?: boolean;
+    isAdmin?: boolean;
 };
 // === Component: ProjectAssetPickerModal ===
 // 프로젝트에 산출물을 추가할 때 쓰는 선택 모달 UI와 페이징 리스트를 담당한다.
@@ -1484,6 +1500,7 @@ function ProjectAssetPickerModal({
     onClose,
     onAttach,
     disabled,
+    isAdmin,
 }: ProjectAssetPickerModalProps) {
     const [page, setPage] = useState(0); // 현재 선택 목록 페이지
     const [loading, setLoading] = useState(true); // 목록 로딩 여부
@@ -1507,10 +1524,10 @@ function ProjectAssetPickerModal({
         const commonParams = { page, size: 6, filter: "mine" as const };
 
         const request = type === "logo"
-            ? fetchLogoPage(commonParams, { signal: controller.signal })
+            ? fetchLogoPage(commonParams, { signal: controller.signal, isAdmin })
             : type === "branding"
-                ? fetchBrandStrategyPage(commonParams, { signal: controller.signal })
-                : fetchColorGuidePage(commonParams, { signal: controller.signal });
+                ? fetchBrandStrategyPage(commonParams, { signal: controller.signal, isAdmin })
+                : fetchColorGuidePage(commonParams, { signal: controller.signal, isAdmin });
 
         request
             .then((payload) => {
@@ -1528,7 +1545,7 @@ function ProjectAssetPickerModal({
             });
 
         return () => controller.abort();
-    }, [type, page, excludedSet]);
+    }, [type, page, excludedSet, isAdmin]);
 
     // 카드 클릭/버튼으로 프로젝트에 산출물 추가
     const handleAttach = async (id: number) => {

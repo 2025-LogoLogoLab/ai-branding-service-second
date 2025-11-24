@@ -28,6 +28,7 @@ function Branding() {
 
   // 사용자 권한 불러오기
   const { user }= useAuth();
+  const isAdmin = user?.role === 'ADMIN';
 
   // 입력/상태
   const [promptText, setPropmt] = useState<string>('');
@@ -93,7 +94,7 @@ function Branding() {
         ? `${promptText}\n\n${serializeColorGuide()}`
         : promptText;
       setLastPrompt(withColorGuide);
-      const markdown: BrandingResponse = await generateBranding({ briefKo: withColorGuide, base64 });
+      const markdown: BrandingResponse = await generateBranding({ briefKo: withColorGuide, base64 }, { isAdmin });
       // 결과: UI용 뷰 모델에 담아 상태 갱신
       setBrandingResult(markdown);
       if (!markdown || !markdown.trim()) {
@@ -134,12 +135,15 @@ function Branding() {
     }
 
     try {
-      const saved = await saveBranding({
-        briefKo: promptText, // 생성에 사용한 텍스트
-        imageUrl: base64,
-        markdown: brandingResult,      // 실제 전략 마크다운
-        // style, projectId 등은 추후 UI에서 입력 받으면 채워넣기
-      });
+      const saved = await saveBranding(
+        {
+          briefKo: promptText, // 생성에 사용한 텍스트
+          imageUrl: base64,
+          markdown: brandingResult,      // 실제 전략 마크다운
+          // style, projectId 등은 추후 UI에서 입력 받으면 채워넣기
+        },
+        { isAdmin },
+      );
       console.log('[브랜딩 전략 저장] 응답:', saved);
       alert(`브랜딩 전략 저장 완료! (id: ${saved.id})`);
     } catch (err) {

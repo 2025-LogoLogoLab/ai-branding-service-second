@@ -35,6 +35,7 @@ import { useSelectionStore } from "../context/selectionStore";
 import { ensureDataUrl } from "../utils/image";
 import { LogoExampleBox } from "../atoms/LogoExampleBox/LogoExampleBox";
 import { LogoStyleExampleBox } from "../atoms/LogoStyleExampleBox/LogoStyleExampleBox";
+import { useAuth } from "../context/AuthContext";
 
 const NUM_IMAGES_DEFAULT = 2; // 생성 이미지 개수(정책상 현재 2장 고정)
 
@@ -75,6 +76,8 @@ export default function Logo() {
     const [selectPurpose, setSelectPurpose] = useState<null | "branding" | "colorGuide">(null);
     const navigate = useNavigate();
     const { setLogo } = useSelectionStore();
+    const { user } = useAuth();
+    const isAdmin = user?.role === "ADMIN";
 
     // 최초 기본값
     useEffect(() => {
@@ -306,15 +309,18 @@ export default function Logo() {
         try {
             setIsLoading(true);
 
-            const res = await generateLogo({
-                prompt: composedPrompt,
-                style,
-                negative_prompt: negativ_prompt || "no watermark",
-                type,
-                num_images: NUM_IMAGES_DEFAULT,
-                width: widthValue,
-                height: heightValue
-            });
+            const res = await generateLogo(
+                {
+                    prompt: composedPrompt,
+                    style,
+                    negative_prompt: negativ_prompt || "no watermark",
+                    type,
+                    num_images: NUM_IMAGES_DEFAULT,
+                    width: widthValue,
+                    height: heightValue
+                },
+                { isAdmin },
+            );
 
             setLogoResult(res.images);
             setSelectPurpose(null); // 새로 생성 시 선택 모드 초기화
@@ -342,7 +348,7 @@ export default function Logo() {
 
         // 메타 정보 포함
         const prompt = `style: ${style}, negative_prompt: ${negativ_prompt}, ${promptText}`;
-        await saveLogo({ prompt, base64: imageData });
+        await saveLogo({ prompt, base64: imageData }, { isAdmin });
         alert("로고가 저장되었습니다.");
     };
 

@@ -4,10 +4,11 @@
 import type { PaginatedResponse } from "./types";
 
 const basePath = import.meta.env.VITE_API_BASE_URL;
+const withRolePrefix = (path: string, isAdmin?: boolean) => `${basePath}${isAdmin ? "/admin" : ""}${path}`;
 
-const projectEndpoint = `${basePath}/project`;
-const projectListEndpoint = `${basePath}/my-projects`;
-const projectGenerateEndpoint = `${projectEndpoint}/generate`;
+const projectEndpoint = `/project`;
+const projectListEndpoint = `/my-projects`;
+const projectGenerateEndpoint = `/project/generate`;
 
 export type ProjectRecord = {
     id: number;
@@ -124,11 +125,12 @@ const toPaginatedProjects = (raw: ProjectListPayload): PaginatedResponse<Project
 
 export async function fetchProjectList(
     params: ProjectListParams = {},
-    options: { signal?: AbortSignal } = {},
+    options: { signal?: AbortSignal; isAdmin?: boolean } = {},
 ): Promise<PaginatedResponse<ProjectRecord>> {
     console.log("프로젝트 목록 조회 요청 시작");
 
-    const url = new URL(projectListEndpoint);
+    const listPath = options.isAdmin ? "/projects" : projectListEndpoint;
+    const url = new URL(withRolePrefix(listPath, options.isAdmin));
     if (params.page != null) url.searchParams.set("page", String(params.page));
     if (params.size != null) url.searchParams.set("size", String(params.size));
 
@@ -151,11 +153,11 @@ export async function fetchProjectList(
 
 export async function fetchProjectDetail(
     projectId: number,
-    options: { signal?: AbortSignal } = {},
+    options: { signal?: AbortSignal; isAdmin?: boolean } = {},
 ): Promise<ProjectRecord> {
     console.log("프로젝트 상세 조회 요청 시작");
 
-    const result = await fetch(`${projectEndpoint}/${projectId}`, {
+    const result = await fetch(withRolePrefix(`${projectEndpoint}/${projectId}`, options.isAdmin), {
         method: "GET",
         credentials: "include",
         signal: options.signal,
@@ -171,10 +173,10 @@ export async function fetchProjectDetail(
     return normalizeProject(payload);
 }
 
-export async function createProject(body: ProjectCreateRequest): Promise<ProjectRecord> {
+export async function createProject(body: ProjectCreateRequest, options: { isAdmin?: boolean } = {}): Promise<ProjectRecord> {
     console.log("프로젝트 생성 요청 시작");
 
-    const result = await fetch(projectGenerateEndpoint, {
+    const result = await fetch(withRolePrefix(projectGenerateEndpoint, options.isAdmin), {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -198,9 +200,9 @@ export async function createProject(body: ProjectCreateRequest): Promise<Project
     return normalizeProject(payload);
 }
 
-export async function updateProject(projectId: number, body: ProjectUpdateRequest): Promise<ProjectRecord> {
+export async function updateProject(projectId: number, body: ProjectUpdateRequest, options: { isAdmin?: boolean } = {}): Promise<ProjectRecord> {
     console.log("프로젝트 수정 요청 시작");
-    const result = await fetch(`${projectEndpoint}/${projectId}`, {
+    const result = await fetch(withRolePrefix(`${projectEndpoint}/${projectId}`, options.isAdmin), {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
@@ -224,9 +226,9 @@ export async function updateProject(projectId: number, body: ProjectUpdateReques
     return normalizeProject(payload);
 }
 
-export async function deleteProject(projectId: number): Promise<void> {
+export async function deleteProject(projectId: number, options: { isAdmin?: boolean } = {}): Promise<void> {
     console.log("프로젝트 삭제 요청 시작");
-    const result = await fetch(`${projectEndpoint}/${projectId}`, {
+    const result = await fetch(withRolePrefix(`${projectEndpoint}/${projectId}`, options.isAdmin), {
         method: "DELETE",
         credentials: "include",
     });

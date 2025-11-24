@@ -9,6 +9,7 @@ import { MarkdownMessage } from '../atoms/MarkdownMessage/MarkdownMessage';
 import LoadingMessage from '../organisms/LoadingMessage/LoadingMessage';
 import ColorGuideResult from '../organisms/ColorGuideResult/ColorGuideResult';
 import { TextButton } from '../atoms/TextButton/TextButton';
+import { useAuth } from '../context/AuthContext';
 
 
 // 컬러 가이드 생성 페이지
@@ -27,6 +28,8 @@ function ColorGuide(){
     const [lastPrompt, setLastPrompt] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [isCopying, setIsCopying] = useState(false);
+    const { user } = useAuth();
+    const isAdmin = user?.role === "ADMIN";
 
     useEffect( () => {
         setStyle('');
@@ -52,7 +55,7 @@ function ColorGuide(){
                 ? `${promptText}\n\n[Branding Strategy]\n${brandingMarkdown}`
                 : promptText;
             setLastPrompt(combined);
-            const res = await generateColorGuide({ briefKo: combined, style, imageUrl});
+            const res = await generateColorGuide({ briefKo: combined, style, imageUrl}, { isAdmin });
             setColorGuideGenResult(res);
 
         } catch (err) {
@@ -80,7 +83,7 @@ function ColorGuide(){
             return;
         }
         try {
-            const result = await saveColorGuide( { briefKo:promptText, guide:colorGuideGenResult} );
+            const result = await saveColorGuide( { briefKo:promptText, guide:colorGuideGenResult}, { isAdmin } );
             console.log(result);
             alert('컬러 가이드가 저장되었습니다.');
 

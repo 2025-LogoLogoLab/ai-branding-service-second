@@ -46,7 +46,11 @@ export function ProtectedRoute({
     //    - 권한 없으면 권한 부족 페이지로 이동
     //───────────────────────────────────────────────────────────────────────────
     if (requireRoles) {
-        const hasRole = requireRoles.some(r => user.role.includes(r));
+        const normalizedRole = (user.role ?? "").toString().toLowerCase();
+        const hasRole = requireRoles.some((role) => {
+            const candidate = role.toLowerCase();
+            return normalizedRole === candidate || normalizedRole.includes(candidate);
+        });
         if (!hasRole) {
             return <RedirectWithAlert to='/unauthorized' message='관리자만 사용할 수 있는 페이지입니다.'/>
         }

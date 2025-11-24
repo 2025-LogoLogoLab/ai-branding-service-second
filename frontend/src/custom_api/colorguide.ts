@@ -1,14 +1,15 @@
 // src/custom_api/colorguide.ts
 
 const basePath = import.meta.env.VITE_API_BASE_URL;
+const withRolePrefix = (path: string, isAdmin?: boolean) => `${basePath}${isAdmin ? "/admin" : ""}${path}`;
 
 import type { PaginatedResponse } from "./types";
 
-const colorguideGenEndPoint = basePath + '/color-guide/generate';
-const colorguideStoreEndPoint = basePath + '/color-guide/save';
-const colorguideDeleteEndPoint = basePath + '/color-guide';
-const colorGuideDetailEndpoint = basePath + '/color-guide';
-const colorGuideListEndpoint = basePath + '/color-guides';
+const colorguideGenEndPoint = '/color-guide/generate';
+const colorguideStoreEndPoint = '/color-guide/save';
+const colorguideDeleteEndPoint = '/color-guide';
+const colorGuideDetailEndpoint = '/color-guide';
+const colorGuideListEndpoint = '/color-guides';
 
 // const navigate = useNavigate();
 
@@ -48,12 +49,15 @@ export type colorGuideStoreRequest = { // 컬러 가이드 저장 요청 타입
     guide:colorGuideGenResponse;
 }
 
-export async function generateColorGuide( { briefKo: promptText, style, imageUrl }: colorGuideRequest ): Promise<colorGuideGenResponse> {
+export async function generateColorGuide(
+    { briefKo: promptText, style, imageUrl }: colorGuideRequest,
+    options: { isAdmin?: boolean } = {},
+): Promise<colorGuideGenResponse> {
     // 컬러 가이드 생성 클라이언트
 
     console.log("컬러 가이드 생성 요청 시작");    
 
-    const result = await fetch(colorguideGenEndPoint, {
+    const result = await fetch(withRolePrefix(colorguideGenEndPoint, options.isAdmin), {
         method: 'POST',
         headers:{
             'Content-Type': 'application/json',
@@ -73,11 +77,11 @@ export async function generateColorGuide( { briefKo: promptText, style, imageUrl
 
 }
 
-export async function deleteColorGuide( colorGuideNum:number ) {
+export async function deleteColorGuide( colorGuideNum:number, options: { isAdmin?: boolean } = {} ) {
     // 컬러 가이드 삭제 클라이언트. 리턴 타입 모름.
     console.log("컬러 가이드 삭제 요청 시작");    
 
-    const result = await fetch(`${colorguideDeleteEndPoint}/${colorGuideNum}`, {
+    const result = await fetch(withRolePrefix(`${colorguideDeleteEndPoint}/${colorGuideNum}`, options.isAdmin), {
         method: 'DELETE',
         // headers:{
         //     'Content-Type': 'application/json',
@@ -98,11 +102,11 @@ export async function deleteColorGuide( colorGuideNum:number ) {
 }
 
 
-export async function saveColorGuide({ briefKo, guide}: colorGuideStoreRequest) {
+export async function saveColorGuide({ briefKo, guide}: colorGuideStoreRequest, options: { isAdmin?: boolean } = {}) {
     // 컬러 가이드 저장 클라이언트. 리턴 타입 모름.
     console.log("컬러 가이드 저장 요청 시작");    
 
-    const result = await fetch(colorguideStoreEndPoint, {
+    const result = await fetch(withRolePrefix(colorguideStoreEndPoint, options.isAdmin), {
         method: 'POST',
         headers:{
             'Content-Type': 'application/json',
@@ -166,11 +170,11 @@ export type ColorGuidePageParams = {
  */
 export async function fetchColorGuidePage(
     params: ColorGuidePageParams = {},
-    options: { signal?: AbortSignal } = {}
+    options: { signal?: AbortSignal; isAdmin?: boolean } = {}
 ): Promise<PaginatedResponse<ColorGuideListItem>> {
     console.log("컬러 가이드 목록 페이지 조회 요청 시작");
 
-    const url = new URL(colorGuideListEndpoint);
+    const url = new URL(withRolePrefix(colorGuideListEndpoint, options.isAdmin));
     const qs = new URLSearchParams();
 
     if (params.projectId != null) qs.set("projectId", String(params.projectId));
@@ -218,11 +222,11 @@ export async function fetchColorGuidePage(
     return mapped;
 }
 
-export async function fetchAllColorGuide(): Promise<ColorGuideListItem[]> {
+export async function fetchAllColorGuide(options: { isAdmin?: boolean } = {}): Promise<ColorGuideListItem[]> {
     // 전체 컬러 가이드 가져오는 함수. 
     console.log("컬러 가이드 전체 가져오기 요청 시작");    
 
-    const firstPage = await fetchColorGuidePage({ page: 0, size: 50, filter: 'mine' });
+    const firstPage = await fetchColorGuidePage({ page: 0, size: 50, filter: 'mine' }, options);
     return firstPage.content;
 }
 
@@ -233,10 +237,10 @@ const normalizePalette = (input: any, fallbackHex?: string, fallbackDescription?
 
 export async function fetchColorGuideDetail(
     id: number,
-    options: { signal?: AbortSignal } = {}
+    options: { signal?: AbortSignal; isAdmin?: boolean } = {}
 ): Promise<ColorGuideDetail> {
     console.log("컬러 가이드 상세 조회 요청 시작");
-    const result = await fetch(`${colorGuideDetailEndpoint}/${id}`, {
+    const result = await fetch(withRolePrefix(`${colorGuideDetailEndpoint}/${id}`, options.isAdmin), {
         method: "GET",
         credentials: "include",
         signal: options.signal,
@@ -271,9 +275,10 @@ export async function fetchColorGuideDetail(
 export async function updateColorGuide(
     id: number,
     body: UpdateColorGuideBody,
+    options: { isAdmin?: boolean } = {},
 ): Promise<ColorGuideDetail> {
     console.log("컬러 가이드 수정 요청 시작");
-    const result = await fetch(`${colorGuideDetailEndpoint}/${id}`, {
+    const result = await fetch(withRolePrefix(`${colorGuideDetailEndpoint}/${id}`, options.isAdmin), {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",

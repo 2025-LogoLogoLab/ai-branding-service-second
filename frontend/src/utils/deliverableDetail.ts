@@ -100,18 +100,18 @@ export const previewToColorGuideDetail = (preview: ColorGuideListItem): ColorGui
     createdAt: preview.createdAt,
 });
 
-export function useDeliverableDetail() {
+export function useDeliverableDetail(isAdmin?: boolean) {
     const [detailState, setDetailState] = useState<DetailState>({ open: false });
 
     const loadDetail = useCallback(async (type: DetailType, id: number) => {
         try {
             let data: LogoDetail | BrandStrategyDetail | ColorGuideDetail;
             if (type === "logo") {
-                data = await fetchLogoDetail(id);
+                data = await fetchLogoDetail(id, { isAdmin });
             } else if (type === "branding") {
-                data = await fetchBrandStrategyDetail(id);
+                data = await fetchBrandStrategyDetail(id, { isAdmin });
             } else {
-                data = await fetchColorGuideDetail(id);
+                data = await fetchColorGuideDetail(id, { isAdmin });
             }
             setDetailState((prev) => {
                 if (prev.open && prev.type === type && prev.id === id) {
@@ -128,7 +128,7 @@ export function useDeliverableDetail() {
                 return prev;
             });
         }
-    }, []);
+    }, [isAdmin]);
 
     const openDetail = useCallback(
         (payload: DetailPreview) => {

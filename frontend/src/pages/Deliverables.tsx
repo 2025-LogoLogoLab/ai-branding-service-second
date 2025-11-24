@@ -51,6 +51,7 @@ import {
 } from "../utils/deliverableDetail";
 import { fetchAssetsByTag, type AssetSummary } from "../custom_api/assets";
 import { fetchTagList, type TagRecord } from "../custom_api/tags";
+import { useAuth } from "../context/AuthContext";
 // 페이지별 기본 페이지 크기(시안에서는 3열 그리드이므로 9개 단위가 자연스러움)
 const PAGE_SIZE = 3;
 
@@ -165,6 +166,8 @@ function DeliverablesPage({
 }: DeliverablesPageProps) {
     const navigate = useNavigate();
     const isBlueprint = variant === "blueprint";
+    const { user } = useAuth();
+    const isAdmin = user?.role === "ADMIN";
 
     // 체크 상태 및 페이지 인덱스
     const [selections, setSelections] = useState<DeliverableSelection>(() => createSelection(mode));
@@ -203,7 +206,7 @@ function DeliverablesPage({
         detailLogoData,
         detailBrandData,
         detailColorData,
-    } = useDeliverableDetail();
+    } = useDeliverableDetail(isAdmin);
 
     // mode가 변경되면 기본 선택 및 페이지 초기화
     useEffect(() => {
@@ -220,28 +223,31 @@ function DeliverablesPage({
     const [logoState] = usePaginatedLoader<LogoListItem>(
         selections.logo,
         logoPage,
-        ({ page, size, signal }) => fetchLogoPage({ page, size, 
-            filter: "mine" 
-        }, 
-            { signal }),
+        ({ page, size, signal }) =>
+            fetchLogoPage(
+                { page, size, filter: "mine" },
+                { signal, isAdmin },
+            ),
         [logoNonce],
     );
     const [brandingState] = usePaginatedLoader<BrandStrategyListItem>(
         selections.branding,
         brandingPage,
-        ({ page, size, signal }) => fetchBrandStrategyPage({ page, size, 
-            filter: "mine" 
-        }, 
-            { signal }),
+        ({ page, size, signal }) =>
+            fetchBrandStrategyPage(
+                { page, size, filter: "mine" },
+                { signal, isAdmin },
+            ),
         [brandingNonce],
     );
     const [colorGuideState] = usePaginatedLoader<ColorGuideListItem>(
         selections.colorGuide,
         colorGuidePage,
-        ({ page, size, signal }) => fetchColorGuidePage({ page, size, 
-            filter: "mine" 
-        }, 
-            { signal }),
+        ({ page, size, signal }) =>
+            fetchColorGuidePage(
+                { page, size, filter: "mine" },
+                { signal, isAdmin },
+            ),
         [colorGuideNonce],
     );
 
@@ -365,7 +371,7 @@ function DeliverablesPage({
     const handleLogoDelete = async (id: number) => {
         setLogoActions((prev) => ({ ...prev, deletingId: id }));
         try {
-            await deleteLogo(id);
+            await deleteLogo(id, { isAdmin });
             bumpNonce("logo");
             closeIfTarget("logo", id);
         } catch (err) {
@@ -406,7 +412,7 @@ function DeliverablesPage({
     const handleBrandingDelete = async (id: number) => {
         setBrandingActions((prev) => ({ ...prev, deletingId: id }));
         try {
-            await deleteBranding({ id });
+            await deleteBranding({ id }, { isAdmin });
             bumpNonce("branding");
             closeIfTarget("branding", id);
         } catch (err) {
@@ -443,7 +449,7 @@ function DeliverablesPage({
     const handleColorGuideDelete = async (id: number) => {
         setColorGuideActions((prev) => ({ ...prev, deletingId: id }));
         try {
-            await deleteColorGuide(id);
+            await deleteColorGuide(id, { isAdmin });
             bumpNonce("colorGuide");
             closeIfTarget("colorGuide", id);
         } catch (err) {
@@ -813,6 +819,7 @@ function DeliverablesPage({
                             : undefined
                     }
                     toolbarProps={detailToolbarProps}
+                    isAdmin={isAdmin}
                 />
             )}
 
@@ -831,6 +838,7 @@ function DeliverablesPage({
                     }
                     toolbarProps={detailToolbarProps}
                     onBrandingUpdated={() => setBrandingNonce((v) => v + 1)}
+                    isAdmin={isAdmin}
                 />
             )}
 
@@ -849,6 +857,7 @@ function DeliverablesPage({
                     }
                     toolbarProps={detailToolbarProps}
                     onColorGuideUpdated={() => setColorGuideNonce((v) => v + 1)}
+                    isAdmin={isAdmin}
                 />
             )}
 
