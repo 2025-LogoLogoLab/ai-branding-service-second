@@ -7,6 +7,7 @@ import type { SocialProvider, } from '../custom_api/auth';
 import { getKakaoAuthUrl, getNaverAuthUrl } from '../custom_api/auth';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import FullScreenLoader from '../organisms/FullScreenLoader/FullScreenLoader';
 
 // CSRF 방지용 랜덤 문자열. naver 쓰려면 필수로 필요함. 여기서만 사용.
 function generateRandomState() {
@@ -47,9 +48,7 @@ function Login() {
     }, [authError, user]);
 
     if (loading) {
-        return (
-            <div> 로그인 중 입니다.. </div>
-        );
+        return <FullScreenLoader message="로그인 중입니다…" subtext="잠시만 기다려주세요." />;
     }
 
     const handleLogin = async () => {   // 일반 로그인 핸들링 로직
