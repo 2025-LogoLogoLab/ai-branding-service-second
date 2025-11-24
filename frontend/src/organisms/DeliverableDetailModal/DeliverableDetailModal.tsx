@@ -2,7 +2,7 @@ import styles from "./DeliverableDetailModal.module.css";
 import { ProductToolbar, type ProductToolbarProps } from "../../molecules/ProductToolbar/ProductToolbar";
 import type { LogoDetail } from "../../custom_api/logo";
 import { updateBrandStrategy, type BrandStrategyDetail } from "../../custom_api/branding";
-import { updateColorGuide, type ColorGuideDetail, type palette } from "../../custom_api/colorguide";
+import { updateColorGuide, type ColorGuideDetail, type colorGuide, type palette } from "../../custom_api/colorguide";
 import { ensureDataUrl } from "../../utils/image";
 import { Fragment, useEffect, useState } from "react";
 import { LOGO_STYLES } from "../../types/logoStyles";
@@ -384,10 +384,20 @@ const renderLogoDetail = (detail: LogoDetail) => {
     };
 
     const handleColorGuideDraftChange = (key: keyof ColorGuideDetail["guide"], field: "hex" | "description", value: string) => {
-        setColorGuideDraft((prev) => ({
-            ...(prev ?? {}),
-            [key]: { ...(prev?.[key] ?? { hex: "", description: "" }), [field]: value },
-        }));
+        const ensurePalette = (p?: palette): palette => ({
+            hex: p?.hex ?? "",
+            description: p?.description ?? "",
+        });
+        setColorGuideDraft((prev): colorGuide => {
+            const base: colorGuide = {
+                main: ensurePalette(prev?.main),
+                sub: ensurePalette(prev?.sub),
+                point: ensurePalette(prev?.point),
+                background: ensurePalette(prev?.background),
+            };
+            const nextPalette = { ...base[key], [field]: value } as palette;
+            return { ...base, [key]: nextPalette };
+        });
     };
 
     const handleColorGuideSave = async () => {
