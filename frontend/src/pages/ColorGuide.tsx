@@ -134,13 +134,14 @@ function ColorGuide(){
 
     // 안내 메시지: 프롬프트 입력/생성 전 단계에서만 표시
     const showPrePromptNotice = !colorGuideGenResult && !loading;
-    const isLinkedFlow = Boolean(selection.logoBase64 || imageUrl || selection.brandingMarkdown);
-    const colorGuideLinkedNotice =
-        "컬러 가이드 - 연계 시 설명: 로고나 브랜딩 정보를 함께 전달하면 핵심 톤앤매너를 더 정확히 반영한 팔레트를 제안합니다. (예시 문구 길이를 늘려둔 상태)";
-    const colorGuideStandaloneNotice =
-        "컬러 가이드 - 단독 시 설명: 브랜드의 감성, 분위기, 활용 채널을 구체적으로 적어주면 색상 제안이 더 정밀해집니다. (예시 문구 길이를 늘려둔 상태)";
-
     const hasLogoContext = Boolean(selection.logoBase64 || imageUrl);
+    const linkedSources: string[] = [];
+    if (hasLogoContext) linkedSources.push('로고');
+    if (selection.brandingMarkdown || brandingMarkdown) linkedSources.push('브랜딩 전략');
+    const isLinkedFlow = linkedSources.length > 0;
+    const targetLabel = '컬러 가이드';
+    const colorGuideLinkedNotice = `선택하신 ${linkedSources.join(', ')} 정보를 바탕으로 ${targetLabel}를 생성합니다. \n원하는 내용을 자세하게 지시하실수록 더 좋은 결과물을 받을 수 있습니다.`;
+    const colorGuideStandaloneNotice = `원하는 내용을 자세하게 지시하실수록 더 좋은 결과물을 받을 수 있습니다. \n좀 더 일관적인 결과를 원하신다면 로고를 먼저 생성해 두세요. \n그러면 그 로고에 맞춘 ${targetLabel}를 만들 수 있습니다.`;
 
     return(
         <div style={{ padding: '12px 16px', display: 'grid', gap: 16 }}>
@@ -150,17 +151,20 @@ function ColorGuide(){
             </h2>
             <div style={{ borderBottom: '1px solid var(--color-divider-border)', margin: '4px 0 8px' }} />
             {showPrePromptNotice && (
-                <div
-                    style={{
-                        padding: '12px 14px',
-                        borderRadius: '12px',
-                        background: '#eef2ff',
-                        color: '#1f2937',
-                        lineHeight: 1.6,
-                    }}
-                >
-                    {isLinkedFlow ? colorGuideLinkedNotice : colorGuideStandaloneNotice}
-                </div>
+                <>
+                    <div
+                        style={{
+                            padding: '12px 14px',
+                            borderRadius: '12px',
+                            color: '#1f2937',
+                            lineHeight: 1.6,
+                            whiteSpace: 'pre-wrap',
+                        }}
+                    >
+                        {isLinkedFlow ? colorGuideLinkedNotice : colorGuideStandaloneNotice}
+                    </div>
+                    <div style={{ borderTop: '1px solid var(--color-divider-border)', margin: '8px 0 12px' }} />
+                </>
             )}
             {lastPrompt && <MarkdownMessage content={lastPrompt} isUser />}
 
@@ -199,7 +203,7 @@ function ColorGuide(){
             {!colorGuideGenResult && (
                 <PromptComposer
                     value={promptText}
-                    placeholder="색상 조합을 입력하세요..."
+                    placeholder="메시지를 입력하세요."
                     onChange={(e) => setPropmt(e.target.value)}
                     onSubmit={handleColorGuideGeneration}
                     disabled={loading}

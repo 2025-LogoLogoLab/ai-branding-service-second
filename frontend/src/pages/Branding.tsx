@@ -191,11 +191,14 @@ function Branding() {
 
   // 안내 메시지: 프롬프트 전/생성 전 단계에서만 표시
   const showPrePromptNotice = !brandingResult && !loading;
-  const isLinkedFlow = Boolean(selection.logoBase64 || base64 || selection.colorGuide);
-  const brandingLinkedNotice =
-    "브랜딩 전략 - 연계 시 설명: 로고나 컬러 가이드를 함께 전달하면 브랜드 톤앤매너를 더 세밀하게 반영합니다. (예시 문구 길이를 늘려둔 상태)";
-  const brandingStandaloneNotice =
-    "브랜딩 전략 - 단독 시 설명: 로고 없이도 핵심 가치, 타깃, 톤을 구체적으로 적어주면 전략의 완성도가 높아집니다. (예시 문구 길이를 늘려둔 상태)";
+  const hasLogoContext = Boolean(selection.logoBase64 || base64);
+  const linkedSources: string[] = [];
+  if (hasLogoContext) linkedSources.push('로고');
+  if (selection.colorGuide) linkedSources.push('컬러 가이드');
+  const isLinkedFlow = linkedSources.length > 0;
+  const targetLabel = '브랜딩 전략';
+  const brandingLinkedNotice = `선택하신 ${linkedSources.join(', ')} 정보를 바탕으로 ${targetLabel}을 생성합니다. \n원하는 내용을 자세하게 지시하실수록 더 좋은 결과물을 받을 수 있습니다.`;
+  const brandingStandaloneNotice = `원하는 내용을 자세하게 지시하실수록 더 좋은 결과물을 받을 수 있습니다. \n좀 더 일관적인 결과를 원하신다면 로고를 먼저 생성해 두세요. \n그러면 그 로고에 맞춘 ${targetLabel}을 만들 수 있습니다.`;
 
   return (
     <div style={{ padding: '12px 16px', display: 'grid', gap: 16 }}>
@@ -205,17 +208,20 @@ function Branding() {
       </h2>
       <div style={{ borderBottom: '1px solid var(--color-divider-border)', margin: '4px 0 8px' }} />
       {showPrePromptNotice && (
-        <div
-          style={{
-            padding: '12px 14px',
-            borderRadius: '12px',
-            background: '#eef2ff',
-            color: '#1f2937',
-            lineHeight: 1.6,
-          }}
-        >
-          {isLinkedFlow ? brandingLinkedNotice : brandingStandaloneNotice}
-        </div>
+        <>
+          <div
+            style={{
+              padding: '12px 14px',
+              borderRadius: '12px',
+              color: '#1f2937',
+              lineHeight: 1.6,
+              whiteSpace: 'pre-wrap',
+            }}
+          >
+            {isLinkedFlow ? brandingLinkedNotice : brandingStandaloneNotice}
+          </div>
+          <div style={{ borderTop: '1px solid var(--color-divider-border)', margin: '8px 0 12px' }} />
+        </>
       )}
       {/* 상단 프롬프트 말풍선 (있을 때만) */}
       {lastPrompt && (
@@ -259,7 +265,7 @@ function Branding() {
       {!brandingResult && (
         <PromptComposer
           value={promptText}
-          placeholder="메시지를 입력하세요..."
+          placeholder="메시지를 입력하세요."
           onChange={(e) => setPropmt(e.target.value)}
           onSubmit={handleBrandingGeneration}
           disabled={loading}

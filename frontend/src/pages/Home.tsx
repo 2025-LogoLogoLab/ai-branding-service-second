@@ -8,8 +8,11 @@ import ContentStrip from "../organisms/home/ContentStrip";
 import FeatureSplit from "../organisms/home/FeatureSplit";
 // import DiagonalMediaBanner from "../organisms/home/DiagonalMediaBanner";
 import styles from "./Home.module.css";
+import featureLogoGenImage from "../assets/images/for_front/front_img_logo_gen.png";
 import featureStylesImage from "../assets/images/for_front/front_img_styles.png";
 import featureBrandingImage from "../assets/images/for_front/front_img_branding.png";
+import featureColorGuideImage from "../assets/images/for_front/front_img_color_guide.png";
+import featureMemberImage from "../assets/images/for_front/front_img_member_feature.png";
 
 function Home() {
   const { user } = useAuth();
@@ -24,7 +27,8 @@ function Home() {
           "\nFLUX 모델 기반으로 구축한 로고 생성기는 \n다른 서비스 대비 사용자가 표출하기를 원하는 \n텍스트를 정확하게 표현합니다.",
         ctaLabel: "로고 생성하기",
         onCtaClick: () => navigate("/logo"),
-        image: { title: "로고 생성기", badge: "AI", chipLabel: "브랜드 워드", accent: "softBlue" as const },
+        imageSrc: featureLogoGenImage,
+        imageAlt: "텍스트 구현율이 높은 로고 생성 예시 이미지",
         imagePosition: "right" as const,
       },
       {
@@ -45,7 +49,8 @@ function Home() {
           "사업에 맞는 가장 효율적이고 확실한 브랜드 설계를 제공합니다. \n앞서 생성한 로고 및 컬러 가이드와 일관된 전략을 제안할 수 있습니다.",
         ctaLabel: "지금 바로 추천 받기",
         onCtaClick: () => navigate("/branding"),
-        image: { title: "로고 생성기", badge: "Workspace", chipLabel: "전략 메모" },
+        imageSrc: featureBrandingImage,
+        imageAlt: "브랜딩 전략 예시 미리보기",
         imagePosition: "right" as const,
       },
       {
@@ -55,7 +60,8 @@ function Home() {
           "여러분의 브랜드 아이덴티티에 맞춰 조합한 \n팔레트와 추천 톤을 제안 받아보세요.",
         ctaLabel: "컬러 가이드 생성하기",
         onCtaClick: () => navigate("/colorGuide"),
-        image: { title: "팔레트 제안", badge: "Guide", chipLabel: "브랜드 컬러", accent: "softBlue" as const },
+        imageSrc: featureColorGuideImage,
+        imageAlt: "컬러 가이드 팔레트 예시 미리보기",
         imagePosition: "left" as const,
       },
       {
@@ -65,8 +71,8 @@ function Home() {
           user? "프로젝트 및 태그를 기반으로 \n작업물들을 효율적으로 관리하세요." : "지금 로고로고랩의 회원이 되시면 \n작업물들을 보다 효율적으로 관리할 수 있습니다.",
         ctaLabel: "살펴보기",
         onCtaClick: () => navigate(user ? "/myPage" : "/signUp"),
-        imageSrc: featureBrandingImage,
-        imageAlt: "워크플로우 예시 미리보기",
+        imageSrc: featureMemberImage,
+        imageAlt: "회원 기능 워크플로우 예시 미리보기",
         imagePosition: "right" as const,
       },
     ],
