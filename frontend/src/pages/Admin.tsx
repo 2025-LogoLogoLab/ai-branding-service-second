@@ -14,6 +14,10 @@ import {
     type AdminUserUpdateRequest,
 } from "../custom_api/adminUsers";
 
+// 관리자용 회원 관리 대시보드 페이지.
+// - 좌측: 신규 회원 생성 카드
+// - 우측: 페이징되는 회원 리스트 + 행 클릭/버튼으로 상세 모달
+// - 모달에서 수정/삭제 후 리스트 즉시 재조회
 function Admin() {
     const [users, setUsers] = useState<AdminUserRecord[]>([]);
     const [page, setPage] = useState(0);

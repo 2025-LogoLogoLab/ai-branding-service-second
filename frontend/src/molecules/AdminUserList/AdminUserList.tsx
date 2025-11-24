@@ -3,6 +3,8 @@ import { Pagination } from "../Pagination/Pagination";
 import type { AdminUserRecord } from "../../custom_api/adminUsers";
 import { TextButton } from "../../atoms/TextButton/TextButton";
 
+// 회원 목록 테이블.
+// 행 전체 클릭 시 상세 열기, 행 내부 버튼은 이벤트 전파를 막아 독립 동작.
 type AdminUserListProps = {
     users: AdminUserRecord[];
     loading?: boolean;

@@ -4,6 +4,8 @@ import type { AdminUserRecord, AdminUserRole, AdminUserUpdateRequest } from "../
 import { TextInput } from "../../atoms/TextInput/TextInput";
 import { TextButton } from "../../atoms/TextButton/TextButton";
 
+// 회원 상세 모달.
+// 드래프트 상태에서 바로 수정/삭제 트리거만 제공하고, 실제 저장은 상위에서 수행.
 type AdminUserDetailModalProps = {
     open: boolean;
     user: AdminUserRecord | null;
@@ -27,6 +29,7 @@ type Draft = {
     newsLetter: boolean;
 };
 
+// API 응답을 모달 내 편집용 드래프트로 변환.
 const toDraft = (user: AdminUserRecord | null): Draft => ({
     profileImage: user?.profileImage ?? "",
     nickname: user?.nickname ?? "",

@@ -46,6 +46,7 @@ export function ProtectedRoute({
     //    - 권한 없으면 권한 부족 페이지로 이동
     //───────────────────────────────────────────────────────────────────────────
     if (requireRoles) {
+        // role 표기(ADMIN/admin 등) 편차를 허용하기 위해 소문자로 비교.
         const normalizedRole = (user.role ?? "").toString().toLowerCase();
         const hasRole = requireRoles.some((role) => {
             const candidate = role.toLowerCase();

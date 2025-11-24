@@ -4,6 +4,8 @@ import { TextInput } from "../../atoms/TextInput/TextInput";
 import { TextButton } from "../../atoms/TextButton/TextButton";
 import type { AdminUserCreateRequest, AdminUserRole } from "../../custom_api/adminUsers";
 
+// 신규 회원 발급 전용 폼.
+// 필수 필드 검증만 프런트에서 가볍게 수행하고, 실제 생성은 상위 onSubmit에 위임.
 type AdminUserCreateFormProps = {
     onSubmit: (payload: AdminUserCreateRequest) => Promise<void>;
     loading?: boolean;
