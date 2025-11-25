@@ -97,15 +97,6 @@ type ProjectPageInfo = {
     totalElements: number;
 };
 
-const createEmptyAssetPage = <T,>(): PaginatedResponse<T> => ({
-    content: [],
-    page: 0,
-    size: PROJECT_ASSET_PAGE_SIZE,
-    totalElements: 0,
-    totalPages: 1,
-    last: true,
-});
-
 const formatDateTime = (value?: string) => {
     if (!value) return "-";
     const date = new Date(value);
