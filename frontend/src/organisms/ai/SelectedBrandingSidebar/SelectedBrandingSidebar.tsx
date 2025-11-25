@@ -1,31 +1,26 @@
 import styles from './SelectedBrandingSidebar.module.css';
-import { MarkdownMessage } from '../../../atoms/MarkdownMessage/MarkdownMessage';
 import { ProductToolbar } from '../../../molecules/ProductToolbar/ProductToolbar';
 import { useSelectionStore } from '../../../context/selectionStore';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { normalizeMarkdown } from '../../../atoms/MarkdownMessage/MarkdownMessage';
 
 export type SelectedBrandingSidebarProps = {
   markdown: string;
-  onDelete?: () => void;
-  onSave?: () => void;
+  onDownload?: () => void;
   onCopy?: () => void;
 };
 
-export default function SelectedBrandingSidebar({ markdown, onDelete, onSave, onCopy }: SelectedBrandingSidebarProps) {
-  const { clearBranding } = useSelectionStore();
+export default function SelectedBrandingSidebar({ markdown, onDownload, onCopy }: SelectedBrandingSidebarProps) {
   const [isCopying, setIsCopying] = useState(false);
 
-  const resolvedDelete = useCallback(() => {
-    if (onDelete) {
-      onDelete();
-      return;
-    }
-    clearBranding();
-  }, [onDelete, clearBranding]);
+  const normalized = useMemo(() => normalizeMarkdown(markdown), [markdown]);
+  const previewText =
+    normalized.length > 600 ? `${normalized.slice(0, 600)}\n\n…` : normalized;
 
-  const resolvedSave = useCallback(() => {
-    if (onSave) {
-      onSave();
+  const resolvedDownload = useCallback(() => {
+    if (onDownload) {
+      onDownload();
       return;
     }
     const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
@@ -35,10 +30,10 @@ export default function SelectedBrandingSidebar({ markdown, onDelete, onSave, on
     anchor.download = `branding-strategy-${Date.now()}.md`;
     anchor.rel = 'noopener';
     document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-    URL.revokeObjectURL(url);
-  }, [onSave, markdown]);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+    }, [onDownload, markdown]);
 
   const resolvedCopy = useCallback(async () => {
     if (onCopy) {
@@ -63,14 +58,15 @@ export default function SelectedBrandingSidebar({ markdown, onDelete, onSave, on
   return (
     <div className={styles.wrap} aria-label="선택된 브랜딩 전략">
       <span className={styles.title}>선택된 브랜딩 전략</span>
-      <div className={styles.box}>
-        <MarkdownMessage content={markdown} variant="compact" />
+      <div className={styles.box} aria-label="브랜딩 전략 미리보기">
+        <div className={styles.markdown}>
+          <ReactMarkdown>{previewText}</ReactMarkdown>
+        </div>
       </div>
       <div className={styles.toolbarOuter}>
         <ProductToolbar
           id={1}
-          onDelete={() => resolvedDelete()}
-          onSave={() => resolvedSave()}
+          onDownload={() => resolvedDownload()}
           onCopy={() => resolvedCopy()}
           isCopying={isCopying}
           size={20}

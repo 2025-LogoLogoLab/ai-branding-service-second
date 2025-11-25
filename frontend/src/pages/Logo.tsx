@@ -13,7 +13,7 @@
 // - TextArea/TextButton: 각각 전용 모듈 CSS 사용
 // - 페이지 레이아웃은 Grid (max-content, max-content, 1fr)로 구성
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import s from "./LogoPage.module.css";
@@ -75,16 +75,22 @@ export default function Logo() {
     const [logoResult, setLogoResult] = useState<string[] | null>(null);
     const [selectPurpose, setSelectPurpose] = useState<null | "branding" | "colorGuide">(null);
     const navigate = useNavigate();
-    const { setLogo } = useSelectionStore();
+    const { setLogo, clearAll: clearSelections } = useSelectionStore();
+    const clearedRef = useRef(false);
     const { user } = useAuth();
     const isAdmin = user?.role === "ADMIN";
 
     // 최초 기본값
     useEffect(() => {
+        // 이전 페이지(브랜딩/컬러 가이드 등)에서 남아 있을 수 있는 선택 상태를 초기화
+        if (!clearedRef.current) {
+            clearSelections();
+            clearedRef.current = true;
+        }
         setNegativePrompt("no watermark");
         setStyle("cute");
         setType("TEXT");
-    }, []);
+    }, [clearSelections]);
 
     // 전체보기 토글(서로 배타)
     const toggleAll = (which: "type" | "style") => {

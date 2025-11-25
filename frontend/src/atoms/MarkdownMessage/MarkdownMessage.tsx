@@ -33,7 +33,7 @@ export function MarkdownMessage({
 }
 
 // 간단한 마크다운 정규화 유틸리티
-function normalizeMarkdown(src: string): string {
+export function normalizeMarkdown(src: string): string {
     let s = src;
     // 1) ATX 헤딩: `###제목` → `### 제목` (해시 뒤에 공백 강제)
     s = s.replace(/^(#{1,6})(?=\S)/gm, '$1 ');

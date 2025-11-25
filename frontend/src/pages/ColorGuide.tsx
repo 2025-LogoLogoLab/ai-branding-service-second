@@ -54,7 +54,8 @@ function ColorGuide(){
             const combined = brandingMarkdown
                 ? `${promptText}\n\n[Branding Strategy]\n${brandingMarkdown}`
                 : promptText;
-            setLastPrompt(combined);
+            // UI에는 사용자 입력만 노출하고, 생성 요청에만 브랜딩 전략 본문을 포함한다.
+            setLastPrompt(promptText);
             const res = await generateColorGuide(
                 {
                     briefKo: combined,
@@ -195,23 +196,7 @@ function ColorGuide(){
                 />
             )}
 
-            {colorGuideGenResult && (
-                <div style={{ display: 'flex', justifyContent: 'center', margin: '50px 0' }}>
-                    {selection.brandingMarkdown ? (
-                        <TextButton
-                            label="추가기능"
-                            onClick={() => alert('추가기능 준비 중입니다.')}
-                            variant="outlined"
-                        />
-                    ) : (
-                        <TextButton
-                            label="이 컬러 가이드로 브랜딩 전략 생성하기"
-                            onClick={goToBrandingWithContext}
-                            variant="blue"
-                        />
-                    )}
-                </div>
-            )}
+            {/* 추가 기능 버튼 제거 */}
 
             {/* 하단 입력 */}
             {!colorGuideGenResult && (

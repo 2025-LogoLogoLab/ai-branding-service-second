@@ -8,6 +8,7 @@ import styles from "./BrandStrategyDeliverableCard.module.css";
 import { ProductToolbar } from "../../molecules/ProductToolbar/ProductToolbar";
 import type { BrandStrategyListItem } from "../../custom_api/branding";
 import ReactMarkdown from "react-markdown";
+import { normalizeMarkdown } from "../../atoms/MarkdownMessage/MarkdownMessage";
 
 export type BrandStrategyDeliverableCardProps = {
     item: BrandStrategyListItem;
@@ -25,10 +26,8 @@ export type BrandStrategyDeliverableCardProps = {
 };
 
 function normalizeStrategyText(item: BrandStrategyListItem): string {
-    // markdown 필드가 있다면 그대로 활용하고, 없으면 summary → brief 순으로 대체
     const source = item.markdown ?? item.summaryKo ?? item.briefKo ?? "";
-    // heading(\#)과 텍스트 사이 공백이 없으면 마크다운 파서가 인식하지 못하므로 강제로 공백을 삽입
-    return source.replace(/(^|\n)(#+)(?!\s)/g, (_, prefix: string, hashes: string) => `${prefix}${hashes} `);
+    return normalizeMarkdown(source);
 }
 
 export default function BrandStrategyDeliverableCard({

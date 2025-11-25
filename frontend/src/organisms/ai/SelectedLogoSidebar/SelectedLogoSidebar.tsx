@@ -7,26 +7,16 @@ import { useCallback, useState } from 'react';
 export type SelectedLogoSidebarProps = {
   base64: string;
   // Optional handlers if parent wants to wire them later
-  onDelete?: () => void;
-  onSave?: () => void;
+  onDownload?: () => void;
   onCopy?: () => void;
 };
 
-export default function SelectedLogoSidebar({ base64, onDelete, onSave, onCopy }: SelectedLogoSidebarProps) {
-  const { clearLogo } = useSelectionStore();
+export default function SelectedLogoSidebar({ base64, onDownload, onCopy }: SelectedLogoSidebarProps) {
   const [isCopying, setIsCopying] = useState(false);
 
-  const resolvedDelete = useCallback(() => {
-    if (onDelete) {
-      onDelete();
-      return;
-    }
-    clearLogo();
-  }, [onDelete, clearLogo]);
-
-  const resolvedSave = useCallback(() => {
-    if (onSave) {
-      onSave();
+  const resolvedDownload = useCallback(() => {
+    if (onDownload) {
+      onDownload();
       return;
     }
     const url = base64.startsWith('data:') ? base64 : `data:image/png;base64,${base64}`;
@@ -37,7 +27,7 @@ export default function SelectedLogoSidebar({ base64, onDelete, onSave, onCopy }
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
-  }, [onSave, base64]);
+  }, [onDownload, base64]);
 
   const resolvedCopy = useCallback(async () => {
     if (onCopy) {
@@ -77,16 +67,15 @@ export default function SelectedLogoSidebar({ base64, onDelete, onSave, onCopy }
       <div className={styles.imageBox}>
         <ImageBase64 imageData={base64} alt="선택된 로고" variant="logoImage" />
       </div>
-      <div className={styles.toolbarOuter}>
-        <ProductToolbar
-          id={0}
-          onDelete={() => resolvedDelete()}
-          onSave={() => resolvedSave()}
-          onCopy={() => resolvedCopy()}
-          isCopying={isCopying}
-          size={20}
-        />
-      </div>
+    <div className={styles.toolbarOuter}>
+      <ProductToolbar
+        id={0}
+        onDownload={() => resolvedDownload()}
+        onCopy={() => resolvedCopy()}
+        isCopying={isCopying}
+        size={20}
+      />
+    </div>
     </div>
   );
 }

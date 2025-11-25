@@ -23,8 +23,8 @@ export const icons: Record<string, string> = Object.fromEntries(
 
 // 아이콘들을 임시로 reactLogo로 설정
 const deleteIcon = icons.delete;
-const saveIcon = icons.save;
-const downloadIcon = icons.download;
+const saveIcon = icons.save ?? icons.download;
+const downloadIcon = icons.download ?? icons.save;
 const tagIcon = icons.tag;
 const insertIcon = icons.tag;
 const copyIcon =

@@ -86,8 +86,8 @@ export default function SelectedColorGuideSidebar({ guide, onDelete, onSave, onC
       <div className={styles.toolbarOuter}>
         <ProductToolbar
           id={2}
-          onDelete={() => resolvedDelete()}
-          onSave={() => resolvedSave()}
+          onDelete={undefined}  // 삭제 버튼 제거
+          onDownload={() => resolvedSave()}
           onCopy={() => resolvedCopy()}
           isCopying={isCopying}
           size={20}
