@@ -4,6 +4,7 @@ const basePath = import.meta.env.VITE_API_BASE_URL;
 const withRolePrefix = (path: string, isAdmin?: boolean) => `${basePath}${isAdmin ? "/admin" : ""}${path}`;
 
 import type { PaginatedResponse } from "./types";
+import type { Cases } from "./branding";
 
 const colorguideGenEndPoint = '/color-guide/generate';
 const colorguideStoreEndPoint = '/color-guide/save';
@@ -47,6 +48,7 @@ export type colorGuideGenResponse = colorGuide;
 export type colorGuideStoreRequest = { // 컬러 가이드 저장 요청 타입
     briefKo:string;
     guide:colorGuideGenResponse;
+    imageUrl?: string; // 생성에 사용된 로고 (base64 포함)
 }
 
 export async function generateColorGuide(
@@ -102,7 +104,7 @@ export async function deleteColorGuide( colorGuideNum:number, options: { isAdmin
 }
 
 
-export async function saveColorGuide({ briefKo, guide}: colorGuideStoreRequest, options: { isAdmin?: boolean } = {}) {
+export async function saveColorGuide({ briefKo, guide, imageUrl }: colorGuideStoreRequest, options: { isAdmin?: boolean } = {}) {
     // 컬러 가이드 저장 클라이언트. 리턴 타입 모름.
     console.log("컬러 가이드 저장 요청 시작");    
 
@@ -113,7 +115,7 @@ export async function saveColorGuide({ briefKo, guide}: colorGuideStoreRequest, 
             // 'Authorization': `Bearer ${token}`,            // JWT 토큰은 쿠키로 관리.
         },
         credentials: 'include',
-        body: JSON.stringify( {briefKo, guide} ),
+        body: JSON.stringify( {briefKo, guide, imageUrl} ),
     });
 
     if( !result.ok ){
@@ -147,7 +149,7 @@ export type ColorGuideDetail = {
     briefKo: string;
     style?: string;
     guide: colorGuide;
-    caseType?: string;
+    caseType?: Cases;
     createdAt?: string;
     updatedAt?: string;
     tags?: ColorGuideTag[];

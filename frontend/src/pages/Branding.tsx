@@ -24,7 +24,7 @@ import { useAuth } from '../context/AuthContext';
 function Branding() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { state: selection, setBranding, clearBranding, setColorGuide } = useSelectionStore();
+  const { state: selection, setBranding, clearBranding, setColorGuide, setLogo } = useSelectionStore();
 
   // 사용자 권한 불러오기
   const { user }= useAuth();
@@ -50,6 +50,9 @@ function Branding() {
 
     // 우선순위: store → location.state
     setBase64(selection.logoBase64 ?? incomingLogo);
+    if (selection.logoBase64 ?? incomingLogo) {
+      setLogo(selection.logoBase64 ?? incomingLogo);
+    }
     const hydratedBranding = selection.brandingMarkdown ?? incomingBranding;
     if (hydratedBranding !== undefined) {
       setBrandingResult(hydratedBranding);
@@ -57,7 +60,12 @@ function Branding() {
     if (incomingColorGuide) {
       setColorGuide(incomingColorGuide);
     }
-  }, [location.state, selection.logoBase64, selection.brandingMarkdown, setColorGuide]);
+  }, [location.state, selection.logoBase64, selection.brandingMarkdown, setColorGuide, setLogo]);
+
+  // 로고 기반 생성 시 selection store에도 로고를 보존해 컬러 가이드 단계에서 재사용
+  useEffect(() => {
+    if (base64) setLogo(base64);
+  }, [base64, setLogo]);
 
   // 생성: custom_api.generateBranding 호출 → string(마크다운) 수신
   // 결과: string을 BrandingVM으로 감싸서 카드에 전달
@@ -94,7 +102,10 @@ function Branding() {
         ? `${promptText}\n\n${serializeColorGuide()}`
         : promptText;
       setLastPrompt(withColorGuide);
-      const markdown: BrandingResponse = await generateBranding({ briefKo: withColorGuide, base64 }, { isAdmin });
+      const markdown: BrandingResponse = await generateBranding(
+        { briefKo: withColorGuide, imageUrl: base64 },
+        { isAdmin },
+      );
       // 결과: UI용 뷰 모델에 담아 상태 갱신
       setBrandingResult(markdown);
       if (!markdown || !markdown.trim()) {

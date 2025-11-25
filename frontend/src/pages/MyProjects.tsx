@@ -444,15 +444,6 @@ function ProjectDetailModal({
     useEffect(() => {
         if (!project) return;
         const controller = new AbortController();
-        const targetIds = dedupeIds(project.logoIds);
-
-        if (targetIds.length === 0) {
-            setLogoAssets({ loading: false, error: null, data: createEmptyAssetPage() });
-            setLogoPage(0);
-            return () => controller.abort();
-        }
-        const targetSet = new Set(targetIds);
-
         setLogoAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchLogoPage(
             { projectId: project.id, page: logoPage, size: PROJECT_ASSET_PAGE_SIZE, filter: "mine" },
@@ -460,22 +451,14 @@ function ProjectDetailModal({
         )
             .then((payload) => {
                 if (controller.signal.aborted) return;
-                const filteredContent = payload.content.filter((item) => targetSet.has(item.id));
-                const filteredTotal = targetIds.length;
-                const filteredPages = Math.max(1, Math.ceil(filteredTotal / Math.max(payload.size, 1)));
-                const adjustedPage = Math.min(payload.page, filteredPages - 1);
-                const adjusted: PaginatedResponse<LogoListItem> = {
-                    ...payload,
-                    content: filteredContent,
-                    totalElements: filteredTotal,
-                    totalPages: filteredPages,
-                    page: adjustedPage,
-                    last: adjustedPage >= filteredPages - 1,
-                };
-                setLogoAssets({ loading: false, error: null, data: adjusted });
-                if (adjustedPage !== logoPage) {
-                    setLogoPage(adjustedPage);
-                }
+                const totalPages = Math.max(payload.totalPages, 1);
+                const adjustedPage = Math.min(payload.page, totalPages - 1);
+                setLogoAssets({
+                    loading: false,
+                    error: null,
+                    data: { ...payload, totalPages, page: adjustedPage },
+                });
+                if (adjustedPage !== logoPage) setLogoPage(adjustedPage);
             })
             .catch((err) => {
                 if (controller.signal.aborted) return;
@@ -487,21 +470,12 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, logoPage, isAdmin]);
+    }, [project?.id, assetRefreshToken, logoPage, isAdmin]);
 
     // 포함된 브랜딩 전략을 프로젝트 ID + 페이지 기준으로 로드
     useEffect(() => {
         if (!project) return;
         const controller = new AbortController();
-        const targetIds = dedupeIds(project.brandStrategyIds);
-
-        if (targetIds.length === 0) {
-            setBrandingAssets({ loading: false, error: null, data: createEmptyAssetPage() });
-            setBrandingPage(0);
-            return () => controller.abort();
-        }
-        const targetSet = new Set(targetIds);
-
         setBrandingAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchBrandStrategyPage(
             { projectId: project.id, page: brandingPage, size: PROJECT_ASSET_PAGE_SIZE, filter: "mine" },
@@ -509,22 +483,14 @@ function ProjectDetailModal({
         )
             .then((payload) => {
                 if (controller.signal.aborted) return;
-                const filteredContent = payload.content.filter((item) => targetSet.has(item.id));
-                const filteredTotal = targetIds.length;
-                const filteredPages = Math.max(1, Math.ceil(filteredTotal / Math.max(payload.size, 1)));
-                const adjustedPage = Math.min(payload.page, filteredPages - 1);
-                const adjusted: PaginatedResponse<BrandStrategyListItem> = {
-                    ...payload,
-                    content: filteredContent,
-                    totalElements: filteredTotal,
-                    totalPages: filteredPages,
-                    page: adjustedPage,
-                    last: adjustedPage >= filteredPages - 1,
-                };
-                setBrandingAssets({ loading: false, error: null, data: adjusted });
-                if (adjustedPage !== brandingPage) {
-                    setBrandingPage(adjustedPage);
-                }
+                const totalPages = Math.max(payload.totalPages, 1);
+                const adjustedPage = Math.min(payload.page, totalPages - 1);
+                setBrandingAssets({
+                    loading: false,
+                    error: null,
+                    data: { ...payload, totalPages, page: adjustedPage },
+                });
+                if (adjustedPage !== brandingPage) setBrandingPage(adjustedPage);
             })
             .catch((err) => {
                 if (controller.signal.aborted) return;
@@ -536,21 +502,12 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, brandingPage, isAdmin]);
+    }, [project?.id, assetRefreshToken, brandingPage, isAdmin]);
 
     // 포함된 컬러 가이드를 프로젝트 ID + 페이지 기준으로 로드
     useEffect(() => {
         if (!project) return;
         const controller = new AbortController();
-        const targetIds = dedupeIds(project.colorGuideIds);
-
-        if (targetIds.length === 0) {
-            setColorAssets({ loading: false, error: null, data: createEmptyAssetPage() });
-            setColorPage(0);
-            return () => controller.abort();
-        }
-        const targetSet = new Set(targetIds);
-
         setColorAssets((prev) => ({ ...prev, loading: true, error: null }));
         fetchColorGuidePage(
             { projectId: project.id, page: colorPage, size: PROJECT_ASSET_PAGE_SIZE, filter: "mine" },
@@ -558,22 +515,14 @@ function ProjectDetailModal({
         )
             .then((payload) => {
                 if (controller.signal.aborted) return;
-                const filteredContent = payload.content.filter((item) => targetSet.has(item.id));
-                const filteredTotal = targetIds.length;
-                const filteredPages = Math.max(1, Math.ceil(filteredTotal / Math.max(payload.size, 1)));
-                const adjustedPage = Math.min(payload.page, filteredPages - 1);
-                const adjusted: PaginatedResponse<ColorGuideListItem> = {
-                    ...payload,
-                    content: filteredContent,
-                    totalElements: filteredTotal,
-                    totalPages: filteredPages,
-                    page: adjustedPage,
-                    last: adjustedPage >= filteredPages - 1,
-                };
-                setColorAssets({ loading: false, error: null, data: adjusted });
-                if (adjustedPage !== colorPage) {
-                    setColorPage(adjustedPage);
-                }
+                const totalPages = Math.max(payload.totalPages, 1);
+                const adjustedPage = Math.min(payload.page, totalPages - 1);
+                setColorAssets({
+                    loading: false,
+                    error: null,
+                    data: { ...payload, totalPages, page: adjustedPage },
+                });
+                if (adjustedPage !== colorPage) setColorPage(adjustedPage);
             })
             .catch((err) => {
                 if (controller.signal.aborted) return;
@@ -585,7 +534,7 @@ function ProjectDetailModal({
             });
 
         return () => controller.abort();
-    }, [project, assetRefreshToken, colorPage, isAdmin]);
+    }, [project?.id, assetRefreshToken, colorPage, isAdmin]);
 
     // 산출물 API를 다시 호출하도록 토큰 증가
     const refreshAssets = () => {

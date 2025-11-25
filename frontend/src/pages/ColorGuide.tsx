@@ -55,7 +55,14 @@ function ColorGuide(){
                 ? `${promptText}\n\n[Branding Strategy]\n${brandingMarkdown}`
                 : promptText;
             setLastPrompt(combined);
-            const res = await generateColorGuide({ briefKo: combined, style, imageUrl}, { isAdmin });
+            const res = await generateColorGuide(
+                {
+                    briefKo: combined,
+                    style,
+                    imageUrl,
+                },
+                { isAdmin },
+            );
             setColorGuideGenResult(res);
 
         } catch (err) {
@@ -83,7 +90,14 @@ function ColorGuide(){
             return;
         }
         try {
-            const result = await saveColorGuide( { briefKo:promptText, guide:colorGuideGenResult}, { isAdmin } );
+            const result = await saveColorGuide(
+                {
+                    briefKo: promptText,
+                    guide: colorGuideGenResult,
+                    imageUrl: imageUrl || selection.logoBase64 || undefined,
+                },
+                { isAdmin },
+            );
             console.log(result);
             alert('컬러 가이드가 저장되었습니다.');
 

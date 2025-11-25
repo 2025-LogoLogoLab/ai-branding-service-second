@@ -40,6 +40,7 @@ class Store {
   private emit() { this.listeners.forEach((l) => l()); save(this.state); }
 
   setLogo(base64?: string) {
+    if (this.state.logoBase64 === base64) return; // prevent redundant updates
     this.state = { ...this.state, logoBase64: base64 };
     this.emit();
   }

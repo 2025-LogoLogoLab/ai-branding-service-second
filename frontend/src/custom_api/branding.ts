@@ -17,12 +17,12 @@ const brandStrategyListEndpoint = '/brand-strategies'; // 페이징 목록 조�
 // const navigate = useNavigate();
 
 export type ISODataTime = string;   // 시간 타입
-export type Cases = string;         // 브랜딩 전략을 어떤 식으로 생성했는지 나타내는 타입. 일단은 string. 나중에 백엔드한테 어떤 옵션들 있는지 봐서 타입 만들어야 할 듯.
+export type Cases = "WITH_LOGO" | "WITHOUT_LOGO"; // 생성 케이스: 로고 사용 여부
 
 export type BrandingRequest = {   // 브랜딩 전략 생성 요청 타입
     briefKo:string;     // 생성용 프롬프트
     style?: string;     // 스타일?
-    base64?: string;    // 프롬프트 생성에 이미지 사용시 추가.
+    imageUrl?: string;  // 프롬프트 생성에 이미지 사용 시(base64 포함)
 }
 
 export type BrandingResponse = string;    // 브랜딩 전략 생성 응답 타입. 단순 마크다운 text
@@ -84,7 +84,7 @@ export type BrandStrategyDetail = {
     id: number;
     briefKo: string;
     style?: string;
-    caseType?: string;
+    caseType?: Cases;
     markdown: string;
     summaryKo?: string;
     createdAt?: string;
@@ -109,7 +109,7 @@ export type BrandStrategyPageParams = {
 };
 
 export async function generateBranding(
-    { briefKo: briefKo, style, base64 }: BrandingRequest,
+    { briefKo: briefKo, style, imageUrl }: BrandingRequest,
     options: { isAdmin?: boolean } = {},
 ): Promise<BrandingResponse> {
     // 브랜딩 전략 생성 클라이언트
@@ -122,7 +122,7 @@ export async function generateBranding(
             'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({briefKo, style, base64})
+        body: JSON.stringify({briefKo, style, imageUrl})
     });
 
     if( !result.ok ){
