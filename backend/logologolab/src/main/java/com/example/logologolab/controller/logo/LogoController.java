@@ -160,6 +160,7 @@ public class LogoController {
     })
     @GetMapping("/api/logos")
     public PageResponse<LogoListItem> listLogos(
+            @Parameter(description = "특정 프로젝트 ID (선택 사항)") @RequestParam(required = false) Long projectId,
             @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 당 항목 수") @RequestParam(defaultValue = "12") int size,
             @Parameter(description = "'mine' 입력 시 내 로고만 조회") @RequestParam(required = false) String filter
@@ -168,12 +169,16 @@ public class LogoController {
         Page<LogoListItem> resultPage;
 
         // "mine" 필터가 있고, 실제로 로그인한 상태일 때
-        if ("mine".equalsIgnoreCase(filter)) {
-            // getLoginUser()는 비로그인 시 예외를 발생시켜 401 Unauthorized 응답을 유도합니다.
-            User user = loginUserProvider.getLoginUser();
+        if (projectId != null) {
+            // 1. 프로젝트 ID가 있으면 -> 프로젝트별 조회
+            resultPage = logoService.listByProject(projectId, pageable);
+        } else if ("mine".equalsIgnoreCase(filter)) {
+            // 2. 'mine' 필터가 있으면 -> 내 로고 조회 (로그인 필수)
+            // loginUserProvider가 로그인 안 된 상태면 예외(401)를 던짐
+            loginUserProvider.getLoginUser();
             resultPage = logoService.listMyLogos(pageable);
         } else {
-            // 필터가 없으면 기존처럼 전체 목록을 보여줍니다.
+            // 3. 그 외 -> 전체 조회
             resultPage = logoService.listPublicLogos(pageable);
         }
 
