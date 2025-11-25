@@ -6,6 +6,7 @@ import com.example.logologolab.repository.brand.BrandStrategyRepository;
 import com.example.logologolab.repository.user.UserRepository;
 import com.example.logologolab.domain.User;
 import com.example.logologolab.security.LoginUserProvider;
+import com.example.logologolab.service.s3.S3UploadService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,24 +23,37 @@ public class BrandStrategyService {
     private final BrandStrategyRepository repo;
     private final UserRepository userRepository;
     private final LoginUserProvider loginUserProvider;
+    private final S3UploadService s3UploadService;
 
     @Transactional
     public BrandStrategyResponse save(BrandStrategyPersistRequest req, String createdByEmail, ProviderType createdByProvider) {
         if (req.markdown() == null || req.markdown().isBlank())
             throw new IllegalArgumentException("markdown is required");
 
-        var style = Style.safeOf(req.style());
-        var caseType = (req.imageUrl() != null && !req.imageUrl().isBlank())
-                ? CaseType.WITH_LOGO : CaseType.WITHOUT_LOGO;
-
         User creator = userRepository.findByEmailAndProvider(createdByEmail, createdByProvider)
                 .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
+
+        // 1. 이미지 처리 로직 추가 (Base64 -> S3 URL 변환)
+        String finalImageUrl = null;
+        if (req.imageUrl() != null && !req.imageUrl().isBlank()) {
+            // 만약 "data:image"로 시작하는 Base64 문자열이라면 S3에 업로드
+            if (req.imageUrl().startsWith("data:")) {
+                finalImageUrl = s3UploadService.uploadBase64AndGetUrl(req.imageUrl());
+            } else {
+                // 이미 URL 형태라면 그대로 사용
+                finalImageUrl = req.imageUrl();
+            }
+        }
+
+        // 2. 케이스 타입 결정 (URL 존재 여부로 판단)
+        var caseType = (finalImageUrl != null) ? CaseType.WITH_LOGO : CaseType.WITHOUT_LOGO;
+        var style = Style.safeOf(req.style());
 
         BrandStrategy e = BrandStrategy.builder()
                 .briefKo(req.briefKo())
                 .style(style)
                 .caseType(caseType)
-                .sourceImage(req.imageUrl())
+                .sourceImage(finalImageUrl)
                 .markdown(req.markdown())
                 .createdBy(creator)
                 .build();

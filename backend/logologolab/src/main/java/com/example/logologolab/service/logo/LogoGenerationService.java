@@ -51,7 +51,7 @@ public class LogoGenerationService {
         // 3) Flux 호출 (여러 장)
         return fluxGenerateService.generateLogoImageBase64(
                 englishPrompt, style,
-                //englishNegative,
+                englishNegative,
                 s, gs, w, h, n
         );
     }

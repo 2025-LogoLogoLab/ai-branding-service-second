@@ -22,16 +22,14 @@ public class FluxGenerateService {
 
     // 기본 1장 (호환용)
     public List<String> generateLogoImageBase64(String prompt) {
-        return generateLogoImageBase64(prompt, "minimal",
-                //""
-                50, 3.5, 1024, 1024, 1);
+        return generateLogoImageBase64(prompt, "minimal", "", 50, 3.5, 1024, 1024, 1);
     }
 
     // 여러 장 지원
     public List<String> generateLogoImageBase64(
             String prompt,
             String style,
-            //String negative_prompt,
+            String negative_prompt,
             Integer steps,
             Double guidanceScale,
             Integer width,
@@ -43,7 +41,7 @@ public class FluxGenerateService {
 
         Map<String, Object> body = buildRequestBody(
                 prompt, style,
-                //negative_prompt
+                negative_prompt,
                 steps, guidanceScale, width, height, num_images
         );
 
@@ -107,7 +105,7 @@ public class FluxGenerateService {
     private Map<String, Object> buildRequestBody(
             String prompt,
             String style,
-            //String negative_prompt,
+            String negative_prompt,
             Integer steps,
             Double guidanceScale,
             Integer width,

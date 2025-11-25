@@ -5,6 +5,7 @@ import com.example.logologolab.dto.color.*;
 import com.example.logologolab.repository.color.ColorGuideRepository;
 import com.example.logologolab.repository.user.UserRepository;
 import com.example.logologolab.security.LoginUserProvider;
+import com.example.logologolab.service.s3.S3UploadService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +22,7 @@ public class ColorGuideService {
     private final ColorGuideRepository repo;
     private final UserRepository userRepository;
     private final LoginUserProvider loginUserProvider;
+    private final S3UploadService s3UploadService;
 
     private static String normHex(String hex) {
         if (hex == null) return null;
@@ -33,9 +35,21 @@ public class ColorGuideService {
     public ColorGuideResponse save(ColorGuidePersistRequest req, String createdByEmail, ProviderType createdByProvider) {
         if (req.guide() == null) throw new IllegalArgumentException("guide is required");
 
+        // 1. 이미지 처리 로직 추가 (Base64 -> S3 URL 변환)
+        String finalImageUrl = null;
+        if (req.imageUrl() != null && !req.imageUrl().isBlank()) {
+            if (req.imageUrl().startsWith("data:")) {
+                // Base64 문자열이면 S3 업로드 후 URL 획득
+                finalImageUrl = s3UploadService.uploadBase64AndGetUrl(req.imageUrl());
+            } else {
+                // 이미 URL 형태면 그대로 사용
+                finalImageUrl = req.imageUrl();
+            }
+        }
+
         var style = Style.safeOf(req.style());
-        var caseType = (req.imageUrl() != null && !req.imageUrl().isBlank())
-                ? CaseType.WITH_LOGO : CaseType.WITHOUT_LOGO;
+        // URL 존재 여부로 CaseType 결정
+        var caseType = (finalImageUrl != null) ? CaseType.WITH_LOGO : CaseType.WITHOUT_LOGO;
 
         var g = req.guide();
         User creator = userRepository.findByEmailAndProvider(createdByEmail, createdByProvider)
@@ -45,7 +59,7 @@ public class ColorGuideService {
                 .briefKo(req.briefKo())
                 .style(style)
                 .caseType(caseType)
-                .sourceImage(req.imageUrl())
+                .sourceImage(finalImageUrl)
                 .createdBy(creator)
                 .mainHex(normHex(g.main().hex())).mainDesc(g.main().description())
                 .subHex(normHex(g.sub().hex())).subDesc(g.sub().description())
