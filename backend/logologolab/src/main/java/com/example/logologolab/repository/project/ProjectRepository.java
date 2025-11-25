@@ -29,7 +29,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     Page<Project> findByUser(User user, Pageable pageable);
 
     // 상세 조회용: 자산들을 다 함께 가져옴
-    @Query("SELECT p FROM Project p " +
+    @Query("SELECT distinct p FROM Project p " +
             "LEFT JOIN FETCH p.brandStrategies " +
             "LEFT JOIN FETCH p.colorGuides " +
             "LEFT JOIN FETCH p.logos " +
@@ -37,7 +37,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     Optional<Project> findWithAssets(@Param("id") Long id, @Param("user") User user);
 
     // [추가] 관리자용: 소유자(User) 조건 없이 ID로만 조회 + Fetch Join
-    @Query("SELECT p FROM Project p " +
+    @Query("SELECT distinct p FROM Project p " +
             "LEFT JOIN FETCH p.brandStrategies " +
             "LEFT JOIN FETCH p.colorGuides " +
             "LEFT JOIN FETCH p.logos " +

@@ -238,16 +238,18 @@ public class BrandController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<BrandStrategyListItem> p;
 
-        if ("mine".equalsIgnoreCase(filter)) {
-            // 2. 'mine' 필터가 있으면 내 목록 조회 (로그인 필수)
+        if (projectId != null) {
+            // 1. 프로젝트 ID가 있으면 -> 프로젝트별 조회 (Service에 추가한 메서드 사용)
+            p = service.listByProject(projectId, pageable);
+        } else if ("mine".equalsIgnoreCase(filter)) {
+            // 2. 'mine' 필터가 있으면 -> 내 목록 조회 (로그인 필수)
             if (principal == null) {
-                // 'mine'을 요청했으나 비로그인 상태
                 p = Page.empty(pageable);
             } else {
                 p = service.listMine(principal.getEmail(), principal.getProvider(), pageable);
             }
         } else {
-            // 3. 그 외 모든 경우 전체 목록 조회
+            // 3. 그 외 모든 경우 -> 전체 공개 목록 조회
             p = service.listPublic(pageable);
         }
 

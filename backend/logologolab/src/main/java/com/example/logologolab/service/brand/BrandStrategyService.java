@@ -96,6 +96,17 @@ public class BrandStrategyService {
                 .map(e -> new BrandStrategyListItem(e.getId(), e.getBriefKo(), e.getStyle(), e.getMarkdown(), e.getCreatedAt()));
     }
 
+    @Transactional(readOnly = true)
+    public Page<BrandStrategyListItem> listByProject(Long projectId, Pageable pageable) {
+        if (projectId == null) {
+            return Page.empty(pageable);
+        }
+
+        // Repository에서 만든 쿼리 메서드 호출
+        return repo.findByProjectId(projectId, pageable)
+                .map(this::mapToListItem); // 기존에 만들어둔 변환 메서드 재활용
+    }
+
     @Transactional
     public BrandStrategyResponse update(Long id, BrandStrategyUpdateRequest req) {
         // 1. 현재 로그인한 사용자 정보 가져오기

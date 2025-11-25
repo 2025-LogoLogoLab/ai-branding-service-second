@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.*;
@@ -20,4 +21,7 @@ public interface ColorGuideRepository extends JpaRepository<ColorGuide, Long> {
 
     List<ColorGuide> findAllByCreatedBy(User user);
     List<ColorGuide> findByTags_NameAndCreatedBy(String tagName, User user);
+
+    @Query("SELECT c FROM Project p JOIN p.colorGuides c WHERE p.id = :projectId")
+    Page<ColorGuide> findByProjectId(@Param("projectId") Long projectId, Pageable pageable);
 }

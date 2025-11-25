@@ -113,6 +113,13 @@ public class ColorGuideService {
                 .map(this::mapToListItem);
     }
 
+    @Transactional(readOnly = true)
+    public Page<ColorGuideListItem> listByProject(Long projectId, Pageable pageable) {
+        if (projectId == null) return Page.empty(pageable);
+        return repo.findByProjectId(projectId, pageable)
+                .map(this::mapToListItem);
+    }
+
     @Transactional
     public ColorGuideResponse update(Long id, ColorGuideUpdateRequest req) {
         // 1. 현재 로그인한 사용자 정보 가져오기
