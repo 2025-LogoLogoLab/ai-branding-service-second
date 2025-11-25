@@ -17,6 +17,7 @@ import com.example.logologolab.security.LoginUserProvider;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,18 +99,35 @@ public class MyAssetService {
         return new TagListResponse(tags); // DTO로 감싸서 반환
     }
 
-    /** 특정 태그가 달린 내 산출물 목록 조회 */
-    public List<AssetListItem> listMyAssetsByTag(String tagName) {
+    /** 특정 태그가 달린 내 산출물 목록 조회 (페이징 적용) */
+    public Page<AssetListItem> listMyAssetsByTag(String tagName, Pageable pageable) {
         User user = loginUserProvider.getLoginUser();
 
-        // 각 종류별로 태그에 해당하는 산출물 조회
-        List<AssetListItem> logos = logoRepository.findByTags_NameAndCreatedBy(tagName, user).stream().map(AssetListItem::from).toList();
-        List<AssetListItem> colors = colorGuideRepository.findByTags_NameAndCreatedBy(tagName, user).stream().map(AssetListItem::from).toList();
-        List<AssetListItem> brands = brandStrategyRepository.findByTags_NameAndCreatedBy(tagName, user).stream().map(AssetListItem::from).toList();
+        // 1. 각 종류별로 태그에 해당하는 산출물 조회 (전체 조회)
+        List<AssetListItem> logos = logoRepository.findByTags_NameAndCreatedBy(tagName, user)
+                .stream().map(AssetListItem::from).toList();
 
-        // 3가지 목록을 합쳐서 최신순으로 정렬
-        return Stream.concat(Stream.concat(logos.stream(), colors.stream()), brands.stream())
+        List<AssetListItem> colors = colorGuideRepository.findByTags_NameAndCreatedBy(tagName, user)
+                .stream().map(AssetListItem::from).toList();
+
+        List<AssetListItem> brands = brandStrategyRepository.findByTags_NameAndCreatedBy(tagName, user)
+                .stream().map(AssetListItem::from).toList();
+
+        // 2. 3가지 목록을 합쳐서 최신순으로 정렬
+        List<AssetListItem> allAssets = Stream.concat(Stream.concat(logos.stream(), colors.stream()), brands.stream())
                 .sorted(Comparator.comparing(AssetListItem::createdAt).reversed())
-                .collect(Collectors.toList());
+                .toList();
+
+        // 3. 페이징 처리 (메모리 상에서 자르기)
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), allAssets.size());
+
+        // 페이지 범위를 벗어나면 빈 리스트 반환, 아니면 자른 리스트 반환
+        List<AssetListItem> pagedContent = (start > allAssets.size())
+                ? List.of()
+                : allAssets.subList(start, end);
+
+        // 4. Page 인터페이스 구현체로 반환 (PageImpl이 totalPages, last 등을 계산해줌)
+        return new PageImpl<>(pagedContent, pageable, allAssets.size());
     }
 }
