@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 @Service
 public class FluxGenerateService {
 
-    private static final String AI_SERVER_URL = "https://70eukxar4iogqz-8000.proxy.runpod.net/generate-logo";
+    private static final String AI_SERVER_URL = "https://e2skdegcd3c53n-8000.proxy.runpod.net/generate-logo";
 
     private static final Set<String> ALLOWED_STYLES = Set.of(
             "simple","minimal","retro","vintage","cute","playful","luxury",
@@ -22,14 +22,16 @@ public class FluxGenerateService {
 
     // 기본 1장 (호환용)
     public List<String> generateLogoImageBase64(String prompt) {
-        return generateLogoImageBase64(prompt, "minimal", "", 50, 3.5, 1024, 1024, 1);
+        return generateLogoImageBase64(prompt, "minimal",
+                //""
+                50, 3.5, 1024, 1024, 1);
     }
 
     // 여러 장 지원
     public List<String> generateLogoImageBase64(
             String prompt,
             String style,
-            String negative_prompt,
+            //String negative_prompt,
             Integer steps,
             Double guidanceScale,
             Integer width,
@@ -40,7 +42,9 @@ public class FluxGenerateService {
         HttpHeaders headers = jsonHeaders();
 
         Map<String, Object> body = buildRequestBody(
-                prompt, style, negative_prompt, steps, guidanceScale, width, height, num_images
+                prompt, style,
+                //negative_prompt
+                steps, guidanceScale, width, height, num_images
         );
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
@@ -103,7 +107,7 @@ public class FluxGenerateService {
     private Map<String, Object> buildRequestBody(
             String prompt,
             String style,
-            String negative_prompt,
+            //String negative_prompt,
             Integer steps,
             Double guidanceScale,
             Integer width,
@@ -124,9 +128,9 @@ public class FluxGenerateService {
         body.put("height", height != null ? height : 1024);
         body.put("num_images", num_images != null ? num_images : 1);
 
-        if (negative_prompt != null && !negative_prompt.isBlank()) {
+        /*if (negative_prompt != null && !negative_prompt.isBlank()) {
             body.put("negative_prompt", negative_prompt);
-        }
+        }*/
         return body;
     }
 
