@@ -2,7 +2,7 @@ import styles from './SelectedColorGuideSidebar.module.css';
 import PaletteCard from '../../../molecules/PaletteCard/PaletteCard';
 import type { colorGuideGenResponse } from '../../../custom_api/colorguide';
 import { ProductToolbar } from '../../../molecules/ProductToolbar/ProductToolbar';
-import { useSelectionStore } from '../../../context/selectionStore';
+// import { useSelectionStore } from '../../../context/selectionStore';
 import { useCallback, useState } from 'react';
 
 export type SelectedColorGuideSidebarProps = {
@@ -12,17 +12,17 @@ export type SelectedColorGuideSidebarProps = {
   onCopy?: () => void;
 };
 
-export default function SelectedColorGuideSidebar({ guide, onDelete, onSave, onCopy }: SelectedColorGuideSidebarProps) {
-  const { clearColorGuide } = useSelectionStore();
+export default function SelectedColorGuideSidebar({ guide, onSave, onCopy }: SelectedColorGuideSidebarProps) {
+  // const { clearColorGuide } = useSelectionStore();
   const [isCopying, setIsCopying] = useState(false);
 
-  const resolvedDelete = useCallback(() => {
-    if (onDelete) {
-      onDelete();
-      return;
-    }
-    clearColorGuide();
-  }, [onDelete, clearColorGuide]);
+  // const resolvedDelete = useCallback(() => {
+  //   if (onDelete) {
+  //     onDelete();
+  //     return;
+  //   }
+  //   clearColorGuide();
+  // }, [onDelete, clearColorGuide]);
 
   const resolvedSave = useCallback(() => {
     if (onSave) {
@@ -86,7 +86,7 @@ export default function SelectedColorGuideSidebar({ guide, onDelete, onSave, onC
       <div className={styles.toolbarOuter}>
         <ProductToolbar
           id={2}
-          onDelete={undefined}  // 삭제 버튼 제거
+          // onDelete={undefined}  // 삭제 버튼 제거
           onDownload={() => resolvedSave()}
           onCopy={() => resolvedCopy()}
           isCopying={isCopying}

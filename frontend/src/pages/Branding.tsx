@@ -2,7 +2,7 @@
 // 페이지 컴포넌트: 사용자의 입력을 받아 custom_api를 호출하고,
 // 결과를 BrandingCard(오가니즘)에 전달해 렌더링한다.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelectionStore } from '../context/selectionStore';
 // ✅ 여기서 사용하는 API는 전부 src/custom_api/branding.ts 제공본
@@ -41,17 +41,22 @@ function Branding() {
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
+  const hydratedRef = useRef(false);
 
   // 초기 진입 시에는 아무 결과도 표시하지 않습니다.
   useEffect(() => {
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+
     const incomingLogo = (location.state as any)?.selectedLogoBase64 as string | undefined;
     const incomingBranding = (location.state as any)?.selectedBrandingMarkdown as string | undefined;
     const incomingColorGuide = (location.state as any)?.selectedColorGuide as colorGuideGenResponse | undefined;
 
     // 우선순위: store → location.state
-    setBase64(selection.logoBase64 ?? incomingLogo);
-    if (selection.logoBase64 ?? incomingLogo) {
-      setLogo(selection.logoBase64 ?? incomingLogo);
+    const logoValue = selection.logoBase64 ?? incomingLogo;
+    if (logoValue) {
+      setBase64(logoValue);
+      setLogo(logoValue);
     }
     const hydratedBranding = selection.brandingMarkdown ?? incomingBranding;
     if (hydratedBranding !== undefined) {
@@ -256,19 +261,11 @@ function Branding() {
       {/* 컬러 가이드 생성으로 이동 */}
       {brandingResult && (
         <div style={{ display: 'flex', justifyContent: 'center', margin: '50px 0' }}>
-          {selection.colorGuide ? (
-            <TextButton
-              label="추가기능"
-              onClick={() => alert('추가기능 준비 중입니다.')}
-              variant="outlined"
-            />
-          ) : (
-            <TextButton
-              label="만들어진 내용을 바탕으로 컬러가이드를 생성하기"
-              onClick={goToColorGuideWithContext}
-              variant="blue"
-            />
-          )}
+          <TextButton
+            label="만들어진 내용을 바탕으로 컬러가이드를 생성하기"
+            onClick={goToColorGuideWithContext}
+            variant="blue"
+          />
         </div>
       )}
 

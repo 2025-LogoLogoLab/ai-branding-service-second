@@ -196,7 +196,16 @@ function ColorGuide(){
                 />
             )}
 
-            {/* 추가 기능 버튼 제거 */}
+            {/* 컬러 가이드 생성으로 이동 */}
+            {colorGuideGenResult && (
+              <div style={{ display: 'flex', justifyContent: 'center', margin: '50px 0' }}>
+                <TextButton
+                  label="만들어진 내용을 바탕으로 브랜딩 전략을 생성하기"
+                  onClick={goToBrandingWithContext}
+                  variant="blue"
+                />
+              </div>
+            )}
 
             {/* 하단 입력 */}
             {!colorGuideGenResult && (

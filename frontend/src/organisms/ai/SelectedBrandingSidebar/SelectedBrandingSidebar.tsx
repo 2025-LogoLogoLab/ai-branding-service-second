@@ -1,6 +1,6 @@
 import styles from './SelectedBrandingSidebar.module.css';
 import { ProductToolbar } from '../../../molecules/ProductToolbar/ProductToolbar';
-import { useSelectionStore } from '../../../context/selectionStore';
+// import { useSelectionStore } from '../../../context/selectionStore';
 import { useCallback, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { normalizeMarkdown } from '../../../atoms/MarkdownMessage/MarkdownMessage';

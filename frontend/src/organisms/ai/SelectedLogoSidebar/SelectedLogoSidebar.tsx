@@ -1,7 +1,6 @@
 import styles from './SelectedLogoSidebar.module.css';
 import { ImageBase64 } from '../../../atoms/ImageBase64/ImageBase64';
 import { ProductToolbar } from '../../../molecules/ProductToolbar/ProductToolbar';
-import { useSelectionStore } from '../../../context/selectionStore';
 import { useCallback, useState } from 'react';
 
 export type SelectedLogoSidebarProps = {
