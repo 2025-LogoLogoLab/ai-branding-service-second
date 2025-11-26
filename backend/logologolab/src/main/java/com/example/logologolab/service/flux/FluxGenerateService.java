@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Service
 public class FluxGenerateService {
 
-    private static final String AI_SERVER_URL = "http://216.81.248.127:11958/generate-logo";
+    private static final String AI_SERVER_URL = "http://195.26.233.76:39535/generate-logo";
 
     private static final Set<String> ALLOWED_STYLES = Set.of(
             "simple","minimal","retro","vintage","cute","playful","luxury",
