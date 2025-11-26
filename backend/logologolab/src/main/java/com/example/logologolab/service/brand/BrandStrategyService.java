@@ -3,6 +3,7 @@ package com.example.logologolab.service.brand;
 import com.example.logologolab.domain.*;
 import com.example.logologolab.dto.brand.*;
 import com.example.logologolab.repository.brand.BrandStrategyRepository;
+import com.example.logologolab.repository.project.ProjectRepository;
 import com.example.logologolab.repository.user.UserRepository;
 import com.example.logologolab.domain.User;
 import com.example.logologolab.security.LoginUserProvider;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class BrandStrategyService {
     private final UserRepository userRepository;
     private final LoginUserProvider loginUserProvider;
     private final S3UploadService s3UploadService;
+    private final ProjectRepository projectRepository;
 
     @Transactional
     public BrandStrategyResponse save(BrandStrategyPersistRequest req, String createdByEmail, ProviderType createdByProvider) {
@@ -131,10 +134,15 @@ public class BrandStrategyService {
         BrandStrategy brandStrategy = repo.findByIdAndCreatedBy(id, user)
                 .orElseThrow(() -> new NoSuchElementException("삭제할 브랜딩 전략을 찾을 수 없거나 권한이 없습니다."));
 
-        // 1. 프로젝트와의 연결 고리 먼저 끊기
-        repo.deleteProjectRelation(id);
+        // 1. 이 전략을 가지고 있는 모든 프로젝트를 찾아서 관계를 끊는다.
+        List<Project> projects = projectRepository.findAllByBrandStrategyId(id);
 
-        // 2. 이제 삭제 (에러 안 남)
+        for (Project project : projects) {
+            // 프로젝트의 Set에서 이 전략을 제거 (JPA가 감지해서 중간 테이블 row 삭제함)
+            project.getBrandStrategies().remove(brandStrategy);
+        }
+
+        // 2. 이제 삭제 (아무도 이 전략을 안 잡고 있으니 삭제됨)
         repo.delete(brandStrategy);
     }
 }

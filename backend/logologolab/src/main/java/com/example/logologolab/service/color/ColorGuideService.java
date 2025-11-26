@@ -3,6 +3,7 @@ package com.example.logologolab.service.color;
 import com.example.logologolab.domain.*;
 import com.example.logologolab.dto.color.*;
 import com.example.logologolab.repository.color.ColorGuideRepository;
+import com.example.logologolab.repository.project.ProjectRepository;
 import com.example.logologolab.repository.user.UserRepository;
 import com.example.logologolab.security.LoginUserProvider;
 import com.example.logologolab.service.s3.S3UploadService;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -23,6 +25,7 @@ public class ColorGuideService {
     private final UserRepository userRepository;
     private final LoginUserProvider loginUserProvider;
     private final S3UploadService s3UploadService;
+    private final ProjectRepository projectRepository;
 
     private static String normHex(String hex) {
         if (hex == null) return null;
@@ -150,10 +153,15 @@ public class ColorGuideService {
         ColorGuide colorGuide = repo.findByIdAndCreatedBy(id, user)
                 .orElseThrow(() -> new NoSuchElementException("삭제할 컬러 가이드를 찾을 수 없거나 권한이 없습니다."));
 
-        // 1. 연결 끊기
-        repo.deleteProjectRelation(id);
+        // 1. 이 컬러 가이드를 담고 있는 모든 프로젝트를 찾음
+        List<Project> projects = projectRepository.findAllByColorGuideId(id);
 
-        // 2. 삭제
+        // 2. 프로젝트들에서 해당 컬러 가이드 제거 (JPA가 중간 테이블 row 삭제)
+        for (Project project : projects) {
+            project.getColorGuides().remove(colorGuide);
+        }
+
+        // 3. 이제 안전하게 삭제
         repo.delete(colorGuide);
     }
 }

@@ -3,6 +3,7 @@ package com.example.logologolab.service.admin;
 import com.example.logologolab.domain.*;
 import com.example.logologolab.dto.brand.*;
 import com.example.logologolab.repository.brand.BrandStrategyRepository;
+import com.example.logologolab.repository.project.ProjectRepository;
 import com.example.logologolab.repository.tag.TagRepository;
 import com.example.logologolab.repository.user.UserRepository;
 import com.example.logologolab.service.gpt.GptPromptService;
@@ -27,6 +28,7 @@ public class AdminBrandService {
     private final UserRepository userRepository;
     private final TagRepository tagRepository;
     private final GptPromptService gptPromptService;
+    private final ProjectRepository projectRepository;
 
     // 1. [관리자] 브랜딩 전략 생성 (GPT 호출)
     public String generateBrandStrategy(BrandStrategyRequest req) {
@@ -102,6 +104,14 @@ public class AdminBrandService {
     public void deleteBrandStrategyAny(Long id) {
         BrandStrategy e = brandStrategyRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("브랜딩 전략을 찾을 수 없습니다. ID: " + id));
+
+        // 프로젝트와의 연결 고리 먼저 끊기 (JPA)
+        List<Project> projects = projectRepository.findAllByBrandStrategyId(id);
+        for (Project project : projects) {
+            project.getBrandStrategies().remove(e);
+        }
+
+        // 삭제
         brandStrategyRepository.delete(e);
     }
 

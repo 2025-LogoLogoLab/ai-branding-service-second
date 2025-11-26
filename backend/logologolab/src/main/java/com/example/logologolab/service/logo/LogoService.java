@@ -1,7 +1,9 @@
 package com.example.logologolab.service.logo;
 
 import com.example.logologolab.domain.Logo;
+import com.example.logologolab.domain.Project;
 import com.example.logologolab.domain.User;
+import com.example.logologolab.repository.project.ProjectRepository;
 import com.example.logologolab.security.LoginUserProvider;
 import com.example.logologolab.dto.logo.LogoListItem;
 import com.example.logologolab.dto.logo.LogoResponse;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -23,6 +26,7 @@ public class LogoService {
     private final LogoRepository logoRepository;
     private final LoginUserProvider loginUserProvider;
     private final S3UploadService s3UploadService;
+    private final ProjectRepository projectRepository;
 
     public LogoResponse getLogo(Long id) {
         Logo logo = logoRepository.findById(id)
@@ -60,10 +64,15 @@ public class LogoService {
         // 1. S3 이미지 삭제
         s3UploadService.deleteObjectByUrl(logo.getImageUrl());
 
-        // 2. 연결 끊기
-        logoRepository.deleteProjectRelation(id);
+        // 2. 이 로고를 담고 있는 모든 프로젝트를 찾음
+        List<Project> projects = projectRepository.findAllByLogoId(id);
 
-        // 3. DB 삭제
+        // 3. 프로젝트들에서 해당 로고 제거 (JPA가 중간 테이블 row 삭제)
+        for (Project project : projects) {
+            project.getLogos().remove(logo);
+        }
+
+        // 4. DB 삭제
         logoRepository.delete(logo);
     }
 }

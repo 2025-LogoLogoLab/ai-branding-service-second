@@ -2,10 +2,11 @@ package com.example.logologolab.service.admin;
 
 import com.example.logologolab.domain.Logo;
 import com.example.logologolab.domain.Tag;
-import com.example.logologolab.domain.User;
+import com.example.logologolab.domain.Project;
 import com.example.logologolab.dto.logo.LogoListItem;
 import com.example.logologolab.dto.logo.LogoResponse;
 import com.example.logologolab.repository.logo.LogoRepository;
+import com.example.logologolab.repository.project.ProjectRepository;
 import com.example.logologolab.repository.tag.TagRepository;
 import com.example.logologolab.service.s3.S3UploadService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class AdminLogoService {
     private final LogoRepository logoRepository;
     private final TagRepository tagRepository;
     private final S3UploadService s3UploadService;
+    private final ProjectRepository projectRepository;
 
     // 1. 전체 로고 리스트 조회 (소유자 구분 없음)
     public Page<LogoListItem> getAllLogos(Pageable pageable) {
@@ -53,9 +55,16 @@ public class AdminLogoService {
         Logo logo = logoRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당 로고를 찾을 수 없습니다. ID: " + id));
 
-        // S3 삭제
+        // 1. S3 삭제
         s3UploadService.deleteObjectByUrl(logo.getImageUrl());
-        // DB 삭제
+
+        // 2. 프로젝트와의 연결 고리 끊기
+        List<Project> projects = projectRepository.findAllByLogoId(id);
+        for (Project project : projects) {
+            project.getLogos().remove(logo);
+        }
+
+        // 33 DB 삭제
         logoRepository.delete(logo);
     }
 

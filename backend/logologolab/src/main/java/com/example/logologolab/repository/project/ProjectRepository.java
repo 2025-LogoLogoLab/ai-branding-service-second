@@ -36,11 +36,23 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             "WHERE p.id = :id AND p.user = :user")
     Optional<Project> findWithAssets(@Param("id") Long id, @Param("user") User user);
 
-    // [추가] 관리자용: 소유자(User) 조건 없이 ID로만 조회 + Fetch Join
+    // 관리자용: 소유자(User) 조건 없이 ID로만 조회 + Fetch Join
     @Query("SELECT distinct p FROM Project p " +
             "LEFT JOIN FETCH p.brandStrategies " +
             "LEFT JOIN FETCH p.colorGuides " +
             "LEFT JOIN FETCH p.logos " +
             "WHERE p.id = :id")
     Optional<Project> findByIdWithAssets(@Param("id") Long id);
+
+    // 특정 브랜딩 전략을 포함하고 있는 프로젝트들 찾기
+    @Query("SELECT p FROM Project p JOIN p.brandStrategies b WHERE b.id = :id")
+    List<Project> findAllByBrandStrategyId(@Param("id") Long brandStrategyId);
+
+    // 컬러 가이드용
+    @Query("SELECT p FROM Project p JOIN p.colorGuides c WHERE c.id = :id")
+    List<Project> findAllByColorGuideId(@Param("id") Long colorGuideId);
+
+    // 로고용
+    @Query("SELECT p FROM Project p JOIN p.logos l WHERE l.id = :id")
+    List<Project> findAllByLogoId(@Param("id") Long logoId);
 }

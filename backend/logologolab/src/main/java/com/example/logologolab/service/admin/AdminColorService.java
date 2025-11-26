@@ -3,6 +3,7 @@ package com.example.logologolab.service.admin;
 import com.example.logologolab.domain.*;
 import com.example.logologolab.dto.color.*;
 import com.example.logologolab.repository.color.ColorGuideRepository;
+import com.example.logologolab.repository.project.ProjectRepository;
 import com.example.logologolab.repository.tag.TagRepository;
 import com.example.logologolab.repository.user.UserRepository;
 import com.example.logologolab.service.gpt.GptPromptService;
@@ -27,6 +28,7 @@ public class AdminColorService {
     private final UserRepository userRepository;
     private final TagRepository tagRepository;
     private final GptPromptService gptPromptService;
+    private final ProjectRepository projectRepository;
 
     // Hex 정규화 헬퍼
     private static String normHex(String hex) {
@@ -123,6 +125,13 @@ public class AdminColorService {
     public void deleteColorGuideAny(Long id) {
         ColorGuide e = colorGuideRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("컬러 가이드를 찾을 수 없습니다. ID: " + id));
+
+        // 프로젝트와의 연결 고리 먼저 끊기
+        List<Project> projects = projectRepository.findAllByColorGuideId(id);
+        for (Project project : projects) {
+            project.getColorGuides().remove(e);
+        }
+
         colorGuideRepository.delete(e);
     }
 
