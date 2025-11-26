@@ -47,9 +47,16 @@ public class UserController {
     @GetMapping("/api/users/me")
     public ResponseEntity<MyPageResponse> getMyProfile() {
         User user = loginUserProvider.getLoginUser();
+        String src = user.getProfileImageUrl();
 
-        // URL → Base64 Data URI
-        String dataUri = ImageDataUriSupport.toDataUriFromUrl(user.getProfileImageUrl());
+        // DB 값이 이미 Base64(data:)라면 변환 없이 그대로 사용!
+        String dataUri;
+        if (src != null && src.startsWith("data:")) {
+            dataUri = src;
+        } else {
+            // URL(https://...)인 경우에만 다운로드 및 변환 시도
+            dataUri = ImageDataUriSupport.toDataUriFromUrl(src);
+        }
 
         // 요구 포맷으로 응답
         MyPageResponse response = MyPageResponse.from(user, dataUri);
