@@ -4,6 +4,7 @@ import com.example.logologolab.domain.Logo;
 import com.example.logologolab.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,4 +22,8 @@ public interface LogoRepository extends JpaRepository<Logo, Long> {
 
     @Query("SELECT l FROM Project p JOIN p.logos l WHERE p.id = :projectId")
     Page<Logo> findByProjectId(@Param("projectId") Long projectId, Pageable pageable);
+
+    @Modifying
+    @Query(value = "DELETE FROM project_logo WHERE logo_id = :id", nativeQuery = true)
+    void deleteProjectRelation(@Param("id") Long id);
 }

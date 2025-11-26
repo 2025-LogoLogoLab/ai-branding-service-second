@@ -57,10 +57,13 @@ public class LogoService {
         Logo logo = logoRepository.findByIdAndCreatedBy(id, user)
                 .orElseThrow(() -> new NoSuchElementException("삭제할 로고를 찾을 수 없거나 권한이 없습니다."));
 
-        // 1. S3에서 이미지 파일 삭제
+        // 1. S3 이미지 삭제
         s3UploadService.deleteObjectByUrl(logo.getImageUrl());
 
-        // 2. DB에서 로고 데이터 삭제
+        // 2. 연결 끊기
+        logoRepository.deleteProjectRelation(id);
+
+        // 3. DB 삭제
         logoRepository.delete(logo);
     }
 }

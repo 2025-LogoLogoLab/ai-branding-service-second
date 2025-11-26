@@ -150,6 +150,10 @@ public class ColorGuideService {
         ColorGuide colorGuide = repo.findByIdAndCreatedBy(id, user)
                 .orElseThrow(() -> new NoSuchElementException("삭제할 컬러 가이드를 찾을 수 없거나 권한이 없습니다."));
 
+        // 1. 연결 끊기
+        repo.deleteProjectRelation(id);
+
+        // 2. 삭제
         repo.delete(colorGuide);
     }
 }

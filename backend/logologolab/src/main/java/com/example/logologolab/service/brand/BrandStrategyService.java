@@ -131,6 +131,10 @@ public class BrandStrategyService {
         BrandStrategy brandStrategy = repo.findByIdAndCreatedBy(id, user)
                 .orElseThrow(() -> new NoSuchElementException("삭제할 브랜딩 전략을 찾을 수 없거나 권한이 없습니다."));
 
+        // 1. 프로젝트와의 연결 고리 먼저 끊기
+        repo.deleteProjectRelation(id);
+
+        // 2. 이제 삭제 (에러 안 남)
         repo.delete(brandStrategy);
     }
 }

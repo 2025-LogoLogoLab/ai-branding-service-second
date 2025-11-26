@@ -24,4 +24,8 @@ public interface ColorGuideRepository extends JpaRepository<ColorGuide, Long> {
 
     @Query("SELECT c FROM Project p JOIN p.colorGuides c WHERE p.id = :projectId")
     Page<ColorGuide> findByProjectId(@Param("projectId") Long projectId, Pageable pageable);
+
+    @Modifying
+    @Query(value = "DELETE FROM project_color_guide WHERE color_guide_id = :id", nativeQuery = true)
+    void deleteProjectRelation(@Param("id") Long id);
 }
