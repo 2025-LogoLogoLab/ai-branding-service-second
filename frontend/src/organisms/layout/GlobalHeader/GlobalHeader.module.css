@@ -119,11 +119,11 @@
 
 /* Responsive: collapse nav under 920px */
 @media (max-width: 920px) {
-  .menuToggler { display: inline-flex; }
+  /* .menuToggler { display: inline-flex; }
 
   .nav {
     position: absolute;
-    inset: 72px 0 auto 0; /* header height */
+    inset: 72px 0 auto 0;
     display: none;
     flex-direction: column;
     background: var(--color-bg-base);
@@ -134,5 +134,5 @@
   .nav[data-open] { display: flex; }
 
   .dropdown { position: static; }
-  .dropdownPanel { position: static; box-shadow: none; border-radius: 10px; margin: 4px 0; }
+  .dropdownPanel { position: static; box-shadow: none; border-radius: 10px; margin: 4px 0; } */
 }

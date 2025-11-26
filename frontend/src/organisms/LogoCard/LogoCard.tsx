@@ -53,11 +53,13 @@ export function LogoCard({
             onKeyDown={handleKeyDown}
             aria-label={onSelect ? "로고 상세 보기" : undefined}
         >
-            <ImageBase64
-                imageData={logoBase64}
-                alt="로고 이미지"
-                variant="logoImage"
-            />
+            <div className={styles.imgWrap}>
+                <ImageBase64
+                    imageData={logoBase64}
+                    alt="로고 이미지"
+                    variant="logoImage"
+                />
+            </div>
             <div
                 className={styles.toolbarWrapper}
                 onClick={(event) => event.stopPropagation()}

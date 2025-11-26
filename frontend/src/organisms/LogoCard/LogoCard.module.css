@@ -16,6 +16,14 @@
     padding: 12px; /* 브랜딩/컬러 카드와 유사한 안쪽 여백 부여 */
 }
 
+.imgWrap{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 /* 툴바 포지션 조정 */
 .toolbarWrapper {
     align-self: flex-end;          /* 오른쪽 정렬 */
