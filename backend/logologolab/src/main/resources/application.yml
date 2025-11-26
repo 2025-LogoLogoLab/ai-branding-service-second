@@ -19,14 +19,20 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+        default_batch_fetch_size: 100
 
 server:
-  server:
-    tomcat:
-      connection-timeout: 600000   # 10분 (단위: ms)
-    servlet:
-      session:
-        timeout: 30m  # 세션은 따로 넉넉하게
+  tomcat:
+    connection-timeout: 300000  # 300초 (5분)
+    keep-alive-timeout: 300000
+    threads:
+      max: 200
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        secure: true
+        same-site: none
   ssl:
     enabled: false
 
@@ -64,7 +70,7 @@ cloud:
       secret-key: 8ByNbpCozLLvWWqy2YjHKGWjUoIcrAn+bPlzyTRo
     region:
       static: ap-northeast-2  # 서울 리전
-q      auto: false
+      auto: false
 
 s3:
   bucket: logologolab-photo  # 만든 S3 버킷 이름

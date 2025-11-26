@@ -1,6 +1,7 @@
 package com.example.logologolab.service.flux;
 
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -11,7 +12,7 @@ import java.util.stream.Collectors;
 @Service
 public class FluxGenerateService {
 
-    private static final String AI_SERVER_URL = "http://195.26.233.9:52641/generate-logo";
+    private static final String AI_SERVER_URL = "http://195.26.233.9:30943/generate-logo";
 
     private static final Set<String> ALLOWED_STYLES = Set.of(
             "simple","minimal","retro","vintage","cute","playful","luxury",
@@ -36,7 +37,12 @@ public class FluxGenerateService {
             Integer height,
             Integer num_images
     ) {
-        RestTemplate restTemplate = new RestTemplate();
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(300000);
+        factory.setReadTimeout(300000);
+
+        RestTemplate restTemplate = new RestTemplate(factory);
+
         HttpHeaders headers = jsonHeaders();
 
         Map<String, Object> body = buildRequestBody(

@@ -42,7 +42,7 @@ public class LogoGenerationService {
         log.info("Using English Negative Prompt: {}", englishNegative);
 
         // 2) 기본값 보정
-        int s = (steps != null ? steps : 50);
+        int s = (steps = 50);
         double gs = (guidanceScale != null ? guidanceScale : 3.5);
         int w = (width != null ? width : 1024);
         int h = (height != null ? height : 1024);
