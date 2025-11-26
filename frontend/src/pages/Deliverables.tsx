@@ -49,11 +49,12 @@ import {
     previewToLogoDetail,
     useDeliverableDetail,
 } from "../utils/deliverableDetail";
-import { fetchAssetsByTag, type AssetSummary } from "../custom_api/assets";
+import { fetchAssetsByTag, type AssetPage, type AssetSummary } from "../custom_api/assets";
 import { fetchTagList, type TagRecord } from "../custom_api/tags";
 import { useAuth } from "../context/AuthContext";
 // 페이지별 기본 페이지 크기(시안에서는 3열 그리드이므로 9개 단위가 자연스러움)
 const PAGE_SIZE = 3;
+const TAG_PAGE_SIZE = 10;
 
 // 각 카테고리 전용 라우트 매핑
 const CATEGORY_PATH: Record<DeliverableCategory, string> = {
@@ -86,6 +87,42 @@ const initialActionState: ActionState = {
     deletingId: null,
     copyingId: null,
     downloadingId: null,
+};
+
+const ASSET_TYPE_LABEL: Record<AssetSummary["assetType"], string> = {
+    LOGO: "로고",
+    BRAND_STRATEGY: "브랜딩 전략",
+    COLOR_GUIDE: "컬러 가이드",
+};
+
+const formatTagPrompt = (title?: string | null) => {
+    if (!title) return "-";
+    const segments = title
+        .split(/\r?\n/)
+        .flatMap((line) => line.split(","))
+        .map((part) => part.trim())
+        .filter(Boolean);
+    const cleaned = segments.filter((segment) => {
+        const lower = segment.toLowerCase();
+        if (lower.startsWith("style:") || lower.startsWith("스타일:")) return false;
+        if (lower.startsWith("negative_prompt") || lower.startsWith("negative prompt")) return false;
+        return true;
+    });
+    const joined = cleaned.join(", ").trim();
+    return joined || "-";
+};
+
+const formatDateTime = (value?: string | null) => {
+    if (!value) return "-";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
 };
 
 export type DeliverablesSidebarBridge = {
@@ -176,7 +213,7 @@ function DeliverablesPage({
     const [brandingPage, setBrandingPage] = useState(0);
     const [colorGuidePage, setColorGuidePage] = useState(0);
     const [tagQuery, setTagQuery] = useState("");
-    const [tagResults, setTagResults] = useState<AssetSummary[]>([]);
+    const [tagResults, setTagResults] = useState<AssetPage | null>(null);
     const [tagLoading, setTagLoading] = useState(false);
     const [tagError, setTagError] = useState<string | null>(null);
     const [tagApplied, setTagApplied] = useState<string | null>(null);
@@ -555,30 +592,34 @@ function DeliverablesPage({
         renderSidebar ? "" : s.layoutNoSidebar,
     ].join(" ").trim();
 
-    const handleTagSearch = useCallback(async (value?: string) => {
-        const trimmed = (value ?? tagQuery).trim();
-        if (!trimmed) {
-            setTagError("검색할 태그를 입력해주세요.");
-            return;
-        }
-        setTagLoading(true);
-        setTagError(null);
-        try {
-            const assets = await fetchAssetsByTag(trimmed);
-            setTagResults(assets);
-            setTagApplied(trimmed);
-            setTagModalOpen(false);
-        } catch (err) {
-            const message = err instanceof Error ? err.message : "태그별 산출물을 불러오지 못했습니다.";
-            setTagError(message);
-            setTagResults([]);
-        } finally {
-            setTagLoading(false);
-        }
-    }, [tagQuery]);
+    const handleTagSearch = useCallback(
+        async (value?: string, pageOverride?: number) => {
+            const trimmed = (value ?? tagQuery).trim();
+            if (!trimmed) {
+                setTagError("검색할 태그를 입력해주세요.");
+                return;
+            }
+            const nextPage = pageOverride ?? 0;
+            setTagLoading(true);
+            setTagError(null);
+            try {
+                const assets = await fetchAssetsByTag({ tag: trimmed, page: nextPage, size: TAG_PAGE_SIZE });
+                setTagResults(assets);
+                setTagApplied(trimmed);
+                setTagModalOpen(false);
+            } catch (err) {
+                const message = err instanceof Error ? err.message : "태그별 산출물을 불러오지 못했습니다.";
+                setTagError(message);
+                setTagResults(null);
+            } finally {
+                setTagLoading(false);
+            }
+        },
+        [tagQuery],
+    );
 
     const resetTagSearch = () => {
-        setTagResults([]);
+        setTagResults(null);
         setTagApplied(null);
         setTagError(null);
         setTagQuery("");
@@ -606,9 +647,59 @@ function DeliverablesPage({
 
     const isTagSearchActive = Boolean(tagApplied);
 
+    const tagRows = useMemo(() => tagResults?.content ?? [], [tagResults]);
+
+    const handleTagDetailOpen = useCallback(
+        (asset: AssetSummary) => {
+            if (asset.assetType === "LOGO") {
+                openDetail({
+                    type: "logo",
+                    item: {
+                        id: asset.id,
+                        prompt: asset.title ?? "",
+                        imageUrl: asset.thumbnailUrl ?? "",
+                        createdAt: asset.createdAt ?? "",
+                    },
+                });
+                return;
+            }
+            if (asset.assetType === "BRAND_STRATEGY") {
+                openDetail({
+                    type: "branding",
+                    item: {
+                        id: asset.id,
+                        briefKo: asset.title ?? "",
+                        summaryKo: asset.title ?? "",
+                        markdown: asset.title ?? "",
+                        createdAt: asset.createdAt ?? "",
+                    },
+                });
+                return;
+            }
+            openDetail({
+                type: "colorGuide",
+                item: {
+                    id: asset.id,
+                    briefKo: asset.title ?? "",
+                    style: undefined,
+                    mainHex: undefined,
+                    subHex: undefined,
+                    pointHex: undefined,
+                    backgroundHex: undefined,
+                    mainDescription: undefined,
+                    subDescription: undefined,
+                    pointDescription: undefined,
+                    backgroundDescription: undefined,
+                    createdAt: asset.createdAt ?? "",
+                },
+            });
+        },
+        [openDetail],
+    );
+
     const tagLogoItems: LogoListItem[] = useMemo(
         () =>
-            tagResults
+            (tagResults?.content ?? [])
                 .filter((asset) => asset.assetType === "LOGO")
                 .map((asset) => ({
                     id: asset.id,
@@ -621,7 +712,7 @@ function DeliverablesPage({
 
     const tagBrandingItems: BrandStrategyListItem[] = useMemo(
         () =>
-            tagResults
+            (tagResults?.content ?? [])
                 .filter((asset) => asset.assetType === "BRAND_STRATEGY")
                 .map((asset) => ({
                     id: asset.id,
@@ -635,7 +726,7 @@ function DeliverablesPage({
 
     const tagColorGuideItems: ColorGuideListItem[] = useMemo(
         () =>
-            tagResults
+            (tagResults?.content ?? [])
                 .filter((asset) => asset.assetType === "COLOR_GUIDE")
                 .map((asset) => ({
                     id: asset.id,
@@ -683,6 +774,58 @@ function DeliverablesPage({
                             </button>
                         </div>
                     </div>
+
+                    {isTagSearchActive ? (
+                        <section className={s.tagTableSection}>
+                            {tagLoading && renderStatus("태그 검색 결과를 불러오는 중입니다…")}
+                            {!tagLoading && tagError && renderStatus(tagError, "error")}
+                            {!tagLoading && !tagError && !tagRows.length && renderStatus("검색 결과가 없습니다.")}
+                            {!tagLoading && !tagError && tagRows.length > 0 && (
+                                <>
+                                    <div className={s.tagTableWrapper}>
+                                        <table className={s.tagTable}>
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">타입</th>
+                                                    <th scope="col">생성 프롬프트</th>
+                                                    <th scope="col">생성 시간</th>
+                                                    <th scope="col" className={s.tagTableActionsHead}>작업</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {tagRows.map((asset) => (
+                                                    <tr key={`${asset.assetType}-${asset.id}`}>
+                                                        <td>{ASSET_TYPE_LABEL[asset.assetType]}</td>
+                                                        <td className={s.tagTablePrompt}>{formatTagPrompt(asset.title)}</td>
+                                                        <td>{formatDateTime(asset.createdAt)}</td>
+                                                        <td className={s.tagTableActions}>
+                                                            <button
+                                                                type="button"
+                                                                className={s.primaryButton}
+                                                                onClick={() => handleTagDetailOpen(asset)}
+                                                            >
+                                                                상세 보기
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {tagResults && (
+                                        <div className={s.tagTablePagination}>
+                                            <Pagination
+                                                page={tagResults.page}
+                                                totalPages={Math.max(tagResults.totalPages, 1)}
+                                                onChange={(next) => void handleTagSearch(tagApplied ?? tagQuery, next)}
+                                            />
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </section>
+                    ) : (
+                    <>
 
                     {selections.logo && (
                         <DeliverableSection title="로고" variant={variant}>
@@ -802,6 +945,9 @@ function DeliverablesPage({
                     )}
 
                     {activeCount === 0 && renderStatus("표시할 항목을 선택해주세요.")}
+
+                    </>
+                    )}
                 </div>
             </div>
 
