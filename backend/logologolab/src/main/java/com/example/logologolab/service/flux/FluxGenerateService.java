@@ -38,8 +38,8 @@ public class FluxGenerateService {
             Integer num_images
     ) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(300000);
-        factory.setReadTimeout(300000);
+        factory.setConnectTimeout(600000);
+        factory.setReadTimeout(600000);
 
         RestTemplate restTemplate = new RestTemplate(factory);
 

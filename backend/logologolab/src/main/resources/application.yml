@@ -23,8 +23,8 @@ spring:
 
 server:
   tomcat:
-    connection-timeout: 300000  # 300초 (5분)
-    keep-alive-timeout: 300000
+    connection-timeout: 600000  # 600초 (10분)
+    keep-alive-timeout: 600000
     threads:
       max: 200
   servlet:
