@@ -45,7 +45,7 @@ export default function AiSidebar() {
                         }
                         aria-label="AI 로고 생성"
                     >
-                        <img className={styles.icon} src={iconLogo} alt="" aria-hidden="true" />
+                        <img className={styles.icon} src={iconLogo} alt="" aria-hidden="true" fetchPriority="high"/>
                         <span className={styles.label}>AI 로고 생성</span>
                     </NavLink>
                 </li>
@@ -55,7 +55,7 @@ export default function AiSidebar() {
                         className={({ isActive }) => `${styles.item} ${isActive ? styles.active : ""}`}
                         aria-label="브랜딩 전략 생성"
                     >
-                        <img className={styles.icon} src={iconStrategy} alt="" aria-hidden="true" />
+                        <img className={styles.icon} src={iconStrategy} alt="" aria-hidden="true"  fetchPriority="high"/>
                         <span className={styles.label}>브랜딩 전략 생성</span>
                     </NavLink>
                 </li>
@@ -65,7 +65,7 @@ export default function AiSidebar() {
                         className={({ isActive }) => `${styles.item} ${isActive ? styles.active : ""}`}
                         aria-label="컬러가이드 생성"
                     >
-                        <img className={styles.icon} src={iconColor} alt="" aria-hidden="true" />
+                        <img className={styles.icon} src={iconColor} alt="" aria-hidden="true"  fetchPriority="high"/>
                         <span className={styles.label}>컬러가이드 생성</span>
                     </NavLink>
                 </li>
