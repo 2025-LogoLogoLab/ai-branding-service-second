@@ -158,6 +158,7 @@ function ColorGuide(){
     const targetLabel = '컬러 가이드';
     const colorGuideLinkedNotice = `선택하신 ${linkedSources.join(', ')} 정보를 바탕으로 ${targetLabel}를 생성합니다. \n원하는 내용을 자세하게 지시하실수록 더 좋은 결과물을 받을 수 있습니다.`;
     const colorGuideStandaloneNotice = `원하는 내용을 자세하게 지시하실수록 더 좋은 결과물을 받을 수 있습니다. \n좀 더 일관적인 결과를 원하신다면 로고를 먼저 생성해 두세요. \n그러면 그 로고에 맞춘 ${targetLabel}를 만들 수 있습니다.`;
+    const shouldShowBrandingCta = Boolean(colorGuideGenResult && !selection.brandingMarkdown);
 
     return(
         <div style={{ padding: '12px 16px', display: 'grid', gap: 16 }}>
@@ -198,7 +199,7 @@ function ColorGuide(){
             )}
 
             {/* 컬러 가이드 생성으로 이동 */}
-            {colorGuideGenResult && (
+            {shouldShowBrandingCta && (
               <div style={{ display: 'flex', justifyContent: 'center', margin: '50px 0' }}>
                 <TextButton
                   label="만들어진 내용을 바탕으로 브랜딩 전략을 생성하기"
