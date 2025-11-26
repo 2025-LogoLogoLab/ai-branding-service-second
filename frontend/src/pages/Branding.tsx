@@ -106,7 +106,7 @@ function Branding() {
       const withColorGuide = base64 && selection.colorGuide
         ? `${promptText}\n\n${serializeColorGuide()}`
         : promptText;
-      setLastPrompt(withColorGuide);
+      setLastPrompt(promptText);
       const markdown: BrandingResponse = await generateBranding(
         { briefKo: withColorGuide, imageUrl: base64 },
         { isAdmin },
@@ -133,6 +133,7 @@ function Branding() {
     // id를 이용해 여러 개 중 특정 카드만 지우도록 확장 가능
     setBrandingResult(undefined);
     clearBranding();
+    setLastPrompt('');
   };
 
   // 저장: custom_api.saveBranding 규약에 맞춰 요청

@@ -79,6 +79,7 @@ function ColorGuide(){
         console.log('color guide delete');
         setColorGuideGenResult(null);
         clearColorGuide();
+        setLastPrompt('');
     }
 
     const handleColorGuideSave = async () => {
