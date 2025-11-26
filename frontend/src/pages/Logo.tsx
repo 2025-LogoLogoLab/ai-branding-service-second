@@ -90,7 +90,7 @@ export default function Logo() {
         setNegativePrompt("no watermark");
         setStyle("cute");
         setType("TEXT");
-    }, [clearSelections]);
+    }, []);
 
     // 전체보기 토글(서로 배타)
     const toggleAll = (which: "type" | "style") => {
@@ -515,7 +515,7 @@ export default function Logo() {
                                             </li>
                                         ))}
                                     </ul>
-                                    <div className={s.cardActions}>
+                                    <div className={s.buttonActions}>
                                         <TextButton
                                             label="이 로고를 기반으로 브랜딩 전략 생성하기"
                                             onClick={() => setSelectPurpose("branding")}
@@ -551,10 +551,11 @@ export default function Logo() {
                                             </li>
                                         ))}
                                     </ul>
-                                    <div className={s.cardActions}>
+                                    <div className={s.buttonActions}>
                                         <TextButton
                                             label="취소"
                                             onClick={() => setSelectPurpose(null)}
+                                            variant="outlined"
                                         />
                                     </div>
                                 </>
