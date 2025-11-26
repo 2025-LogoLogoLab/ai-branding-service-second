@@ -129,8 +129,11 @@ export async function fetchProjectList(
 ): Promise<PaginatedResponse<ProjectRecord>> {
     console.log("프로젝트 목록 조회 요청 시작");
 
-    const listPath = options.isAdmin ? "/projects" : projectListEndpoint;
-    const url = new URL(withRolePrefix(listPath, options.isAdmin));
+    // 목록: 일반 사용자는 /my-projects, 관리자는 /admin/projects
+    const listPath = options.isAdmin
+        ? `${basePath}/admin/projects`
+        : `${basePath}${projectListEndpoint}`;
+    const url = new URL(listPath);
     if (params.page != null) url.searchParams.set("page", String(params.page));
     if (params.size != null) url.searchParams.set("size", String(params.size));
 

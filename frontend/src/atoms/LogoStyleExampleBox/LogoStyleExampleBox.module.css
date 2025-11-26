@@ -8,7 +8,8 @@
 .box {
     width: 100%;
     height: var(--ls-card-h, 180px); /* 기본 180px, 사이드바에서 확장값 주입 */
-    border: 1px solid #e5e7eb; /* 밝은 회색 테두리로 카드 경계 표시 */
+    /* 밝은 회색 테두리로 카드 경계 표시 */
+    border: 1px solid #e5e7eb;
     border-radius: 10px; /* 모서리를 둥글게 처리하여 부드러운 느낌 */
     background-color: var(--color-bg-base); /* 카드 배경은 흰색 */
     display: flex; /* 세로 정렬을 위해 flex 사용 */

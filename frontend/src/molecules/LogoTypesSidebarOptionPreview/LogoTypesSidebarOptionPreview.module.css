@@ -22,7 +22,8 @@
 }
 
 .card:focus-visible {
-    outline: 2px solid #93c5fd;      /* 키보드 포커스 접근성 */
+    /* 키보드 포커스 접근성 */
+    outline: 2px solid #93c5fd;      
     outline-offset: 2px;
 }
 /* 

@@ -5,7 +5,8 @@
 // - 실서버 호출(default)과 UI 테스트용 mock(toggle) 둘 다 지원.
 // - 목록/생성/상세/수정/삭제 공통 타입을 한 군데에서 관리.
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
-const adminBase = `${baseUrl}/api/admin`;
+// VITE_API_BASE_URL already includes "/api", so avoid duplicating it here
+const adminBase = `${baseUrl}/admin`;
 
 // TEMP MOCK: 로컬 UI 확인용 더미 데이터. 필요 없으면 false 고정 또는 제거.
 const USE_ADMIN_MOCK = false;
