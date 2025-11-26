@@ -31,17 +31,17 @@ export default function GlobalFooter() {
             aria-label="LogoLogoLab home"
             onClick={handleNotImplemented}
           >
-            <img src={brandImage} alt="LogoLogoLab" className={styles.brandImage} />
+            <img src={brandImage} alt="LogoLogoLab" className={styles.brandImage} fetchPriority="low"/>
           </Link>
           <div className={styles.socials}>
             <a href="#" aria-label="Facebook" className={styles.socialLink} onClick={handleNotImplemented}>
-              <img src={facebookIcon} alt="" className={styles.socialIcon} />
+              <img src={facebookIcon} alt="" className={styles.socialIcon} fetchPriority="low"/>
             </a>
             <a href="#" aria-label="Instagram" className={styles.socialLink} onClick={handleNotImplemented}>
-              <img src={instagramIcon} alt="" className={styles.socialIcon} />
+              <img src={instagramIcon} alt="" className={styles.socialIcon} fetchPriority="low"/>
             </a>
             <a href="#" aria-label="Twitter" className={styles.socialLink} onClick={handleNotImplemented}>
-              <img src={twitterIcon} alt="" className={styles.socialIcon} />
+              <img src={twitterIcon} alt="" className={styles.socialIcon} fetchPriority="low"/>
             </a>
           </div>
         </div>

@@ -54,7 +54,7 @@ export default function FeatureSplit({
       </div>
       <div className={styles.visualCol} aria-hidden={!image && !imageSrc}>
         {imageSrc ? (
-          <img src={imageSrc} alt={imageAlt ?? ""} className={styles.imageMedia} />
+          <img src={imageSrc} alt={imageAlt ?? ""} className={styles.imageMedia} fetchPriority="high"/>
         ) : (
           image && (
             <PreviewCard
