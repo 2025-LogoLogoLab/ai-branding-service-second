@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 @Service
 public class FluxGenerateService {
 
-    private static final String AI_SERVER_URL = "https://e2skdegcd3c53n-8000.proxy.runpod.net/generate-logo";
+    private static final String AI_SERVER_URL = "http://195.26.233.9:52641/generate-logo";
 
     private static final Set<String> ALLOWED_STYLES = Set.of(
             "simple","minimal","retro","vintage","cute","playful","luxury",
@@ -120,7 +120,8 @@ public class FluxGenerateService {
         body.put("style", normStyle);
 
         // 기본값 보정
-        body.put("steps", steps != null ? steps : 50);
+        //body.put("steps", steps != null ? steps : 50);
+        body.put("steps", steps = 50);
         body.put("guidance_scale", guidanceScale != null ? guidanceScale : 3.5);
         body.put("width", width != null ? width : 1024);
         body.put("height", height != null ? height : 1024);
