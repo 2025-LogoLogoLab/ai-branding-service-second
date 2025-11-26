@@ -80,21 +80,28 @@ public class AdminColorService {
         return ColorGuideResponse.from(colorGuideRepository.save(e));
     }
 
-    // 3. [관리자] 전체 리스트 조회 (소유자 구분 X)
-    public Page<ColorGuideListItem> getAllColorGuides(Pageable pageable) {
-        return colorGuideRepository.findAll(pageable)
-                .map(e -> new ColorGuideListItem(
-                        e.getId(),
-                        e.getBriefKo(),
-                        e.getStyle(),
-                        new ColorGuideDTO(
-                                new ColorGuideDTO.Role(e.getMainHex(), e.getMainDesc()),
-                                new ColorGuideDTO.Role(e.getSubHex(), e.getSubDesc()),
-                                new ColorGuideDTO.Role(e.getPointHex(), e.getPointDesc()),
-                                new ColorGuideDTO.Role(e.getBackgroundHex(), e.getBackgroundDesc())
-                        ),
-                        e.getCreatedAt()
-                ));
+    // 3. [관리자] 전체 리스트 조회 (projectId 필터 추가)
+    public Page<ColorGuideListItem> getAllColorGuides(Long projectId, Pageable pageable) {
+        Page<ColorGuide> page;
+
+        if (projectId != null) {
+            page = colorGuideRepository.findByProjectId(projectId, pageable);
+        } else {
+            page = colorGuideRepository.findAll(pageable);
+        }
+
+        return page.map(e -> new ColorGuideListItem(
+                e.getId(),
+                e.getBriefKo(),
+                e.getStyle(),
+                new ColorGuideDTO(
+                        new ColorGuideDTO.Role(e.getMainHex(), e.getMainDesc()),
+                        new ColorGuideDTO.Role(e.getSubHex(), e.getSubDesc()),
+                        new ColorGuideDTO.Role(e.getPointHex(), e.getPointDesc()),
+                        new ColorGuideDTO.Role(e.getBackgroundHex(), e.getBackgroundDesc())
+                ),
+                e.getCreatedAt()
+        ));
     }
 
     // 4. [관리자] 상세 조회

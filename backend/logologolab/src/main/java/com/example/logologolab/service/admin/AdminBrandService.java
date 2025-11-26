@@ -70,16 +70,25 @@ public class AdminBrandService {
         return BrandStrategyResponse.from(brandStrategyRepository.save(e));
     }
 
-    // 3. [관리자] 전체 리스트 조회 (소유자 구분 X)
-    public Page<BrandStrategyListItem> getAllBrandStrategies(Pageable pageable) {
-        return brandStrategyRepository.findAll(pageable)
-                .map(e -> new BrandStrategyListItem(
-                        e.getId(),
-                        e.getBriefKo(),
-                        e.getStyle(),
-                        e.getMarkdown(),
-                        e.getCreatedAt()
-                ));
+    // 3. [관리자] 전체 리스트 조회 (projectId 필터 추가)
+    public Page<BrandStrategyListItem> getAllBrandStrategies(Long projectId, Pageable pageable) {
+        Page<BrandStrategy> page;
+
+        if (projectId != null) {
+            // 프로젝트 ID가 있으면 해당 프로젝트의 전략만 조회
+            page = brandStrategyRepository.findByProjectId(projectId, pageable);
+        } else {
+            // 없으면 전체 조회
+            page = brandStrategyRepository.findAll(pageable);
+        }
+
+        return page.map(e -> new BrandStrategyListItem(
+                e.getId(),
+                e.getBriefKo(),
+                e.getStyle(),
+                e.getMarkdown(),
+                e.getCreatedAt()
+        ));
     }
 
     // 4. [관리자] 상세 조회

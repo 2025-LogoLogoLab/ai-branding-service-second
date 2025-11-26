@@ -31,15 +31,22 @@ public class AdminLogoService {
     private final S3UploadService s3UploadService;
     private final ProjectRepository projectRepository;
 
-    // 1. 전체 로고 리스트 조회 (소유자 구분 없음)
-    public Page<LogoListItem> getAllLogos(Pageable pageable) {
-        return logoRepository.findAll(pageable)
-                .map(logo -> new LogoListItem(
-                        logo.getId(),
-                        logo.getPrompt(),
-                        logo.getImageUrl(),
-                        logo.getCreatedAt()
-                ));
+    // 1. 전체 로고 리스트 조회 (projectId 필터 추가)
+    public Page<LogoListItem> getAllLogos(Long projectId, Pageable pageable) {
+        Page<Logo> page;
+
+        if (projectId != null) {
+            page = logoRepository.findByProjectId(projectId, pageable);
+        } else {
+            page = logoRepository.findAll(pageable);
+        }
+
+        return page.map(logo -> new LogoListItem(
+                logo.getId(),
+                logo.getPrompt(),
+                logo.getImageUrl(),
+                logo.getCreatedAt()
+        ));
     }
 
     // 2. 로고 상세 조회 (소유자 체크 X)

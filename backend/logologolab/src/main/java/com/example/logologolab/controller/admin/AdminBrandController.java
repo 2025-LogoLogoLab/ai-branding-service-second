@@ -172,12 +172,12 @@ public class AdminBrandController {
     // 3. 리스트 조회
     @Operation(
             summary = "[관리자] 전체 브랜딩 전략 리스트 조회",
-            description = "모든 전략을 최신순으로 조회합니다.",
+            description = "모든 전략을 최신순으로 조회합니다. projectId 입력 시 해당 프로젝트의 전략만 필터링합니다.",
             security = @SecurityRequirement(name = "bearerAuth"),
             parameters = {
-                    @Parameter(name = "projectId", description = "Project ID (선택)"),
+                    @Parameter(name = "projectId", description = "Project ID (선택)"), // 설명 수정
                     @Parameter(name = "page", description = "0-base 페이지 인덱스 (기본 0)"),
-                    @Parameter(name = "size", description = "페이지 크기 (기본 12)")
+                    @Parameter(name = "size", description = "페이지 크기 (기본 20)")
             }
     )
     @ApiResponses({
@@ -200,11 +200,15 @@ public class AdminBrandController {
     })
     @GetMapping("/api/admin/brand-strategies")
     public PageResponse<BrandStrategyListItem> getAll(
+            @Parameter(description = "프로젝트 ID") @RequestParam(required = false) Long projectId, // 👈 추가
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 사이즈") @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<BrandStrategyListItem> result = adminBrandService.getAllBrandStrategies(pageable);
+
+        // 서비스 호출 시 projectId 전달
+        Page<BrandStrategyListItem> result = adminBrandService.getAllBrandStrategies(projectId, pageable);
+
         return new PageResponse<>(result.getContent(), result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages(), result.isLast());
     }
 

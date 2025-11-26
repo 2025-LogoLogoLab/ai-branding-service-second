@@ -135,15 +135,17 @@ public class AdminLogoController {
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @GetMapping("/api/admin/logos")
-    public PageResponse<LogoListItem> getAllLogos(
-            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "페이지 당 항목 수") @RequestParam(defaultValue = "20") int size
+    public PageResponse<LogoListItem> getAll(
+            @RequestParam(required = false) Long projectId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<LogoListItem> result = adminLogoService.getAllLogos(pageable);
 
-        return new PageResponse<>(result.getContent(), result.getNumber(), result.getSize(),
-                result.getTotalElements(), result.getTotalPages(), result.isLast());
+        // projectId 전달
+        Page<LogoListItem> result = adminLogoService.getAllLogos(projectId, pageable);
+
+        return new PageResponse<>(result.getContent(), result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages(), result.isLast());
     }
 
     // 4. [관리자] 로고 상세 조회

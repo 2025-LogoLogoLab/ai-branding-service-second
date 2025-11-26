@@ -197,11 +197,15 @@ public class AdminColorController {
     })
     @GetMapping("/api/admin/color-guides")
     public PageResponse<ColorGuideListItem> getAll(
-            @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "페이지 사이즈") @RequestParam(defaultValue = "20") int size
+            @RequestParam(required = false) Long projectId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<ColorGuideListItem> result = adminColorService.getAllColorGuides(pageable);
+
+        // projectId 전달
+        Page<ColorGuideListItem> result = adminColorService.getAllColorGuides(projectId, pageable);
+
         return new PageResponse<>(result.getContent(), result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages(), result.isLast());
     }
 
