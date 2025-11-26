@@ -24,7 +24,7 @@ public class User {
     @Column(name = "nickname")
     private String nickname;
 
-    @Column(name = "profile_image_url")
+    @Column(name = "profile_image_url", columnDefinition = "TEXT")
     private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
