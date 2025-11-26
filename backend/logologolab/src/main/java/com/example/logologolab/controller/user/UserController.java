@@ -46,21 +46,29 @@ public class UserController {
     })
     @GetMapping("/api/users/me")
     public ResponseEntity<MyPageResponse> getMyProfile() {
-        User user = loginUserProvider.getLoginUser();
-        String src = user.getProfileImageUrl();
+        // 1. DB에서 최신 정보 조회
+        User sessionUser = loginUserProvider.getLoginUser();
+        User freshUser = userService.findByEmailAndProvider(sessionUser.getEmail(), sessionUser.getProvider());
 
-        // DB 값이 이미 Base64(data:)라면 변환 없이 그대로 사용!
-        String dataUri;
-        if (src != null && src.startsWith("data:")) {
-            dataUri = src;
-        } else {
-            // URL(https://...)인 경우에만 다운로드 및 변환 시도
-            dataUri = ImageDataUriSupport.toDataUriFromUrl(src);
+        String src = freshUser.getProfileImageUrl();
+        String dataUri = null;
+
+        if (src != null) {
+            if (src.startsWith("http")) {
+                // 1) URL인 경우: 다운로드 후 변환
+                dataUri = ImageDataUriSupport.toDataUriFromUrl(src);
+            } else if (src.startsWith("data:")) {
+                // 2) 이미 완성된 Base64인 경우: 그대로 사용
+                dataUri = src;
+            } else {
+                // 3) 순수 Base64 문자열만 있는 경우: 헤더를 붙여준다 (기본값 jpeg로 가정)
+                // 만약 png라면 "data:image/png;base64," 를 붙여야 함
+                dataUri = "data:image/jpeg;base64," + src;
+            }
         }
 
-        // 요구 포맷으로 응답
-        MyPageResponse response = MyPageResponse.from(user, dataUri);
-
+        // 4. 응답 생성
+        MyPageResponse response = MyPageResponse.from(freshUser, dataUri);
         return ResponseEntity.ok(response);
     }
 
