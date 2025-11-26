@@ -58,9 +58,10 @@ public class AdminProjectService {
 
     // 2. [관리자] 전체 프로젝트 리스트 조회
     @Transactional(readOnly = true)
-    public Page<ProjectListItem> getAllProjects(Pageable pageable) {
+    public Page<ProjectResponse> getAllProjects(Pageable pageable) {
+        // N+1 방지를 위해 application.yml에 default_batch_fetch_size 설정 필수
         return projectRepository.findAll(pageable)
-                .map(ProjectListItem::from);
+                .map(this::toResponse);
     }
 
     // 3. [관리자] 프로젝트 상세 조회

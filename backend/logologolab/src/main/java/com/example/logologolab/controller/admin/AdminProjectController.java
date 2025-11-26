@@ -115,12 +115,12 @@ public class AdminProjectController {
                     ))
     })
     @GetMapping("/api/admin/projects")
-    public PageResponse<ProjectListItem> getAllProjects(
+    public PageResponse<ProjectResponse> getAllProjects(
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 사이즈") @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<ProjectListItem> result = adminProjectService.getAllProjects(pageable);
+        Page<ProjectResponse> result = adminProjectService.getAllProjects(pageable);
 
         return new PageResponse<>(
                 result.getContent(),
