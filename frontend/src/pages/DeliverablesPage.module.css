@@ -57,6 +57,18 @@
     min-width: 80px;
 }
 
+.searchButton {
+    margin-top: 16px;
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    background: var(--color-button-primary-bg);
+    color: #fff;
+    min-width: 80px;
+}
+
 .secondaryButton {
     border: 1px solid rgba(15, 23, 42, 0.12);
     background: var(--color-bg-base);
@@ -90,7 +102,7 @@
     z-index: 4600;
 }
 
-.tagModal {
+/* .tagModal {
     width: min(460px, 92%);
     background: var(--color-bg-base);
     border-radius: 16px;
@@ -98,19 +110,31 @@
     display: grid;
     grid-template-rows: auto 1fr;
     overflow: hidden;
+} */
+
+.tagModal {
+    width: min(520px, 100%);
+    background: var(--color-bg-base);
+    border-radius: 32px;
+    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.25);
+    max-height: calc(100vh - 64px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .tagModalHeader {
+    padding: 28px 32px 16px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    align-items: flex-start;
+    /* padding: 14px 16px; */
+    border-bottom: 1px solid var(--color-divider-border);
 }
 
-.tagModalHeader h3 {
+.tagModalHeader h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: 24px;
 }
 
 .tagModalClose {
@@ -120,9 +144,30 @@
     cursor: pointer;
 }
 
-.tagModalBody {
-    padding: 16px;
+.closeButton {
+    border: none;
+    background: rgba(15, 23, 42, 0.05);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    color: #0f172a;
+    font-size: 20px;
+    line-height: 1;
     display: grid;
+    place-items: center;
+    transition: background 0.2s ease;
+}
+
+.closeButton:hover {
+    background: rgba(15, 23, 42, 0.12);
+}
+
+.tagModalBody {
+    padding: 24px 32px 32px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     gap: 12px;
 }
 
@@ -154,6 +199,7 @@
     border-radius: 10px;
     background: var(--color-bg-base);
     cursor: pointer;
+    font-weight: 500;
 }
 
 .tagOption[disabled] {

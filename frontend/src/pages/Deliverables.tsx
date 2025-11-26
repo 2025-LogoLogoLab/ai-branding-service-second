@@ -1011,8 +1011,8 @@ function DeliverablesPage({
                 <div className={s.tagModalOverlay} role="dialog" aria-modal="true" aria-label="태그 검색">
                     <div className={s.tagModal} onClick={(event) => event.stopPropagation()}>
                         <header className={s.tagModalHeader}>
-                            <h3>태그 검색</h3>
-                            <button type="button" className={s.tagModalClose} onClick={() => setTagModalOpen(false)} aria-label="닫기">
+                            <h2>태그 검색</h2>
+                            <button type="button" className={s.closeButton} onClick={() => setTagModalOpen(false)} aria-label="닫기">
                                 ×
                             </button>
                         </header>
@@ -1052,14 +1052,11 @@ function DeliverablesPage({
                             <div className={s.tagModalActions}>
                                 <button
                                     type="button"
-                                    className={s.primaryButton}
+                                    className={s.searchButton}
                                     onClick={() => void handleTagSearch()}
                                     disabled={tagLoading}
                                 >
                                     {tagLoading ? "검색 중…" : "태그로 검색하기"}
-                                </button>
-                                <button type="button" className={s.secondaryButton} onClick={() => setTagModalOpen(false)}>
-                                    닫기
                                 </button>
                             </div>
                             {tagError && <div className={`${s.status} ${s.error}`}>{tagError}</div>}
