@@ -36,6 +36,7 @@ import { ensureDataUrl } from "../utils/image";
 import { LogoExampleBox } from "../atoms/LogoExampleBox/LogoExampleBox";
 import { LogoStyleExampleBox } from "../atoms/LogoStyleExampleBox/LogoStyleExampleBox";
 import { useAuth } from "../context/AuthContext";
+import FullScreenLoader from "../organisms/FullScreenLoader/FullScreenLoader";
 
 const NUM_IMAGES_DEFAULT = 2; // 생성 이미지 개수(정책상 현재 2장 고정)
 
@@ -421,6 +422,12 @@ export default function Logo() {
 
     return (
         <div className={s.page}>
+            {isLoading && (
+                <FullScreenLoader
+                    message="로고가 생성 중입니다...."
+                    subtext="잠시만 기다려주세요."
+                />
+            )}
 
             {/* 본문: [타입] [스타일] [폼/결과] */}
             <div className={containerClass}>
